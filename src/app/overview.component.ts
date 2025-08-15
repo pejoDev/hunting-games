@@ -6,8 +6,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule } from '@angular/common';
 import { CompetitionService } from './competition.service';
+import { PdfReportService } from './pdf-report.service';
 import { AddTeamDialog } from './dialogs/add-team.dialog';
 import { AddDisciplineDialog } from './dialogs/add-discipline.dialog';
 import { AddResultDialog } from './dialogs/add-result.dialog';
@@ -16,7 +18,7 @@ import { CompetitorRanking, TeamRanking } from './models';
 @Component({
   standalone: true,
   selector: 'overview',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatDialogModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatCardModule],
+  imports: [CommonModule, MatTableModule, MatButtonModule, MatDialogModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatCardModule, MatTooltipModule],
   template: `
     <!-- Control Panel -->
     <div class="control-panel">
@@ -32,6 +34,26 @@ import { CompetitorRanking, TeamRanking } from './models';
         <mat-icon>edit</mat-icon>
         Unos rezultata
       </button>
+      
+      <!-- PDF Export buttons -->
+      <div class="pdf-controls">
+        <button mat-raised-button 
+                color="primary" 
+                [disabled]="!hasData()" 
+                (click)="exportCurrentViewToPdf()"
+                class="pdf-button">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Izvoz u PDF
+        </button>
+        <button mat-raised-button 
+                color="accent" 
+                [disabled]="!hasData()" 
+                (click)="exportCompleteReport()"
+                class="pdf-button">
+          <mat-icon>description</mat-icon>
+          Kompletan izvještaj
+        </button>
+      </div>
       
       <div class="filter-controls">
         <mat-form-field appearance="outline">
@@ -74,6 +96,16 @@ import { CompetitorRanking, TeamRanking } from './models';
               [class]="'category-badge ' + (selectedCategory === 'M' ? 'male' : 'female')">
           {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
         </span>
+        
+        <!-- Individual PDF export button -->
+        <button mat-icon-button 
+                color="primary" 
+                [disabled]="competitorRows.length === 0"
+                (click)="exportIndividualToPdf()"
+                matTooltip="Izvoz pojedinačnog poretka u PDF"
+                class="export-button">
+          <mat-icon>download</mat-icon>
+        </button>
       </div>
       
       <!-- Formula explanation -->
@@ -164,6 +196,16 @@ import { CompetitorRanking, TeamRanking } from './models';
               [class]="'category-badge ' + (selectedCategory === 'M' ? 'male' : 'female')">
           {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
         </span>
+        
+        <!-- Team PDF export button -->
+        <button mat-icon-button 
+                color="primary" 
+                [disabled]="teamRows.length === 0"
+                (click)="exportTeamToPdf()"
+                matTooltip="Izvoz ekipnog poretka u PDF"
+                class="export-button">
+          <mat-icon>download</mat-icon>
+        </button>
       </div>
       
       <!-- Formula explanation -->
@@ -259,6 +301,20 @@ import { CompetitorRanking, TeamRanking } from './models';
       flex-wrap: wrap;
     }
 
+    .pdf-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .pdf-button {
+      min-width: 140px;
+    }
+    
+    .export-button {
+      margin-left: auto;
+    }
+    
     .filter-controls {
       display: flex;
       gap: 12px;
@@ -277,6 +333,7 @@ import { CompetitorRanking, TeamRanking } from './models';
       display: flex;
       align-items: center;
       margin-bottom: 16px;
+      position: relative;
     }
 
     .section-header mat-icon {
@@ -381,7 +438,8 @@ export class OverviewComponent implements OnInit {
 
   constructor(
     private competitionService: CompetitionService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private pdfReportService: PdfReportService
   ) {}
 
   ngOnInit() {
@@ -456,6 +514,47 @@ export class OverviewComponent implements OnInit {
         this.competitionService.addResult(result.competitorId, result.disciplineId, result.points);
       }
     });
+  }
+
+  exportCurrentViewToPdf() {
+    if (this.viewMode === 'individual') {
+      this.exportIndividualToPdf();
+    } else {
+      this.exportTeamToPdf();
+    }
+  }
+
+  exportIndividualToPdf() {
+    const category = this.selectedCategory || undefined;
+    const data = this.competitionService.getCompetitorRankings(category as 'M' | 'Ž');
+    const disciplines = this.competitionService.getDisciplinesForCategory(category as 'M' | 'Ž');
+
+    this.pdfReportService.exportIndividualRankingToPdf(data, disciplines, this.selectedCategory);
+  }
+
+  exportTeamToPdf() {
+    const category = this.selectedCategory || undefined;
+    const data = this.competitionService.getTeamRankings(category as 'M' | 'Ž');
+    const disciplines = this.competitionService.getDisciplinesForCategory(category as 'M' | 'Ž');
+
+    this.pdfReportService.exportTeamRankingToPdf(data, disciplines, this.selectedCategory);
+  }
+
+  exportCompleteReport() {
+    const category = this.selectedCategory || undefined;
+    const individualData = this.competitionService.getCompetitorRankings(category as 'M' | 'Ž');
+    const teamData = this.competitionService.getTeamRankings(category as 'M' | 'Ž');
+    const disciplines = this.competitionService.getDisciplinesForCategory(category as 'M' | 'Ž');
+
+    this.pdfReportService.exportCompleteReportToPdf(individualData, teamData, disciplines, this.selectedCategory);
+  }
+
+  hasData(): boolean {
+    if (this.viewMode === 'individual') {
+      return this.competitorRows.length > 0;
+    } else {
+      return this.teamRows.length > 0;
+    }
   }
 
   getRankClass(rank: number): string {
