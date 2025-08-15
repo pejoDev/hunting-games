@@ -1,0 +1,154 @@
+{
+  "teams": [
+    {
+      "id": 1,
+      "name": "DVD Donji Vidovec Muškarci",
+      "category": "M",
+      "members": [
+        {
+          "id": 1,
+          "firstName": "Marko",
+          "lastName": "Horvat"
+        },
+        {
+          "id": 2,
+          "firstName": "Petar",
+          "lastName": "Novak"
+        },
+        {
+          "id": 3,
+          "firstName": "Ivan",
+          "lastName": "Kovač"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "DVD Donji Vidovec Žene",
+      "category": "Ž",
+      "members": [
+        {
+          "id": 4,
+          "firstName": "Ana",
+          "lastName": "Marić"
+        },
+        {
+          "id": 5,
+          "firstName": "Petra",
+          "lastName": "Babić"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Društvo Žena Donji Mihaljevec",
+      "category": "Ž",
+      "members": [
+        {
+          "id": 6,
+          "firstName": "Štefica",
+          "lastName": "Horvat"
+        },
+        {
+          "id": 7,
+          "firstName": "Marija",
+          "lastName": "Tomić"
+        },
+        {
+          "id": 8,
+          "firstName": "Kata",
+          "lastName": "Jurić"
+        }
+      ]
+    }
+  ],
+  "disciplines": [
+    {
+      "id": 1,
+      "name": "TRAP",
+      "category": "M"
+    },
+    {
+      "id": 2,
+      "name": "ZRAČNA PUŠKA",
+      "category": "M"
+    },
+    {
+      "id": 3,
+      "name": "PRAČKA",
+      "category": "M"
+    },
+    {
+      "id": 4,
+      "name": "ZRAČNA PUŠKA",
+      "category": "Ž"
+    },
+    {
+      "id": 5,
+      "name": "PRAČKA",
+      "category": "Ž"
+    },
+    {
+      "id": 6,
+      "name": "PIKADO",
+      "category": "Ž"
+    }
+  ],
+  "results": [
+    {
+      "id": 1,
+      "competitorId": 1,
+      "disciplineId": 1,
+      "points": 45
+    },
+    {
+      "id": 2,
+      "competitorId": 1,
+      "disciplineId": 2,
+      "points": 38
+    },
+    {
+      "id": 3,
+      "competitorId": 1,
+      "disciplineId": 3,
+      "points": 22
+    },
+    {
+      "id": 4,
+      "competitorId": 4,
+      "disciplineId": 4,
+      "points": 41
+    },
+    {
+      "id": 5,
+      "competitorId": 4,
+      "disciplineId": 5,
+      "points": 15
+    },
+    {
+      "id": 6,
+      "competitorId": 4,
+      "disciplineId": 6,
+      "points": 28
+    },
+    {
+      "id": 7,
+      "competitorId": 6,
+      "disciplineId": 4,
+      "points": 41
+    },
+    {
+      "id": 8,
+      "competitorId": 6,
+      "disciplineId": 5,
+      "points": 2
+    },
+    {
+      "id": 9,
+      "competitorId": 6,
+      "disciplineId": 6,
+      "points": 68
+    }
+  ]
+}
+

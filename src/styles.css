@@ -1,0 +1,321 @@
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Card styling */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Header styling */
+.header {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+  padding: 24px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 300;
+  text-align: center;
+  color: white !important;
+}
+
+/* Control panel */
+.control-panel {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.control-panel button {
+  min-width: 140px;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+}
+
+/* Table styling - fixed contrast issues */
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modern-table .mat-mdc-header-row {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+}
+
+.modern-table .mat-mdc-header-cell {
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 16px 12px !important;
+  border-bottom: none !important;
+  background: transparent !important;
+}
+
+.modern-table .mat-mdc-row {
+  transition: background-color 0.2s ease;
+  background-color: white !important;
+}
+
+.modern-table .mat-mdc-row:hover {
+  background-color: #f8f9fa !important;
+}
+
+.modern-table .mat-mdc-cell {
+  padding: 16px 12px !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  color: #212529 !important;
+  background-color: transparent !important;
+}
+
+/* Ranking styles - improved visibility */
+.rank-cell {
+  font-weight: bold;
+  text-align: center;
+  border-radius: 20px;
+  padding: 6px 12px;
+  margin: 4px;
+  display: inline-block;
+  min-width: 30px;
+  color: white !important;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.rank-1 {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+  color: #333 !important;
+  text-shadow: none;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.rank-2 {
+  background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
+  color: #333 !important;
+  text-shadow: none;
+  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
+}
+
+.rank-3 {
+  background: linear-gradient(135deg, #cd7f32 0%, #b8860b 100%);
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+}
+
+.total-points {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #1976d2 !important;
+}
+
+/* Section headers - improved contrast */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.section-header h3 {
+  margin: 0;
+  color: #1976d2 !important;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.category-badge {
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.category-badge.male {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+}
+
+.category-badge.female {
+  background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+}
+
+/* Dialog improvements - better contrast */
+.dialog-content {
+  min-width: 400px;
+  padding: 24px;
+}
+
+.dialog-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  color: #1976d2 !important;
+  font-size: 24px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Score coloring - improved visibility */
+.score-high {
+  color: #2e7d32 !important;
+  font-weight: 600;
+  background-color: #e8f5e8;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.score-medium {
+  color: #f57c00 !important;
+  font-weight: 500;
+  background-color: #fff3e0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.score-low {
+  color: #c62828 !important;
+  background-color: #ffebee;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Row highlighting - better visibility */
+.row-winner {
+  background-color: #fff8e1 !important;
+  border-left: 4px solid #ffd700 !important;
+}
+
+.row-podium {
+  background-color: #f3e5f5 !important;
+  border-left: 4px solid #9c27b0 !important;
+}
+
+/* Material Icons fix */
+.mat-icon {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .control-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-controls {
+    margin-left: 0;
+    margin-top: 16px;
+  }
+
+  .modern-table .mat-mdc-cell,
+  .modern-table .mat-mdc-header-cell {
+    padding: 12px 8px !important;
+    font-size: 14px;
+  }
+
+  .header h1 {
+    font-size: 20px;
+  }
+}
+
+/* Loading and empty states - improved contrast */
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #666 !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666 !important;
+}
+
+.empty-state mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+  color: #999 !important;
+}
