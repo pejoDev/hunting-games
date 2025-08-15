@@ -20,7 +20,7 @@ import { CommonModule } from '@angular/common';
           Dodaj novu disciplinu
         </h2>
       </div>
-      
+
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Naziv discipline</mat-label>
@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
           <mat-icon matSuffix>sports_score</mat-icon>
         </mat-form-field>
       </div>
-      
+
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Kategorija</mat-label>
@@ -45,7 +45,7 @@ import { CommonModule } from '@angular/common';
           <mat-icon matSuffix>category</mat-icon>
         </mat-form-field>
       </div>
-      
+
       <div class="dialog-actions">
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
@@ -74,3 +74,4 @@ export class AddDisciplineDialog {
     this.ref.close();
   }
 }
+

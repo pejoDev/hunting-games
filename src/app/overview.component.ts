@@ -76,6 +76,28 @@ import { CompetitorRanking, TeamRanking } from './models';
         </span>
       </div>
       
+      <!-- Formula explanation -->
+      <div class="formula-info" *ngIf="selectedCategory">
+        <mat-icon>calculate</mat-icon>
+        <div class="formula-content">
+          <strong>Balansirana formula bodovanja:</strong>
+          <span *ngIf="selectedCategory === 'M'">
+            TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20
+          </span>
+          <span *ngIf="selectedCategory === 'Ž'">
+            ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33
+          </span>
+          <small class="formula-explanation">
+            <em *ngIf="selectedCategory === 'M'">
+              Maksimalni utjecaj: TRAP (5×20=100), ZRAČNA (50×2=100), PRAČKA (5×20=100). Sve discipline jednako važne!
+            </em>
+            <em *ngIf="selectedCategory === 'Ž'">
+              Maksimalni utjecaj: ZRAČNA (50×2=100), PRAČKA (5×20=100), PIKADO (300×0,33≈100). Fer natjecanje!
+            </em>
+          </small>
+        </div>
+      </div>
+      
       <div *ngIf="competitorRows.length === 0" class="empty-state">
         <mat-icon>sentiment_dissatisfied</mat-icon>
         <p>Nema dostupnih rezultata za prikaz</p>
@@ -120,10 +142,10 @@ import { CompetitorRanking, TeamRanking } from './models';
         <ng-container matColumnDef="total">
           <th mat-header-cell *matHeaderCellDef>
             <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
-            Ukupno
+            Ukupno (formula)
           </th>
           <td mat-cell *matCellDef="let r">
-            <span class="total-points">{{r.totalPoints}}</span>
+            <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
           </td>
         </ng-container>
 
@@ -142,6 +164,20 @@ import { CompetitorRanking, TeamRanking } from './models';
               [class]="'category-badge ' + (selectedCategory === 'M' ? 'male' : 'female')">
           {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
         </span>
+      </div>
+      
+      <!-- Formula explanation -->
+      <div class="formula-info" *ngIf="selectedCategory">
+        <mat-icon>calculate</mat-icon>
+        <div class="formula-content">
+          <strong>Formula bodovanja (zbroj svih članova):</strong>
+          <span *ngIf="selectedCategory === 'M'">
+            TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20
+          </span>
+          <span *ngIf="selectedCategory === 'Ž'">
+            ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33
+          </span>
+        </div>
       </div>
       
       <div *ngIf="teamRows.length === 0" class="empty-state">
@@ -180,10 +216,10 @@ import { CompetitorRanking, TeamRanking } from './models';
         <ng-container matColumnDef="total">
           <th mat-header-cell *matHeaderCellDef>
             <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
-            Ukupno
+            Ukupno (formula)
           </th>
           <td mat-cell *matCellDef="let r">
-            <span class="total-points">{{r.totalPoints}}</span>
+            <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
           </td>
         </ng-container>
 
@@ -309,6 +345,28 @@ import { CompetitorRanking, TeamRanking } from './models';
       font-weight: 600;
       font-size: 16px;
     }
+
+    .formula-info {
+      background-color: #f9f9f9;
+      border-left: 4px solid #2196f3;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .formula-content {
+      font-size: 14px;
+      color: #333;
+    }
+
+    .formula-explanation {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
   `]
 })
 export class OverviewComponent implements OnInit {
@@ -419,5 +477,9 @@ export class OverviewComponent implements OnInit {
     if (rank === 1) return 'row-winner';
     if (rank <= 3) return 'row-podium';
     return '';
+  }
+
+  formatPoints(points: number): string {
+    return points.toString().replace('.', ',');
   }
 }

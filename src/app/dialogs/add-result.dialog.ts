@@ -33,17 +33,17 @@ interface CompetitorOption {
           Unos rezultata
         </h2>
       </div>
-      
+
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Pretraži natjecatelja</mat-label>
-          <input matInput 
+          <input matInput
                  [formControl]="competitorSearchControl"
                  [matAutocomplete]="auto"
                  placeholder="Unesite ime, prezime ili tim..."
                  (input)="onSearchInput($event)">
           <mat-icon matSuffix>search</mat-icon>
-          <mat-autocomplete #auto="matAutocomplete" 
+          <mat-autocomplete #auto="matAutocomplete"
                            [displayWith]="displayCompetitor"
                            (optionSelected)="onCompetitorSelected($event)">
             <mat-option *ngFor="let option of filteredCompetitors | async" [value]="option">
@@ -60,7 +60,7 @@ interface CompetitorOption {
                 </div>
               </div>
             </mat-option>
-            <mat-option *ngIf="(filteredCompetitors | async)?.length === 0 && competitorSearchControl.value" 
+            <mat-option *ngIf="(filteredCompetitors | async)?.length === 0 && competitorSearchControl.value"
                        value="add-new" class="add-new-option">
               <div class="add-new-competitor">
                 <mat-icon>person_add</mat-icon>
@@ -75,12 +75,12 @@ interface CompetitorOption {
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>
-        
+
         <!-- Quick team filter buttons -->
         <div class="team-filter-chips" *ngIf="competitorOptions.length > 0">
           <span class="filter-label">Brza pretraga po timu:</span>
           <mat-chip-set>
-            <mat-chip *ngFor="let team of getUniqueTeams()" 
+            <mat-chip *ngFor="let team of getUniqueTeams()"
                      (click)="filterByTeam(team)"
                      [class.selected]="selectedTeamFilter === team">
               {{ team }}
@@ -94,7 +94,7 @@ interface CompetitorOption {
           </mat-chip-set>
         </div>
       </div>
-      
+
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Disciplina</mat-label>
@@ -110,17 +110,47 @@ interface CompetitorOption {
           </mat-hint>
         </mat-form-field>
       </div>
-      
+
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Bodovi</mat-label>
-          <input matInput type="number" [(ngModel)]="points" min="0" max="100" 
-                 placeholder="Unesite broj bodova" />
+          <input matInput type="number" [(ngModel)]="points"
+                 min="0"
+                 [max]="getSelectedDisciplineMaxPoints()"
+                 placeholder="Unesite broj bodova"
+                 (input)="onPointsChange()" />
           <mat-icon matSuffix>calculate</mat-icon>
-          <mat-hint>Unesite bodove koje je natjecatelj ostvario (0-100)</mat-hint>
+          <mat-hint *ngIf="disciplineId && !validatePoints()">
+            Maksimalno bodova: {{ getSelectedDisciplineMaxPoints() }}
+            <span class="discipline-info">({{ getSelectedDisciplineName() }})</span>
+          </mat-hint>
+          <mat-error *ngIf="validatePoints()">
+            {{ validatePoints() }}
+          </mat-error>
         </mat-form-field>
       </div>
-      
+
+      <!-- Validation info panel -->
+      <div class="validation-info" *ngIf="disciplineId">
+        <mat-icon [color]="validatePoints() ? 'warn' : 'primary'">info</mat-icon>
+        <div class="validation-content">
+          <strong>{{ getSelectedDisciplineName() }}:</strong>
+          <span>Maksimalno {{ getSelectedDisciplineMaxPoints() }} bodova</span>
+          <span *ngIf="getSelectedDisciplineName() === 'TRAP'" class="discipline-details">
+            (5 glinenih golubova)
+          </span>
+          <span *ngIf="getSelectedDisciplineName() === 'PRAČKA'" class="discipline-details">
+            (5 meta)
+          </span>
+          <span *ngIf="getSelectedDisciplineName() === 'ZRAČNA PUŠKA'" class="discipline-details">
+            (5 metaka, do 10 bodova po metku)
+          </span>
+          <span *ngIf="getSelectedDisciplineName() === 'PIKADO'" class="discipline-details">
+            (standardni PIKADO format)
+          </span>
+        </div>
+      </div>
+
       <!-- Selected competitor info -->
       <div *ngIf="selectedCompetitor" class="selected-competitor-info">
         <mat-icon>info</mat-icon>
@@ -129,14 +159,14 @@ interface CompetitorOption {
           <span>{{ selectedCompetitor.teamName }} ({{ selectedCompetitor.category === 'M' ? 'Muškarci' : 'Žene' }})</span>
         </div>
       </div>
-      
+
       <div class="dialog-actions">
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
           Odustani
         </button>
-        <button mat-raised-button color="warn" (click)="add()" 
-                [disabled]="!selectedCompetitor || !disciplineId || points === null || points < 0">
+        <button mat-raised-button color="warn" (click)="add()"
+                [disabled]="!selectedCompetitor || !disciplineId || points === null || points < 0 || validatePoints() !== null">
           <mat-icon>save</mat-icon>
           Spremi rezultat
         </button>
@@ -151,17 +181,17 @@ interface CompetitorOption {
       width: 100%;
       padding: 8px 0;
     }
-    
+
     .competitor-info {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    
+
     .competitor-name {
       font-weight: 500;
     }
-    
+
     .team-info {
       display: flex;
       align-items: center;
@@ -169,15 +199,15 @@ interface CompetitorOption {
       color: #666;
       font-size: 0.9em;
     }
-    
+
     .category-icon.male {
       color: #1976d2;
     }
-    
+
     .category-icon.female {
       color: #e91e63;
     }
-    
+
     .no-results {
       display: flex;
       align-items: center;
@@ -186,7 +216,7 @@ interface CompetitorOption {
       padding: 16px 0;
       justify-content: center;
     }
-    
+
     .selected-competitor-info {
       display: flex;
       align-items: center;
@@ -197,18 +227,18 @@ interface CompetitorOption {
       margin-bottom: 16px;
       border-left: 4px solid #1976d2;
     }
-    
+
     .info-content {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
-    
+
     .info-content span {
       color: #666;
       font-size: 0.9em;
     }
-    
+
     .team-filter-chips {
       display: flex;
       align-items: center;
@@ -216,27 +246,54 @@ interface CompetitorOption {
       flex-wrap: wrap;
       margin-top: 8px;
     }
-    
+
     .filter-label {
       font-weight: 500;
       color: #333;
     }
-    
+
     mat-chip-option {
       cursor: pointer;
     }
-    
+
     .selected {
       background-color: #1976d2 !important;
       color: white !important;
     }
-    
+
     .clear-filter {
       display: flex;
       align-items: center;
       gap: 4px;
       background-color: #f44336;
       color: white;
+    }
+
+    .discipline-info {
+      font-weight: 500;
+      color: #333;
+      margin-left: 4px;
+    }
+
+    .validation-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #e8f5e9;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .validation-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .discipline-details {
+      font-size: 0.9em;
+      color: #666;
     }
   `]
 })
@@ -336,6 +393,35 @@ export class AddResultDialog implements OnInit {
     return this.competitionService.getDisciplinesForCategory(this.selectedCompetitorCategory);
   }
 
+  // Maksimalni bodovi po disciplini
+  private getMaxPoints(disciplineName: string): number {
+    switch (disciplineName) {
+      case 'TRAP': return 5;
+      case 'PRAČKA': return 5;
+      case 'ZRAČNA PUŠKA': return 50;
+      case 'PIKADO': return 300;
+      default: return 100; // Default maksimum za nepoznate discipline
+    }
+  }
+
+  // Dohvaćanje maksimalnih bodova za odabranu disciplinu
+  getSelectedDisciplineMaxPoints(): number {
+    if (!this.disciplineId) return 100;
+    const discipline = this.competitionService.getDisciplines().find(d => d.id === this.disciplineId);
+    return discipline ? this.getMaxPoints(discipline.name) : 100;
+  }
+
+  // Validacija unosa bodova
+  validatePoints(): string | null {
+    if (this.points === null || this.points === undefined) return null;
+
+    const maxPoints = this.getSelectedDisciplineMaxPoints();
+    if (this.points < 0) return 'Bodovi ne mogu biti negativni';
+    if (this.points > maxPoints) return `Maksimalan broj bodova za ovu disciplinu je ${maxPoints}`;
+
+    return null;
+  }
+
   add() {
     if (!this.selectedCompetitor || !this.disciplineId || this.points === null || this.points < 0) return;
     this.ref.close({
@@ -365,5 +451,14 @@ export class AddResultDialog implements OnInit {
     this.selectedTeamFilter = null;
     this.competitorSearchControl.setValue('');
     // Filtriranje će se automatski obaviti kroz valueChanges observable
+  }
+
+  getSelectedDisciplineName(): string {
+    const discipline = this.competitionService.getDisciplines().find(d => d.id === this.disciplineId);
+    return discipline ? discipline.name : '';
+  }
+
+  onPointsChange() {
+    // Ovdje možete dodati dodatnu logiku ako je potrebna prilikom promjene bodova
   }
 }

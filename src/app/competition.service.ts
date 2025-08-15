@@ -96,6 +96,34 @@ export class CompetitionService {
     return this.value.disciplines.filter(d => d.category === category);
   }
 
+  // Izračun ukupnih bodova prema balansiranoj formuli (na temelju maksimalnih bodova)
+  calculateTotalPoints(disciplineScores: { [disciplineName: string]: number }, category: 'M' | 'Ž'): number {
+    let total = 0;
+
+    if (category === 'M') {
+      // BALANSIRANA FORMULA za muškarce:
+      // TRAP: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
+      // ZRAČNA: max 50 bodova → koef. 2 (50×2=100 max utjecaj)
+      // PRAČKA: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
+      // Sada sve discipline imaju jednaki maksimalni utjecaj od 100 bodova
+      total = (disciplineScores['TRAP'] || 0) * 20 +
+              (disciplineScores['ZRAČNA PUŠKA'] || 0) * 2 +
+              (disciplineScores['PRAČKA'] || 0) * 20;
+    } else {
+      // BALANSIRANA FORMULA za žene:
+      // ZRAČNA: max 50 bodova → koef. 2 (50×2=100 max utjecaj)
+      // PRAČKA: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
+      // PIKADO: max 300 bodova → koef. 0.33 (300×0.33≈100 max utjecaj)
+      // Sve discipline imaju približno jednaki maksimalni utjecaj od ~100 bodova
+      total = (disciplineScores['ZRAČNA PUŠKA'] || 0) * 2 +
+              (disciplineScores['PRAČKA'] || 0) * 20 +
+              (disciplineScores['PIKADO'] || 0) * 0.33;
+    }
+
+    // Zaokružuj na 2 decimale
+    return Math.round(total * 100) / 100;
+  }
+
   // Izračun pojedinačnog poretka
   getCompetitorRankings(category?: 'M' | 'Ž'): CompetitorRanking[] {
     const state = this.value;
@@ -107,7 +135,6 @@ export class CompetitionService {
     for (const team of teams) {
       for (const competitor of team.members) {
         const disciplineScores: { [disciplineName: string]: number } = {};
-        let totalPoints = 0;
 
         // Dohvati rezultate za ovog natjecatelja
         const competitorResults = state.results.filter(r => r.competitorId === competitor.id);
@@ -117,8 +144,10 @@ export class CompetitionService {
           const result = competitorResults.find(r => r.disciplineId === discipline.id);
           const points = result ? result.points : 0;
           disciplineScores[discipline.name] = points;
-          totalPoints += points;
         }
+
+        // Koristi novu formulu za izračun ukupnih bodova
+        const totalPoints = this.calculateTotalPoints(disciplineScores, team.category);
 
         rankings.push({
           rank: 0, // Postavit ćemo nakon sortiranja
@@ -148,8 +177,6 @@ export class CompetitionService {
 
     for (const team of teams) {
       const disciplineScores: { [disciplineName: string]: number } = {};
-      let totalPoints = 0;
-
       const relevantDisciplines = this.getDisciplinesForCategory(team.category);
 
       for (const discipline of relevantDisciplines) {
@@ -164,8 +191,10 @@ export class CompetitionService {
         }
 
         disciplineScores[discipline.name] = disciplineTotal;
-        totalPoints += disciplineTotal;
       }
+
+      // Koristi novu formulu za izračun ukupnih bodova
+      const totalPoints = this.calculateTotalPoints(disciplineScores, team.category);
 
       rankings.push({
         rank: 0, // Postavit ćemo nakon sortiranja
@@ -199,3 +228,5 @@ export class CompetitionService {
     return this.value.teams.flatMap(team => team.members);
   }
 }
+
+
