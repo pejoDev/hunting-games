@@ -12,7 +12,6 @@ import { CompetitionService } from './competition.service';
 import { PdfReportService } from './pdf-report.service';
 import { AddTeamDialog } from './dialogs/add-team.dialog';
 import { EditTeamDialog } from './dialogs/edit-team.dialog';
-import { AddDisciplineDialog } from './dialogs/add-discipline.dialog';
 import { AddResultDialog } from './dialogs/add-result.dialog';
 import { CompetitorRanking, TeamRanking } from './models';
 
@@ -30,10 +29,6 @@ import { CompetitorRanking, TeamRanking } from './models';
       <button mat-raised-button color="accent" (click)="openEditTeamSelector()">
         <mat-icon>edit</mat-icon>
         Editiraj tim
-      </button>
-      <button mat-raised-button color="accent" (click)="openAddDiscipline()">
-        <mat-icon>sports</mat-icon>
-        Dodaj disciplinu
       </button>
       <button mat-raised-button color="warn" (click)="openAddResult()">
         <mat-icon>edit</mat-icon>
@@ -506,18 +501,6 @@ export class OverviewComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.competitionService.updateTeam(result.id, result.name, result.category, result.members);
-      }
-    });
-  }
-
-  openAddDiscipline() {
-    const dialogRef = this.dialog.open(AddDisciplineDialog, {
-      width: '400px'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.competitionService.addDiscipline(result.name, result.category);
       }
     });
   }

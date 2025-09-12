@@ -71,19 +71,6 @@ export class CompetitionService {
     return true;
   }
 
-  // Dodavanje discipline
-  addDiscipline(name: string, category: 'M' | 'Ž') {
-    const s = this.value;
-    const newId = Math.max(...s.disciplines.map(d => d.id), 0) + 1;
-    const discipline: Discipline = {
-      id: newId,
-      name: name.trim(),
-      category
-    };
-    s.disciplines = [...s.disciplines, discipline];
-    this._state.next(s);
-  }
-
   // Dodavanje rezultata
   addResult(competitorId: number, disciplineId: number, points: number) {
     const s = this.value;
