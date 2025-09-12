@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { CompetitionService } from './competition.service';
 import { PdfReportService } from './pdf-report.service';
 import { AddTeamDialog } from './dialogs/add-team.dialog';
+import { EditTeamDialog } from './dialogs/edit-team.dialog';
 import { AddDisciplineDialog } from './dialogs/add-discipline.dialog';
 import { AddResultDialog } from './dialogs/add-result.dialog';
 import { CompetitorRanking, TeamRanking } from './models';
@@ -25,6 +26,10 @@ import { CompetitorRanking, TeamRanking } from './models';
       <button mat-raised-button color="primary" (click)="openAddTeam()">
         <mat-icon>group_add</mat-icon>
         Dodaj tim
+      </button>
+      <button mat-raised-button color="accent" (click)="openEditTeamSelector()">
+        <mat-icon>edit</mat-icon>
+        Editiraj tim
       </button>
       <button mat-raised-button color="accent" (click)="openAddDiscipline()">
         <mat-icon>sports</mat-icon>
@@ -446,6 +451,7 @@ export class OverviewComponent implements OnInit {
     this.competitionService.state$.subscribe(() => {
       this.updateView();
     });
+    this.updateView();
   }
 
   updateView() {
@@ -488,6 +494,18 @@ export class OverviewComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.competitionService.addTeam(result.name, result.category);
+      }
+    });
+  }
+
+  openEditTeamSelector() {
+    const dialogRef = this.dialog.open(EditTeamDialog, {
+      width: '600px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.competitionService.updateTeam(result.id, result.name, result.category, result.members);
       }
     });
   }

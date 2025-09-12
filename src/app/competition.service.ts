@@ -34,6 +34,25 @@ export class CompetitionService {
     this._state.next(s);
   }
 
+  // Ažuriranje tima
+  updateTeam(teamId: number, name: string, category: 'M' | 'Ž', members?: Competitor[]) {
+    const s = this.value;
+    const teamIndex = s.teams.findIndex(t => t.id === teamId);
+
+    if (teamIndex === -1) return false;
+
+    const updatedTeam: Team = {
+      ...s.teams[teamIndex],
+      name: name.trim(),
+      category,
+      members: members || s.teams[teamIndex].members
+    };
+
+    s.teams[teamIndex] = updatedTeam;
+    this._state.next(s);
+    return true;
+  }
+
   // Dodavanje natjecatelja u tim
   addCompetitorToTeam(teamId: number, firstName: string, lastName: string) {
     const s = this.value;
@@ -228,5 +247,3 @@ export class CompetitionService {
     return this.value.teams.flatMap(team => team.members);
   }
 }
-
-
