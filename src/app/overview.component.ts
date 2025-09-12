@@ -488,12 +488,12 @@ export class OverviewComponent implements OnInit {
 
   openAddTeam() {
     const dialogRef = this.dialog.open(AddTeamDialog, {
-      width: '400px'
+      width: '600px' // Povećaj širinu zbog dodanih članova
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.competitionService.addTeam(result.name, result.category);
+        this.competitionService.addTeam(result.name, result.category, result.members);
       }
     });
   }

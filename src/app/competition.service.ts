@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { Database, ref, onValue, set, push, update, remove } from '@angular/fire/database';
 import { Team, Discipline, Result, AppState, Competitor, CompetitorRanking, TeamRanking } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -8,34 +8,55 @@ export class CompetitionService {
   private _state = new BehaviorSubject<AppState>({ teams: [], disciplines: [], results: [] });
   state$ = this._state.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(private db: Database) {
     this.loadInitialData();
   }
 
   get value() { return this._state.getValue(); }
 
   private loadInitialData() {
-    this.http.get<AppState>('/assets/competition-data.json').subscribe(data => {
-      this._state.next(data);
+    const competitionRef = ref(this.db);
+    console.log(competitionRef);
+    onValue(competitionRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log(data);
+      if (data) {
+        this._state.next({
+          teams: data.teams || [],
+          disciplines: data.disciplines || [],
+          results: data.results || []
+        });
+      }
     });
   }
 
   // Dodavanje tima
-  addTeam(name: string, category: 'M' | 'Ž') {
+  async addTeam(name: string, category: 'M' | 'Ž', members: Competitor[] = []) {
     const s = this.value;
-    const newId = Math.max(...s.teams.map(t => t.id), 0) + 1;
+    const newTeamId = Math.max(...s.teams.map(t => t.id), 0) + 1;
+
+    // Generiraj ID-jeve za nove članove
+    const allMembers = s.teams.flatMap(t => (t.members || []));
+    let nextMemberId = allMembers.length > 0 ? Math.max(...allMembers.map(m => m.id), 0) + 1 : 1;
+
+    const teamMembers = members.map(member => ({
+      ...member,
+      id: nextMemberId++
+    }));
+
     const team: Team = {
-      id: newId,
+      id: newTeamId,
       name: name.trim(),
       category,
-      members: []
+      members: teamMembers
     };
-    s.teams = [...s.teams, team];
-    this._state.next(s);
+
+    const updatedTeams = [...s.teams, team];
+    await set(ref(this.db, 'teams'), updatedTeams);
   }
 
   // Ažuriranje tima
-  updateTeam(teamId: number, name: string, category: 'M' | 'Ž', members?: Competitor[]) {
+  async updateTeam(teamId: number, name: string, category: 'M' | 'Ž', members?: Competitor[]) {
     const s = this.value;
     const teamIndex = s.teams.findIndex(t => t.id === teamId);
 
@@ -48,13 +69,15 @@ export class CompetitionService {
       members: members || s.teams[teamIndex].members
     };
 
-    s.teams[teamIndex] = updatedTeam;
-    this._state.next(s);
+    const updatedTeams = [...s.teams];
+    updatedTeams[teamIndex] = updatedTeam;
+
+    await set(ref(this.db, 'teams'), updatedTeams);
     return true;
   }
 
   // Dodavanje natjecatelja u tim
-  addCompetitorToTeam(teamId: number, firstName: string, lastName: string) {
+  async addCompetitorToTeam(teamId: number, firstName: string, lastName: string) {
     const s = this.value;
     const team = s.teams.find(t => t.id === teamId);
     if (!team || team.members.length >= 3) return false;
@@ -66,13 +89,19 @@ export class CompetitionService {
       lastName: lastName.trim()
     };
 
-    team.members = [...team.members, competitor];
-    this._state.next(s);
+    const updatedTeams = s.teams.map(t => {
+      if (t.id === teamId) {
+        return { ...t, members: [...t.members, competitor] };
+      }
+      return t;
+    });
+
+    await set(ref(this.db, 'teams'), updatedTeams);
     return true;
   }
 
   // Dodavanje rezultata
-  addResult(competitorId: number, disciplineId: number, points: number) {
+  async addResult(competitorId: number, disciplineId: number, points: number) {
     const s = this.value;
     const newId = Math.max(...s.results.map(r => r.id), 0) + 1;
 
@@ -88,29 +117,121 @@ export class CompetitionService {
       points
     };
 
+    let updatedResults;
     if (existingIndex >= 0) {
-      s.results[existingIndex] = result;
+      updatedResults = [...s.results];
+      updatedResults[existingIndex] = result;
     } else {
-      s.results = [...s.results, result];
+      updatedResults = [...s.results, result];
     }
 
-    this._state.next(s);
+    await set(ref(this.db, 'results'), updatedResults);
   }
 
   // Ažuriranje rezultata
-  updateResult(resultId: number, competitorId: number, disciplineId: number, points: number) {
+  async updateResult(resultId: number, competitorId: number, disciplineId: number, points: number) {
     const s = this.value;
     const existingIndex = s.results.findIndex(r => r.id === resultId);
 
     if (existingIndex >= 0) {
-      s.results[existingIndex] = {
+      const updatedResults = [...s.results];
+      updatedResults[existingIndex] = {
         id: resultId,
         competitorId,
         disciplineId,
         points
       };
-      this._state.next(s);
+
+      await set(ref(this.db, 'results'), updatedResults);
     }
+  }
+
+  // Brisanje tima
+  async deleteTeam(teamId: number) {
+    const s = this.value;
+    const updatedTeams = s.teams.filter(t => t.id !== teamId);
+
+    // Također obriši sve rezultate natjecatelja iz ovog tima
+    const teamMembers = s.teams.find(t => t.id === teamId)?.members || [];
+    const memberIds = teamMembers.map(m => m.id);
+    const updatedResults = s.results.filter(r => !memberIds.includes(r.competitorId));
+
+    await Promise.all([
+      set(ref(this.db, 'teams'), updatedTeams),
+      set(ref(this.db, 'results'), updatedResults)
+    ]);
+  }
+
+  // Brisanje natjecatelja iz tima
+  async removeCompetitorFromTeam(teamId: number, competitorId: number) {
+    const s = this.value;
+    const updatedTeams = s.teams.map(t => {
+      if (t.id === teamId) {
+        return { ...t, members: t.members.filter(m => m.id !== competitorId) };
+      }
+      return t;
+    });
+
+    // Također obriši sve rezultate ovog natjecatelja
+    const updatedResults = s.results.filter(r => r.competitorId !== competitorId);
+
+    await Promise.all([
+      set(ref(this.db, 'teams'), updatedTeams),
+      set(ref(this.db, 'results'), updatedResults)
+    ]);
+  }
+
+  // Brisanje rezultata
+  async deleteResult(resultId: number) {
+    const s = this.value;
+    const updatedResults = s.results.filter(r => r.id !== resultId);
+    await set(ref(this.db, 'results'), updatedResults);
+  }
+
+  // Dodavanje discipline
+  async addDiscipline(name: string, category: 'M' | 'Ž') {
+    const s = this.value;
+    const newId = Math.max(...s.disciplines.map(d => d.id), 0) + 1;
+    const discipline: Discipline = {
+      id: newId,
+      name: name.trim(),
+      category
+    };
+
+    const updatedDisciplines = [...s.disciplines, discipline];
+    await set(ref(this.db, 'disciplines'), updatedDisciplines);
+  }
+
+  // Ažuriranje discipline
+  async updateDiscipline(disciplineId: number, name: string, category: 'M' | 'Ž') {
+    const s = this.value;
+    const disciplineIndex = s.disciplines.findIndex(d => d.id === disciplineId);
+
+    if (disciplineIndex === -1) return false;
+
+    const updatedDisciplines = [...s.disciplines];
+    updatedDisciplines[disciplineIndex] = {
+      id: disciplineId,
+      name: name.trim(),
+      category
+    };
+
+    await set(ref(this.db, 'disciplines'), updatedDisciplines);
+    return true;
+  }
+
+  // Brisanje discipline
+  async deleteDiscipline(disciplineId: number) {
+    const s = this.value;
+    const updatedDisciplines = s.disciplines.filter(d => d.id !== disciplineId);
+
+    // Također obriši sve rezultate u ovoj disciplini
+    const updatedResults = s.results.filter(r => r.disciplineId !== disciplineId);
+
+    await Promise.all([
+      set(ref(this.db, 'disciplines'), updatedDisciplines),
+      set(ref(this.db, 'results'), updatedResults)
+    ]);
   }
 
   // Dohvaćanje svih rezultata

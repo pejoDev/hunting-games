@@ -1,0 +1,11 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "competition-data": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
+
