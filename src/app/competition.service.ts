@@ -97,6 +97,27 @@ export class CompetitionService {
     this._state.next(s);
   }
 
+  // Ažuriranje rezultata
+  updateResult(resultId: number, competitorId: number, disciplineId: number, points: number) {
+    const s = this.value;
+    const existingIndex = s.results.findIndex(r => r.id === resultId);
+
+    if (existingIndex >= 0) {
+      s.results[existingIndex] = {
+        id: resultId,
+        competitorId,
+        disciplineId,
+        points
+      };
+      this._state.next(s);
+    }
+  }
+
+  // Dohvaćanje svih rezultata
+  getResults(): Result[] {
+    return this.value.results;
+  }
+
   // Dohvaćanje disciplina za kategoriju
   getDisciplinesForCategory(category: 'M' | 'Ž'): Discipline[] {
     return this.value.disciplines.filter(d => d.category === category);

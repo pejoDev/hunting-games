@@ -14,6 +14,7 @@ import { AddTeamDialog } from './dialogs/add-team.dialog';
 import { EditTeamDialog } from './dialogs/edit-team.dialog';
 import { AddResultDialog } from './dialogs/add-result.dialog';
 import { CompetitorRanking, TeamRanking } from './models';
+import { EditResultDialog } from './dialogs/edit-result.dialog';
 
 @Component({
   standalone: true,
@@ -35,6 +36,10 @@ import { CompetitorRanking, TeamRanking } from './models';
         Unos rezultata
       </button>
       
+      <button mat-raised-button color="warn" (click)="openEditResult()">
+        <mat-icon>edit_note</mat-icon>
+        Editiraj rezultat
+      </button>
       <!-- PDF Export buttons -->
       <div class="pdf-controls">
         <button mat-raised-button 
@@ -513,6 +518,23 @@ export class OverviewComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.competitionService.addResult(result.competitorId, result.disciplineId, result.points);
+      }
+    });
+  }
+
+  openEditResult() {
+    const dialogRef = this.dialog.open(EditResultDialog, {
+      width: '500px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.competitionService.updateResult(
+          result.id,
+          result.competitorId,
+          result.disciplineId,
+          result.points
+        );
       }
     });
   }
