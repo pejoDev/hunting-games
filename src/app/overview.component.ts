@@ -505,7 +505,13 @@ export class OverviewComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.competitionService.updateTeam(result.id, result.name, result.category, result.members);
+        if (result.delete && result.team) {
+          // Handle team deletion
+          this.competitionService.deleteTeam(result.team.id);
+        } else {
+          // Handle team update
+          this.competitionService.updateTeam(result.id, result.name, result.category, result.members);
+        }
       }
     });
   }

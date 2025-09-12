@@ -99,6 +99,19 @@ import { CompetitionService } from '../competition.service';
       </div>
 
       <div class="dialog-actions">
+        <!-- Delete button on the left -->
+        <button mat-raised-button 
+                color="warn" 
+                (click)="deleteTeam()" 
+                [disabled]="!selectedTeam"
+                class="delete-button">
+          <mat-icon>delete_forever</mat-icon>
+          Obriši tim
+        </button>
+        
+        <!-- Spacer to push other buttons to the right -->
+        <div class="spacer"></div>
+        
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
           Odustani
@@ -186,11 +199,19 @@ import { CompetitionService } from '../competition.service';
     
     .dialog-actions {
       display: flex;
+      align-items: center;
       gap: 12px;
-      justify-content: flex-end;
       margin-top: 24px;
       padding-top: 16px;
       border-top: 1px solid #e0e0e0;
+    }
+    
+    .delete-button {
+      margin-right: auto;
+    }
+    
+    .spacer {
+      flex: 1;
     }
   `]
 })
@@ -264,8 +285,17 @@ export class EditTeamDialog implements OnInit {
     this.ref.close(updatedTeam);
   }
 
+  deleteTeam() {
+    if (!this.selectedTeam) return;
+
+    const confirmDelete = confirm(`Jeste li sigurni da želite obrisati tim "${this.selectedTeam.name}"?`);
+
+    if (confirmDelete) {
+      this.ref.close({ delete: true, team: this.selectedTeam });
+    }
+  }
+
   close() {
     this.ref.close();
   }
 }
-
