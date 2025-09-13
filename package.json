@@ -21,9 +21,8 @@
     "@angular/platform-browser": "^18.0.0",
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@angular/router": "^18.0.0",
-    "jspdf": "^3.0.1",
+    "jspdf": "^2.5.1",
     "jspdf-autotable": "^5.0.2",
-    "jspdf-customfonts": "^0.0.4-rc.4",
     "rxjs": "^7.8.1",
     "tslib": "^2.6.2",
     "zone.js": "~0.14.10"
@@ -37,4 +36,3 @@
     "typescript": "~5.4.0"
   }
 }
-
