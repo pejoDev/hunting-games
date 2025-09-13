@@ -149,11 +149,16 @@ export class CompetitionService {
   // Brisanje tima
   async deleteTeam(teamId: number) {
     const s = this.value;
+
+    // PRVO dohvati članove tima PRIJE brisanja tima
+    const teamToDelete = s.teams.find(t => t.id === teamId);
+    const teamMembers = teamToDelete?.members || [];
+    const memberIds = teamMembers.map(m => m.id);
+
+    // ZATIM obriši tim iz liste
     const updatedTeams = s.teams.filter(t => t.id !== teamId);
 
-    // Također obriši sve rezultate natjecatelja iz ovog tima
-    const teamMembers = s.teams.find(t => t.id === teamId)?.members || [];
-    const memberIds = teamMembers.map(m => m.id);
+    // Obriši sve rezultate natjecatelja iz ovog tima
     const updatedResults = s.results.filter(r => !memberIds.includes(r.competitorId));
 
     await Promise.all([
