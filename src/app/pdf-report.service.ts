@@ -40,6 +40,7 @@ export class PdfReportService {
   ): void {
     const doc = new jsPDF();
     const disciplineColumns = disciplines.map(d => this.normalizeText(d.name));
+    const originalDisciplineNames = disciplines.map(d => d.name); // Keep original names for data access
 
     // Header
     doc.setFontSize(20);
@@ -79,7 +80,7 @@ export class PdfReportService {
       row.rank.toString(),
       this.normalizeText(`${row.competitor.firstName} ${row.competitor.lastName}`),
       this.normalizeText(row.team),
-      ...disciplineColumns.map(discipline => (row.disciplineScores[discipline] || 0).toString()),
+      ...originalDisciplineNames.map(disciplineName => (row.disciplineScores[disciplineName] || 0).toString()),
       row.totalPoints.toFixed(2)
     ]);
 
@@ -142,6 +143,7 @@ export class PdfReportService {
   ): void {
     const doc = new jsPDF();
     const disciplineColumns = disciplines.map(d => this.normalizeText(d.name));
+    const originalDisciplineNames = disciplines.map(d => d.name); // Keep original names for data access
 
     // Header
     doc.setFontSize(20);
@@ -179,7 +181,7 @@ export class PdfReportService {
     const rows = data.map(row => [
       row.rank.toString(),
       this.normalizeText(row.team.name),
-      ...disciplineColumns.map(discipline => (row.disciplineScores[discipline] || 0).toString()),
+      ...originalDisciplineNames.map(disciplineName => (row.disciplineScores[disciplineName] || 0).toString()),
       row.totalPoints.toFixed(2)
     ]);
 
@@ -270,6 +272,7 @@ export class PdfReportService {
   ): void {
     const doc = new jsPDF();
     const disciplineColumns = disciplines.map(d => this.normalizeText(d.name));
+    const originalDisciplineNames = disciplines.map(d => d.name); // Keep original names for data access
 
     // Main header
     doc.setFontSize(24);
@@ -303,7 +306,7 @@ export class PdfReportService {
         row.rank.toString(),
         this.normalizeText(`${row.competitor.firstName} ${row.competitor.lastName}`),
         this.normalizeText(row.team),
-        ...disciplineColumns.map(discipline => (row.disciplineScores[discipline] || 0).toString()),
+        ...originalDisciplineNames.map(disciplineName => (row.disciplineScores[disciplineName] || 0).toString()),
         row.totalPoints.toFixed(2)
       ]);
 
@@ -338,7 +341,7 @@ export class PdfReportService {
       const rows = teamData.slice(0, 10).map(row => [
         row.rank.toString(),
         this.normalizeText(row.team.name),
-        ...disciplineColumns.map(discipline => (row.disciplineScores[discipline] || 0).toString()),
+        ...originalDisciplineNames.map(disciplineName => (row.disciplineScores[disciplineName] || 0).toString()),
         row.totalPoints.toFixed(2)
       ]);
 
