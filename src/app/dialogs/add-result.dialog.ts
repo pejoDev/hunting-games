@@ -32,146 +32,178 @@ interface CompetitorOption {
           Unos rezultata
         </h2>
       </div>
-
+    
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Pretraži natjecatelja</mat-label>
           <input matInput
-                 [formControl]="competitorSearchControl"
-                 [matAutocomplete]="auto"
-                 placeholder="Unesite ime, prezime ili tim..."
-                 (input)="onSearchInput($event)">
+            [formControl]="competitorSearchControl"
+            [matAutocomplete]="auto"
+            placeholder="Unesite ime, prezime ili tim..."
+            (input)="onSearchInput($event)">
           <mat-icon matSuffix>search</mat-icon>
           <mat-autocomplete #auto="matAutocomplete"
-                           [displayWith]="displayCompetitor"
-                           (optionSelected)="onCompetitorSelected($event)">
-            <mat-option *ngFor="let option of filteredCompetitors | async" [value]="option">
-              <div class="competitor-option">
-                <div class="competitor-info">
-                  <mat-icon class="category-icon" [class.male]="option.category === 'M'" [class.female]="option.category === 'Ž'">
-                    {{ option.category === 'M' ? 'man' : 'woman' }}
-                  </mat-icon>
-                  <span class="competitor-name">{{ option.competitor.firstName }} {{ option.competitor.lastName }}</span>
+            [displayWith]="displayCompetitor"
+            (optionSelected)="onCompetitorSelected($event)">
+            @for (option of filteredCompetitors | async; track option) {
+              <mat-option [value]="option">
+                <div class="competitor-option">
+                  <div class="competitor-info">
+                    <mat-icon class="category-icon" [class.male]="option.category === 'M'" [class.female]="option.category === 'Ž'">
+                      {{ option.category === 'M' ? 'man' : 'woman' }}
+                    </mat-icon>
+                    <span class="competitor-name">{{ option.competitor.firstName }} {{ option.competitor.lastName }}</span>
+                  </div>
+                  <div class="team-info">
+                    <mat-icon>group</mat-icon>
+                    <span>{{ option.teamName }}</span>
+                  </div>
                 </div>
-                <div class="team-info">
-                  <mat-icon>group</mat-icon>
-                  <span>{{ option.teamName }}</span>
+              </mat-option>
+            }
+            @if ((filteredCompetitors | async)?.length === 0 && competitorSearchControl.value) {
+              <mat-option
+                value="add-new" class="add-new-option">
+                <div class="add-new-competitor">
+                  <mat-icon>person_add</mat-icon>
+                  <span>Dodaj novog natjecatelja "{{ competitorSearchControl.value }}"</span>
                 </div>
-              </div>
-            </mat-option>
-            <mat-option *ngIf="(filteredCompetitors | async)?.length === 0 && competitorSearchControl.value"
-                       value="add-new" class="add-new-option">
-              <div class="add-new-competitor">
-                <mat-icon>person_add</mat-icon>
-                <span>Dodaj novog natjecatelja "{{ competitorSearchControl.value }}"</span>
-              </div>
-            </mat-option>
-            <mat-option *ngIf="(filteredCompetitors | async)?.length === 0 && !competitorSearchControl.value" disabled>
-              <div class="no-results">
-                <mat-icon>search_off</mat-icon>
-                <span>Počnite tipkati za pretragu...</span>
-              </div>
-            </mat-option>
+              </mat-option>
+            }
+            @if ((filteredCompetitors | async)?.length === 0 && !competitorSearchControl.value) {
+              <mat-option disabled>
+                <div class="no-results">
+                  <mat-icon>search_off</mat-icon>
+                  <span>Počnite tipkati za pretragu...</span>
+                </div>
+              </mat-option>
+            }
           </mat-autocomplete>
         </mat-form-field>
-
+    
         <!-- Quick team filter buttons -->
-        <div class="team-filter-chips" *ngIf="competitorOptions.length > 0">
-          <span class="filter-label">Brza pretraga po timu:</span>
-          <mat-chip-set>
-            <mat-chip *ngFor="let team of getUniqueTeams()"
-                     (click)="filterByTeam(team)"
-                     [class.selected]="selectedTeamFilter === team">
-              {{ team }}
-            </mat-chip>
-            <mat-chip *ngIf="selectedTeamFilter"
-                     (click)="clearTeamFilter()"
-                     class="clear-filter">
-              <mat-icon>clear</mat-icon>
-              Očisti
-            </mat-chip>
-          </mat-chip-set>
-        </div>
+        @if (competitorOptions.length > 0) {
+          <div class="team-filter-chips">
+            <span class="filter-label">Brza pretraga po timu:</span>
+            <mat-chip-set>
+              @for (team of getUniqueTeams(); track team) {
+                <mat-chip
+                  (click)="filterByTeam(team)"
+                  [class.selected]="selectedTeamFilter === team">
+                  {{ team }}
+                </mat-chip>
+              }
+              @if (selectedTeamFilter) {
+                <mat-chip
+                  (click)="clearTeamFilter()"
+                  class="clear-filter">
+                  <mat-icon>clear</mat-icon>
+                  Očisti
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
       </div>
-
+    
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Disciplina</mat-label>
           <mat-select [(ngModel)]="disciplineId" [disabled]="!selectedCompetitorCategory">
-            <mat-option *ngFor="let discipline of getAvailableDisciplines()" [value]="discipline.id">
-              <mat-icon>sports</mat-icon>
-              {{discipline.name}}
-            </mat-option>
+            @for (discipline of getAvailableDisciplines(); track discipline) {
+              <mat-option [value]="discipline.id">
+                <mat-icon>sports</mat-icon>
+                {{discipline.name}}
+              </mat-option>
+            }
           </mat-select>
           <mat-icon matSuffix>sports_score</mat-icon>
-          <mat-hint *ngIf="selectedCompetitorCategory">
-            Dostupne discipline za {{ selectedCompetitorCategory === 'M' ? 'muškarce' : 'žene' }}
-          </mat-hint>
+          @if (selectedCompetitorCategory) {
+            <mat-hint>
+              Dostupne discipline za {{ selectedCompetitorCategory === 'M' ? 'muškarce' : 'žene' }}
+            </mat-hint>
+          }
         </mat-form-field>
       </div>
-
+    
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Bodovi</mat-label>
           <input matInput type="number" [(ngModel)]="points"
-                 min="0"
-                 [max]="getSelectedDisciplineMaxPoints()"
-                 placeholder="Unesite broj bodova"
-                 (input)="onPointsChange()" />
+            min="0"
+            [max]="getSelectedDisciplineMaxPoints()"
+            placeholder="Unesite broj bodova"
+            (input)="onPointsChange()" />
           <mat-icon matSuffix>calculate</mat-icon>
-          <mat-hint *ngIf="disciplineId && !validatePoints()">
-            Maksimalno bodova: {{ getSelectedDisciplineMaxPoints() }}
-            <span class="discipline-info">({{ getSelectedDisciplineName() }})</span>
-          </mat-hint>
-          <mat-error *ngIf="validatePoints()">
-            {{ validatePoints() }}
-          </mat-error>
+          @if (disciplineId && !validatePoints()) {
+            <mat-hint>
+              Maksimalno bodova: {{ getSelectedDisciplineMaxPoints() }}
+              <span class="discipline-info">({{ getSelectedDisciplineName() }})</span>
+            </mat-hint>
+          }
+          @if (validatePoints()) {
+            <mat-error>
+              {{ validatePoints() }}
+            </mat-error>
+          }
         </mat-form-field>
       </div>
-
+    
       <!-- Validation info panel -->
-      <div class="validation-info" *ngIf="disciplineId">
-        <mat-icon [color]="validatePoints() ? 'warn' : 'primary'">info</mat-icon>
-        <div class="validation-content">
-          <strong>{{ getSelectedDisciplineName() }}:</strong>
-          <span>Maksimalno {{ getSelectedDisciplineMaxPoints() }} bodova</span>
-          <span *ngIf="getSelectedDisciplineName() === 'TRAP'" class="discipline-details">
-            (5 glinenih golubova)
-          </span>
-          <span *ngIf="getSelectedDisciplineName() === 'PRAČKA'" class="discipline-details">
-            (5 meta)
-          </span>
-          <span *ngIf="getSelectedDisciplineName() === 'ZRAČNA PUŠKA'" class="discipline-details">
-            (5 metaka, do 10 bodova po metku)
-          </span>
-          <span *ngIf="getSelectedDisciplineName() === 'PIKADO'" class="discipline-details">
-            (standardni PIKADO format)
-          </span>
+      @if (disciplineId) {
+        <div class="validation-info">
+          <mat-icon [color]="validatePoints() ? 'warn' : 'primary'">info</mat-icon>
+          <div class="validation-content">
+            <strong>{{ getSelectedDisciplineName() }}:</strong>
+            <span>Maksimalno {{ getSelectedDisciplineMaxPoints() }} bodova</span>
+            @if (getSelectedDisciplineName() === 'TRAP') {
+              <span class="discipline-details">
+                (5 glinenih golubova)
+              </span>
+            }
+            @if (getSelectedDisciplineName() === 'PRAČKA') {
+              <span class="discipline-details">
+                (5 meta)
+              </span>
+            }
+            @if (getSelectedDisciplineName() === 'ZRAČNA PUŠKA') {
+              <span class="discipline-details">
+                (5 metaka, do 10 bodova po metku)
+              </span>
+            }
+            @if (getSelectedDisciplineName() === 'PIKADO') {
+              <span class="discipline-details">
+                (standardni PIKADO format)
+              </span>
+            }
+          </div>
         </div>
-      </div>
-
+      }
+    
       <!-- Selected competitor info -->
-      <div *ngIf="selectedCompetitor" class="selected-competitor-info">
-        <mat-icon>info</mat-icon>
-        <div class="info-content">
-          <strong>{{ selectedCompetitor.competitor.firstName }} {{ selectedCompetitor.competitor.lastName }}</strong>
-          <span>{{ selectedCompetitor.teamName }} ({{ selectedCompetitor.category === 'M' ? 'Muškarci' : 'Žene' }})</span>
+      @if (selectedCompetitor) {
+        <div class="selected-competitor-info">
+          <mat-icon>info</mat-icon>
+          <div class="info-content">
+            <strong>{{ selectedCompetitor.competitor.firstName }} {{ selectedCompetitor.competitor.lastName }}</strong>
+            <span>{{ selectedCompetitor.teamName }} ({{ selectedCompetitor.category === 'M' ? 'Muškarci' : 'Žene' }})</span>
+          </div>
         </div>
-      </div>
-
+      }
+    
       <div class="dialog-actions">
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
           Odustani
         </button>
         <button mat-raised-button color="warn" (click)="add()"
-                [disabled]="!selectedCompetitor || !disciplineId || points === null || points < 0 || validatePoints() !== null">
+          [disabled]="!selectedCompetitor || !disciplineId || points === null || points < 0 || validatePoints() !== null">
           <mat-icon>save</mat-icon>
           Spremi rezultat
         </button>
       </div>
     </div>
-  `,
+    `,
     styles: [`
     .competitor-option {
       display: flex;

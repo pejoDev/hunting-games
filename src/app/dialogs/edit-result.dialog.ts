@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+
 import { CompetitionService } from '../competition.service';
 import { Result, Competitor, Discipline, Team } from '../models';
 
@@ -19,7 +19,7 @@ interface CompetitorResult {
 
 @Component({
     selector: 'edit-result-dialog',
-    imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
+    imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
     template: `
     <div class="dialog-content">
       <div class="dialog-header">
@@ -28,68 +28,70 @@ interface CompetitorResult {
           Editiraj rezultat
         </h2>
       </div>
-
+    
       <!-- Result Selection -->
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Odaberi rezultat za uređivanje</mat-label>
           <mat-select [(ngModel)]="selectedResult" (selectionChange)="onResultSelected()">
             <mat-option value="">-- Odaberi rezultat --</mat-option>
-            <mat-option *ngFor="let item of availableResults" [value]="item">
-              {{item.competitor.firstName}} {{item.competitor.lastName}} - {{item.discipline.name}} ({{item.result.points}} bodova) - Tim: {{item.team.name}}
-            </mat-option>
+            @for (item of availableResults; track item) {
+              <mat-option [value]="item">
+                {{item.competitor.firstName}} {{item.competitor.lastName}} - {{item.discipline.name}} ({{item.result.points}} bodova) - Tim: {{item.team.name}}
+              </mat-option>
+            }
           </mat-select>
           <mat-icon matSuffix>assignment</mat-icon>
         </mat-form-field>
       </div>
-
+    
       <!-- Result Details (shown only when result is selected) -->
-      <div *ngIf="selectedResult" class="result-details">
-        <div class="competitor-info">
-          <mat-icon>person</mat-icon>
-          <strong>{{selectedResult!.competitor.firstName}} {{selectedResult!.competitor.lastName}}</strong>
-          <span class="discipline-badge">{{selectedResult!.discipline.name}}</span>
-        </div>
-
-        <div class="form-group">
-          <mat-form-field appearance="outline" style="width:100%">
-            <mat-label>Broj bodova</mat-label>
-            <input matInput 
-                   type="number" 
-                   [(ngModel)]="points" 
-                   placeholder="Unesite broj bodova"
-                   min="0"
-                   step="0.1" />
-            <mat-icon matSuffix>score</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <div class="info-box">
-          <mat-icon>info</mat-icon>
-          <div class="info-content">
-            <strong>Disciplina:</strong> {{selectedResult!.discipline.name}}<br>
-            <strong>Kategorija:</strong> {{selectedResult!.discipline.category === 'M' ? 'Muškarci' : 'Žene'}}<br>
-            <strong>Tim:</strong> {{selectedResult!.team.name}}<br>
-            <strong>Trenutni rezultat:</strong> {{selectedResult!.result.points}} bodova
+      @if (selectedResult) {
+        <div class="result-details">
+          <div class="competitor-info">
+            <mat-icon>person</mat-icon>
+            <strong>{{selectedResult!.competitor.firstName}} {{selectedResult!.competitor.lastName}}</strong>
+            <span class="discipline-badge">{{selectedResult!.discipline.name}}</span>
+          </div>
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Broj bodova</mat-label>
+              <input matInput
+                type="number"
+                [(ngModel)]="points"
+                placeholder="Unesite broj bodova"
+                min="0"
+                step="0.1" />
+              <mat-icon matSuffix>score</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="info-box">
+            <mat-icon>info</mat-icon>
+            <div class="info-content">
+              <strong>Disciplina:</strong> {{selectedResult!.discipline.name}}<br>
+              <strong>Kategorija:</strong> {{selectedResult!.discipline.category === 'M' ? 'Muškarci' : 'Žene'}}<br>
+              <strong>Tim:</strong> {{selectedResult!.team.name}}<br>
+              <strong>Trenutni rezultat:</strong> {{selectedResult!.result.points}} bodova
+            </div>
           </div>
         </div>
-      </div>
-
+      }
+    
       <div class="dialog-actions">
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
           Odustani
         </button>
-        <button mat-raised-button 
-                color="primary" 
-                (click)="save()" 
-                [disabled]="!canSave()">
+        <button mat-raised-button
+          color="primary"
+          (click)="save()"
+          [disabled]="!canSave()">
           <mat-icon>check</mat-icon>
           Spremi promjene
         </button>
       </div>
     </div>
-  `,
+    `,
     styles: [`
     .dialog-content {
       padding: 24px;

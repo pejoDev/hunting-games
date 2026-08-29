@@ -6,12 +6,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+
 import { Competitor } from '../models';
 
 @Component({
     selector: 'add-team-dialog',
-    imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
+    imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
     template: `
     <div class="dialog-content">
       <div class="dialog-header">
@@ -20,7 +20,7 @@ import { Competitor } from '../models';
           Dodaj novi tim
         </h2>
       </div>
-
+    
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Naziv tima</mat-label>
@@ -28,7 +28,7 @@ import { Competitor } from '../models';
           <mat-icon matSuffix>edit</mat-icon>
         </mat-form-field>
       </div>
-
+    
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Kategorija</mat-label>
@@ -45,7 +45,7 @@ import { Competitor } from '../models';
           <mat-icon matSuffix>category</mat-icon>
         </mat-form-field>
       </div>
-
+    
       <!-- Team Members Section -->
       <div class="members-section">
         <div class="members-header">
@@ -58,28 +58,32 @@ import { Competitor } from '../models';
             Dodaj člana
           </button>
         </div>
-
-        <div class="member-item" *ngFor="let member of teamMembers; let i = index">
-          <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
-            <mat-label>Ime</mat-label>
-            <input matInput [(ngModel)]="member.firstName" placeholder="Ime" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
-            <mat-label>Prezime</mat-label>
-            <input matInput [(ngModel)]="member.lastName" placeholder="Prezime" />
-          </mat-form-field>
-          <button mat-icon-button color="warn" (click)="removeMember(i)" 
-                  [disabled]="i === 0">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-
-        <div *ngIf="teamMembers.length === 0" class="empty-members">
-          <mat-icon>person_off</mat-icon>
-          <p>Dodajte barem jednog člana tima</p>
-        </div>
+    
+        @for (member of teamMembers; track member; let i = $index) {
+          <div class="member-item">
+            <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
+              <mat-label>Ime</mat-label>
+              <input matInput [(ngModel)]="member.firstName" placeholder="Ime" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
+              <mat-label>Prezime</mat-label>
+              <input matInput [(ngModel)]="member.lastName" placeholder="Prezime" />
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="removeMember(i)"
+              [disabled]="i === 0">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+    
+        @if (teamMembers.length === 0) {
+          <div class="empty-members">
+            <mat-icon>person_off</mat-icon>
+            <p>Dodajte barem jednog člana tima</p>
+          </div>
+        }
       </div>
-
+    
       <div class="dialog-actions">
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
@@ -91,7 +95,7 @@ import { Competitor } from '../models';
         </button>
       </div>
     </div>
-  `,
+    `,
     styles: [`
     .dialog-content {
       padding: 24px;
