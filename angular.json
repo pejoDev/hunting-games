@@ -25,6 +25,23 @@
           "options": {
             "browserTarget": "app:build"
           }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "karmaConfig": "karma.conf.js",
+            "polyfills": ["zone.js", "zone.js/testing"],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": ["src/assets"],
+            "styles": ["src/styles.css"],
+            "scripts": [],
+            "codeCoverage": true,
+            "codeCoverageExclude": [
+              "src/main.ts",
+              "src/environments/**",
+              "src/app/realtime-db.gateway.ts"
+            ]
+          }
         }
       }
     }

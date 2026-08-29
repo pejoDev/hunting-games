@@ -1,25 +1,21 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Database, ref, onValue, set, push, update, remove } from '@angular/fire/database';
 import { Team, Discipline, Result, AppState, Competitor, CompetitorRanking, TeamRanking } from './models';
+import { RealtimeDbGateway } from './realtime-db.gateway';
 
 @Injectable({ providedIn: 'root' })
 export class CompetitionService {
   private _state = new BehaviorSubject<AppState>({ teams: [], disciplines: [], results: [] });
   state$ = this._state.asObservable();
 
-  constructor(private db: Database) {
+  constructor(private dbGateway: RealtimeDbGateway) {
     this.loadInitialData();
   }
 
   get value() { return this._state.getValue(); }
 
   private loadInitialData() {
-    const competitionRef = ref(this.db);
-    console.log(competitionRef);
-    onValue(competitionRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log(data);
+    this.dbGateway.observeRoot((data) => {
       if (data) {
         this._state.next({
           teams: data.teams || [],
@@ -52,7 +48,7 @@ export class CompetitionService {
     };
 
     const updatedTeams = [...s.teams, team];
-    await set(ref(this.db, 'teams'), updatedTeams);
+    await this.dbGateway.setCollection('teams', updatedTeams);
   }
 
   // Ažuriranje tima
@@ -72,7 +68,7 @@ export class CompetitionService {
     const updatedTeams = [...s.teams];
     updatedTeams[teamIndex] = updatedTeam;
 
-    await set(ref(this.db, 'teams'), updatedTeams);
+    await this.dbGateway.setCollection('teams', updatedTeams);
     return true;
   }
 
@@ -96,7 +92,7 @@ export class CompetitionService {
       return t;
     });
 
-    await set(ref(this.db, 'teams'), updatedTeams);
+    await this.dbGateway.setCollection('teams', updatedTeams);
     return true;
   }
 
@@ -125,7 +121,7 @@ export class CompetitionService {
       updatedResults = [...s.results, result];
     }
 
-    await set(ref(this.db, 'results'), updatedResults);
+    await this.dbGateway.setCollection('results', updatedResults);
   }
 
   // Ažuriranje rezultata
@@ -142,7 +138,7 @@ export class CompetitionService {
         points
       };
 
-      await set(ref(this.db, 'results'), updatedResults);
+      await this.dbGateway.setCollection('results', updatedResults);
     }
   }
 
@@ -162,8 +158,8 @@ export class CompetitionService {
     const updatedResults = s.results.filter(r => !memberIds.includes(r.competitorId));
 
     await Promise.all([
-      set(ref(this.db, 'teams'), updatedTeams),
-      set(ref(this.db, 'results'), updatedResults)
+      this.dbGateway.setCollection('teams', updatedTeams),
+      this.dbGateway.setCollection('results', updatedResults)
     ]);
   }
 
@@ -181,8 +177,8 @@ export class CompetitionService {
     const updatedResults = s.results.filter(r => r.competitorId !== competitorId);
 
     await Promise.all([
-      set(ref(this.db, 'teams'), updatedTeams),
-      set(ref(this.db, 'results'), updatedResults)
+      this.dbGateway.setCollection('teams', updatedTeams),
+      this.dbGateway.setCollection('results', updatedResults)
     ]);
   }
 
@@ -190,7 +186,7 @@ export class CompetitionService {
   async deleteResult(resultId: number) {
     const s = this.value;
     const updatedResults = s.results.filter(r => r.id !== resultId);
-    await set(ref(this.db, 'results'), updatedResults);
+    await this.dbGateway.setCollection('results', updatedResults);
   }
 
   // Dodavanje discipline
@@ -204,7 +200,7 @@ export class CompetitionService {
     };
 
     const updatedDisciplines = [...s.disciplines, discipline];
-    await set(ref(this.db, 'disciplines'), updatedDisciplines);
+    await this.dbGateway.setCollection('disciplines', updatedDisciplines);
   }
 
   // Ažuriranje discipline
@@ -221,7 +217,7 @@ export class CompetitionService {
       category
     };
 
-    await set(ref(this.db, 'disciplines'), updatedDisciplines);
+    await this.dbGateway.setCollection('disciplines', updatedDisciplines);
     return true;
   }
 
@@ -234,8 +230,8 @@ export class CompetitionService {
     const updatedResults = s.results.filter(r => r.disciplineId !== disciplineId);
 
     await Promise.all([
-      set(ref(this.db, 'disciplines'), updatedDisciplines),
-      set(ref(this.db, 'results'), updatedResults)
+      this.dbGateway.setCollection('disciplines', updatedDisciplines),
+      this.dbGateway.setCollection('results', updatedResults)
     ]);
   }
 
