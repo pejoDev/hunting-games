@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -294,6 +294,7 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
       </div>
     }
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
     .score-high {
       color: #4caf50;
