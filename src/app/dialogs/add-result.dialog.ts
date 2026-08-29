@@ -22,10 +22,9 @@ interface CompetitorOption {
 }
 
 @Component({
-  standalone: true,
-  selector: 'add-result-dialog',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatAutocompleteModule, MatChipsModule],
-  template: `
+    selector: 'add-result-dialog',
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatAutocompleteModule, MatChipsModule],
+    template: `
     <div class="dialog-content">
       <div class="dialog-header">
         <h2>
@@ -173,7 +172,7 @@ interface CompetitorOption {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .competitor-option {
       display: flex;
       justify-content: space-between;

@@ -11,10 +11,9 @@ import { Team, Competitor } from '../models';
 import { CompetitionService } from '../competition.service';
 
 @Component({
-  standalone: true,
-  selector: 'edit-team-dialog',
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
-  template: `
+    selector: 'edit-team-dialog',
+    imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
+    template: `
     <div class="dialog-content">
       <div class="dialog-header">
         <h2>
@@ -126,7 +125,7 @@ import { CompetitionService } from '../competition.service';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .dialog-content {
       padding: 24px;
       min-width: 500px;

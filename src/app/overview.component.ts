@@ -17,10 +17,9 @@ import { CompetitorRanking, TeamRanking } from './models';
 import { EditResultDialog } from './dialogs/edit-result.dialog';
 
 @Component({
-  standalone: true,
-  selector: 'overview',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatDialogModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatCardModule, MatTooltipModule],
-  template: `
+    selector: 'overview',
+    imports: [CommonModule, MatTableModule, MatButtonModule, MatDialogModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatCardModule, MatTooltipModule],
+    template: `
     <!-- Control Panel -->
     <div class="control-panel">
       <button mat-raised-button color="primary" (click)="openAddTeam()">
@@ -276,7 +275,7 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
       </table>
     </div>
   `,
-  styles: [`
+    styles: [`
     .score-high {
       color: #4caf50;
       font-weight: 600;

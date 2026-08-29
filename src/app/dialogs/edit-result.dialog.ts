@@ -18,10 +18,9 @@ interface CompetitorResult {
 }
 
 @Component({
-  standalone: true,
-  selector: 'edit-result-dialog',
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
-  template: `
+    selector: 'edit-result-dialog',
+    imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
+    template: `
     <div class="dialog-content">
       <div class="dialog-header">
         <h2>
@@ -91,7 +90,7 @@ interface CompetitorResult {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .dialog-content {
       padding: 24px;
       min-width: 500px;
