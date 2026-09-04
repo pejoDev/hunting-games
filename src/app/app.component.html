@@ -1,9 +1,17 @@
     <div class="header">
-      <div class="container">
+      <div class="container header-row">
         <h1>
           <mat-icon style="vertical-align: middle; margin-right: 12px;">emoji_events</mat-icon>
           Sustav za Praćenje Rezultata Međudruštvenog Natjecanja
         </h1>
+        @if (authService.currentUser) {
+          <div class="user-info">
+            <span class="user-email">{{ authService.currentUser.email }}</span>
+            <button mat-icon-button (click)="logout()" aria-label="Odjava" title="Odjava">
+              <mat-icon>logout</mat-icon>
+            </button>
+          </div>
+        }
       </div>
     </div>
     <div class="container">

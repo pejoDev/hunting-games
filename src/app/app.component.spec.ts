@@ -3,8 +3,11 @@ import { AppComponent, routes } from './app.component';
 import { CompetitionService } from './competition.service';
 import { RealtimeDbGateway } from './realtime-db.gateway';
 import { FakeRealtimeDbGateway } from './testing/fake-realtime-db.gateway';
+import { AuthGateway } from './auth.gateway';
+import { FakeAuthGateway } from './testing/fake-auth.gateway';
 import { provideRouter } from '@angular/router';
 import { OverviewComponent } from './overview.component';
+import { LoginComponent } from './login.component';
 
 describe('AppComponent', () => {
   beforeEach(() => {
@@ -13,7 +16,8 @@ describe('AppComponent', () => {
       providers: [
         provideRouter(routes),
         CompetitionService,
-        { provide: RealtimeDbGateway, useValue: new FakeRealtimeDbGateway() }
+        { provide: RealtimeDbGateway, useValue: new FakeRealtimeDbGateway() },
+        { provide: AuthGateway, useValue: new FakeAuthGateway() }
       ]
     });
   });
@@ -23,7 +27,13 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should route the empty path to the overview screen (the app\'s single page)', () => {
-    expect(routes).toEqual([{ path: '', component: OverviewComponent }]);
+  it('should route the empty path to the overview screen, guarded by login', () => {
+    expect(routes[0].path).toBe('');
+    expect(routes[0].component).toBe(OverviewComponent);
+    expect(routes[0].canActivate).toBeTruthy();
+  });
+
+  it('should route /login to the login screen', () => {
+    expect(routes[1]).toEqual({ path: 'login', component: LoginComponent });
   });
 });

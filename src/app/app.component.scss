@@ -2,3 +2,27 @@
   display: block;
   min-height: 100vh;
 }
+
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  h1 {
+    flex: 1;
+    // Keeps the title visually centered whether or not .user-info is rendered next to it.
+    margin: 0;
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.user-email {
+  font-size: 14px;
+  opacity: 0.85;
+}
