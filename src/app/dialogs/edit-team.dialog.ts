@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -6,15 +6,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+
 import { Team, Competitor } from '../models';
 import { CompetitionService } from '../competition.service';
 
 @Component({
-  standalone: true,
-  selector: 'edit-team-dialog',
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
-  template: `
+    selector: 'edit-team-dialog',
+    imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule, MatIconModule],
+    template: `
     <div class="dialog-content">
       <div class="dialog-header">
         <h2>
@@ -22,111 +21,116 @@ import { CompetitionService } from '../competition.service';
           Editiraj tim
         </h2>
       </div>
-
+    
       <!-- Team Selection -->
       <div class="form-group">
         <mat-form-field appearance="outline" style="width:100%">
           <mat-label>Odaberi tim za uređivanje</mat-label>
           <mat-select [(ngModel)]="selectedTeam" (selectionChange)="onTeamSelected()">
             <mat-option value="">-- Odaberi tim --</mat-option>
-            <mat-option *ngFor="let team of availableTeams" [value]="team">
-              {{team.name}} ({{team.category === 'M' ? 'Muškarci' : 'Žene'}})
-            </mat-option>
+            @for (team of availableTeams; track team) {
+              <mat-option [value]="team">
+                {{team.name}} ({{team.category === 'M' ? 'Muškarci' : 'Žene'}})
+              </mat-option>
+            }
           </mat-select>
           <mat-icon matSuffix>groups</mat-icon>
         </mat-form-field>
       </div>
-
+    
       <!-- Team Details (shown only when team is selected) -->
-      <div *ngIf="selectedTeam" class="team-details">
-        <div class="form-group">
-          <mat-form-field appearance="outline" style="width:100%">
-            <mat-label>Naziv tima</mat-label>
-            <input matInput [(ngModel)]="teamName" placeholder="Unesite naziv tima" />
-            <mat-icon matSuffix>edit</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <div class="form-group">
-          <mat-form-field appearance="outline" style="width:100%">
-            <mat-label>Kategorija</mat-label>
-            <mat-select [(ngModel)]="teamCategory">
-              <mat-option value="M">
-                <mat-icon>man</mat-icon>
-                Muškarci
-              </mat-option>
-              <mat-option value="Ž">
-                <mat-icon>woman</mat-icon>
-                Žene
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix>category</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <!-- Team Members -->
-        <div class="members-section">
-          <div class="members-header">
-            <h3>
-              <mat-icon>group</mat-icon>
-              Članovi tima
-            </h3>
-            <button mat-button color="accent" (click)="addMember()">
-              <mat-icon>person_add</mat-icon>
-              Dodaj člana
-            </button>
-          </div>
-
-          <div *ngIf="teamMembers.length === 0" class="empty-members">
-            <mat-icon>person_off</mat-icon>
-            <p>Nema članova u timu</p>
-          </div>
-
-          <div class="member-item" *ngFor="let member of teamMembers; let i = index">
-            <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
-              <mat-label>Ime</mat-label>
-              <input matInput [(ngModel)]="member.firstName" placeholder="Ime" />
+      @if (selectedTeam) {
+        <div class="team-details">
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Naziv tima</mat-label>
+              <input matInput [(ngModel)]="teamName" placeholder="Unesite naziv tima" />
+              <mat-icon matSuffix>edit</mat-icon>
             </mat-form-field>
-            <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
-              <mat-label>Prezime</mat-label>
-              <input matInput [(ngModel)]="member.lastName" placeholder="Prezime" />
+          </div>
+          <div class="form-group">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Kategorija</mat-label>
+              <mat-select [(ngModel)]="teamCategory">
+                <mat-option value="M">
+                  <mat-icon>man</mat-icon>
+                  Muškarci
+                </mat-option>
+                <mat-option value="Ž">
+                  <mat-icon>woman</mat-icon>
+                  Žene
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>category</mat-icon>
             </mat-form-field>
-            <button mat-icon-button color="warn" (click)="removeMember(i)" matTooltip="Ukloni člana">
-              <mat-icon>delete</mat-icon>
-            </button>
+          </div>
+          <!-- Team Members -->
+          <div class="members-section">
+            <div class="members-header">
+              <h3>
+                <mat-icon>group</mat-icon>
+                Članovi tima
+              </h3>
+              <button mat-button color="accent" (click)="addMember()">
+                <mat-icon>person_add</mat-icon>
+                Dodaj člana
+              </button>
+            </div>
+            @if (teamMembers.length === 0) {
+              <div class="empty-members">
+                <mat-icon>person_off</mat-icon>
+                <p>Nema članova u timu</p>
+              </div>
+            }
+            @for (member of teamMembers; track member; let i = $index) {
+              <div class="member-item">
+                <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
+                  <mat-label>Ime</mat-label>
+                  <input matInput [(ngModel)]="member.firstName" placeholder="Ime" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" style="flex: 1; margin-right: 8px;">
+                  <mat-label>Prezime</mat-label>
+                  <input matInput [(ngModel)]="member.lastName" placeholder="Prezime" />
+                </mat-form-field>
+                <button mat-icon-button color="warn" (click)="removeMember(i)" matTooltip="Ukloni člana">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
           </div>
         </div>
-      </div>
-
+      }
+    
       <div class="dialog-actions">
         <!-- Delete button on the left -->
-        <button mat-raised-button 
-                color="warn" 
-                (click)="deleteTeam()" 
-                [disabled]="!selectedTeam"
-                class="delete-button">
+        <button mat-raised-button
+          color="warn"
+          (click)="deleteTeam()"
+          [disabled]="!selectedTeam"
+          class="delete-button">
           <mat-icon>delete_forever</mat-icon>
           Obriši tim
         </button>
-        
+    
         <!-- Spacer to push other buttons to the right -->
         <div class="spacer"></div>
-        
+    
         <button mat-button (click)="close()">
           <mat-icon>close</mat-icon>
           Odustani
         </button>
-        <button mat-raised-button 
-                color="primary" 
-                (click)="save()" 
-                [disabled]="!canSave()">
+        <button mat-raised-button
+          color="primary"
+          (click)="save()"
+          [disabled]="!canSave()">
           <mat-icon>check</mat-icon>
           Spremi promjene
         </button>
       </div>
     </div>
-  `,
-  styles: [`
+    `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`
     .dialog-content {
       padding: 24px;
       min-width: 500px;

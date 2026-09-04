@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { CommonModule } from '@angular/common';
+
 import { CompetitionService } from './competition.service';
 import { PdfReportService } from './pdf-report.service';
 import { AddTeamDialog } from './dialogs/add-team.dialog';
@@ -17,10 +17,9 @@ import { CompetitorRanking, TeamRanking } from './models';
 import { EditResultDialog } from './dialogs/edit-result.dialog';
 
 @Component({
-  standalone: true,
-  selector: 'overview',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatDialogModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatCardModule, MatTooltipModule],
-  template: `
+    selector: 'overview',
+    imports: [MatTableModule, MatButtonModule, MatDialogModule, MatSelectModule, MatFormFieldModule, MatIconModule, MatCardModule, MatTooltipModule],
+    template: `
     <!-- Control Panel -->
     <div class="control-panel">
       <button mat-raised-button color="primary" (click)="openAddTeam()">
@@ -35,31 +34,31 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
         <mat-icon>edit</mat-icon>
         Unos rezultata
       </button>
-      
+    
       <button mat-raised-button color="warn" (click)="openEditResult()">
         <mat-icon>edit_note</mat-icon>
         Editiraj rezultat
       </button>
       <!-- PDF Export buttons -->
       <div class="pdf-controls">
-        <button mat-raised-button 
-                color="primary" 
-                [disabled]="!hasData()" 
-                (click)="exportCurrentViewToPdf()"
-                class="pdf-button">
+        <button mat-raised-button
+          color="primary"
+          [disabled]="!hasData()"
+          (click)="exportCurrentViewToPdf()"
+          class="pdf-button">
           <mat-icon>picture_as_pdf</mat-icon>
           Izvoz u PDF
         </button>
-        <button mat-raised-button 
-                color="accent" 
-                [disabled]="!hasData()" 
-                (click)="exportCompleteReport()"
-                class="pdf-button">
+        <button mat-raised-button
+          color="accent"
+          [disabled]="!hasData()"
+          (click)="exportCompleteReport()"
+          class="pdf-button">
           <mat-icon>description</mat-icon>
           Kompletan izvještaj
         </button>
       </div>
-      
+    
       <div class="filter-controls">
         <mat-form-field appearance="outline">
           <mat-label>Prikaz</mat-label>
@@ -74,7 +73,7 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
             </mat-option>
           </mat-select>
         </mat-form-field>
-        
+    
         <mat-form-field appearance="outline">
           <mat-label>Kategorija</mat-label>
           <mat-select [(value)]="selectedCategory" (selectionChange)="updateView()">
@@ -91,192 +90,212 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
         </mat-form-field>
       </div>
     </div>
-
+    
     <!-- Pojedinačni poredak -->
-    <div *ngIf="viewMode === 'individual'" class="card">
-      <div class="section-header">
-        <mat-icon color="primary">person</mat-icon>
-        <h3>Pojedinačni Poredak</h3>
-        <span *ngIf="selectedCategory" 
+    @if (viewMode === 'individual') {
+      <div class="card">
+        <div class="section-header">
+          <mat-icon color="primary">person</mat-icon>
+          <h3>Pojedinačni Poredak</h3>
+          @if (selectedCategory) {
+            <span
               [class]="'category-badge ' + (selectedCategory === 'M' ? 'male' : 'female')">
-          {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
-        </span>
-        
-        <!-- Individual PDF export button -->
-        <button mat-icon-button 
-                color="primary" 
-                [disabled]="competitorRows.length === 0"
-                (click)="exportIndividualToPdf()"
-                matTooltip="Izvoz pojedinačnog poretka u PDF"
-                class="export-button">
-          <mat-icon>download</mat-icon>
-        </button>
-      </div>
-      
-      <!-- Formula explanation -->
-      <div class="formula-info" *ngIf="selectedCategory">
-        <mat-icon>calculate</mat-icon>
-        <div class="formula-content">
-          <strong>Balansirana formula bodovanja:</strong>
-          <span *ngIf="selectedCategory === 'M'">
-            TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20
-          </span>
-          <span *ngIf="selectedCategory === 'Ž'">
-            ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33
-          </span>
-          <small class="formula-explanation">
-            <em *ngIf="selectedCategory === 'M'">
-              Maksimalni utjecaj: TRAP (5×20=100), ZRAČNA (50×2=100), PRAČKA (5×20=100). Sve discipline jednako važne!
-            </em>
-            <em *ngIf="selectedCategory === 'Ž'">
-              Maksimalni utjecaj: ZRAČNA (50×2=100), PRAČKA (5×20=100), PIKADO (300×0,33≈100). Fer natjecanje!
-            </em>
-          </small>
-        </div>
-      </div>
-      
-      <div *ngIf="competitorRows.length === 0" class="empty-state">
-        <mat-icon>sentiment_dissatisfied</mat-icon>
-        <p>Nema dostupnih rezultata za prikaz</p>
-      </div>
-      
-      <table *ngIf="competitorRows.length > 0" mat-table [dataSource]="competitorRows" class="modern-table">
-        <ng-container matColumnDef="rank">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
-            Rang
-          </th>
-          <td mat-cell *matCellDef="let r">
-            <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
-          </td>
-        </ng-container>
-        
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">badge</mat-icon>
-            Ime i Prezime
-          </th>
-          <td mat-cell *matCellDef="let r">{{r.competitor.firstName}} {{r.competitor.lastName}}</td>
-        </ng-container>
-        
-        <ng-container matColumnDef="team">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
-            Tim
-          </th>
-          <td mat-cell *matCellDef="let r">{{r.team}}</td>
-        </ng-container>
-        
-        <ng-container *ngFor="let discipline of getDisciplineColumns()" [matColumnDef]="discipline">
-          <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
-          <td mat-cell *matCellDef="let r">
-            <span [class]="getScoreClass(r.disciplineScores[discipline])">
-              {{r.disciplineScores[discipline] || 0}}
+              {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
             </span>
-          </td>
-        </ng-container>
-        
-        <ng-container matColumnDef="total">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
-            Ukupno (formula)
-          </th>
-          <td mat-cell *matCellDef="let r">
-            <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="individualDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: individualDisplayedColumns" 
+          }
+          <!-- Individual PDF export button -->
+          <button mat-icon-button
+            color="primary"
+            [disabled]="competitorRows.length === 0"
+            (click)="exportIndividualToPdf()"
+            matTooltip="Izvoz pojedinačnog poretka u PDF"
+            class="export-button">
+            <mat-icon>download</mat-icon>
+          </button>
+        </div>
+        <!-- Formula explanation -->
+        @if (selectedCategory) {
+          <div class="formula-info">
+            <mat-icon>calculate</mat-icon>
+            <div class="formula-content">
+              <strong>Balansirana formula bodovanja:</strong>
+              @if (selectedCategory === 'M') {
+                <span>
+                  TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20
+                </span>
+              }
+              @if (selectedCategory === 'Ž') {
+                <span>
+                  ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33
+                </span>
+              }
+              <small class="formula-explanation">
+                @if (selectedCategory === 'M') {
+                  <em>
+                    Maksimalni utjecaj: TRAP (5×20=100), ZRAČNA (50×2=100), PRAČKA (5×20=100). Sve discipline jednako važne!
+                  </em>
+                }
+                @if (selectedCategory === 'Ž') {
+                  <em>
+                    Maksimalni utjecaj: ZRAČNA (50×2=100), PRAČKA (5×20=100), PIKADO (300×0,33≈100). Fer natjecanje!
+                  </em>
+                }
+              </small>
+            </div>
+          </div>
+        }
+        @if (competitorRows.length === 0) {
+          <div class="empty-state">
+            <mat-icon>sentiment_dissatisfied</mat-icon>
+            <p>Nema dostupnih rezultata za prikaz</p>
+          </div>
+        }
+        @if (competitorRows.length > 0) {
+          <table mat-table [dataSource]="competitorRows" class="modern-table">
+            <ng-container matColumnDef="rank">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
+                Rang
+              </th>
+              <td mat-cell *matCellDef="let r">
+                <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">badge</mat-icon>
+                Ime i Prezime
+              </th>
+              <td mat-cell *matCellDef="let r">{{r.competitor.firstName}} {{r.competitor.lastName}}</td>
+            </ng-container>
+            <ng-container matColumnDef="team">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
+                Tim
+              </th>
+              <td mat-cell *matCellDef="let r">{{r.team}}</td>
+            </ng-container>
+            @for (discipline of getDisciplineColumns(); track discipline) {
+              <ng-container [matColumnDef]="discipline">
+                <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
+                <td mat-cell *matCellDef="let r">
+                  <span [class]="getScoreClass(r.disciplineScores[discipline])">
+                    {{r.disciplineScores[discipline] || 0}}
+                  </span>
+                </td>
+              </ng-container>
+            }
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
+                Ukupno (formula)
+              </th>
+              <td mat-cell *matCellDef="let r">
+                <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="individualDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: individualDisplayedColumns"
             [class]="getRowClass(row.rank)"></tr>
-      </table>
-    </div>
-
+          </table>
+        }
+      </div>
+    }
+    
     <!-- Ekipni poredak -->
-    <div *ngIf="viewMode === 'team'" class="card">
-      <div class="section-header">
-        <mat-icon color="primary">groups</mat-icon>
-        <h3>Ekipni Poredak</h3>
-        <span *ngIf="selectedCategory" 
+    @if (viewMode === 'team') {
+      <div class="card">
+        <div class="section-header">
+          <mat-icon color="primary">groups</mat-icon>
+          <h3>Ekipni Poredak</h3>
+          @if (selectedCategory) {
+            <span
               [class]="'category-badge ' + (selectedCategory === 'M' ? 'male' : 'female')">
-          {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
-        </span>
-        
-        <!-- Team PDF export button -->
-        <button mat-icon-button 
-                color="primary" 
-                [disabled]="teamRows.length === 0"
-                (click)="exportTeamToPdf()"
-                matTooltip="Izvoz ekipnog poretka u PDF"
-                class="export-button">
-          <mat-icon>download</mat-icon>
-        </button>
-      </div>
-      
-      <!-- Formula explanation -->
-      <div class="formula-info" *ngIf="selectedCategory">
-        <mat-icon>calculate</mat-icon>
-        <div class="formula-content">
-          <strong>Formula bodovanja (zbroj svih članova):</strong>
-          <span *ngIf="selectedCategory === 'M'">
-            TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20
-          </span>
-          <span *ngIf="selectedCategory === 'Ž'">
-            ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33
-          </span>
-        </div>
-      </div>
-      
-      <div *ngIf="teamRows.length === 0" class="empty-state">
-        <mat-icon>sentiment_dissatisfied</mat-icon>
-        <p>Nema dostupnih timova za prikaz</p>
-      </div>
-      
-      <table *ngIf="teamRows.length > 0" mat-table [dataSource]="teamRows" class="modern-table">
-        <ng-container matColumnDef="rank">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
-            Rang
-          </th>
-          <td mat-cell *matCellDef="let r">
-            <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
-          </td>
-        </ng-container>
-        
-        <ng-container matColumnDef="teamName">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
-            Naziv Ekipe
-          </th>
-          <td mat-cell *matCellDef="let r">{{r.team.name}}</td>
-        </ng-container>
-        
-        <ng-container *ngFor="let discipline of getDisciplineColumns()" [matColumnDef]="discipline">
-          <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
-          <td mat-cell *matCellDef="let r">
-            <span [class]="getScoreClass(r.disciplineScores[discipline])">
-              {{r.disciplineScores[discipline] || 0}}
+              {{ selectedCategory === 'M' ? 'Muškarci' : 'Žene' }}
             </span>
-          </td>
-        </ng-container>
-        
-        <ng-container matColumnDef="total">
-          <th mat-header-cell *matHeaderCellDef>
-            <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
-            Ukupno (formula)
-          </th>
-          <td mat-cell *matCellDef="let r">
-            <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="teamDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: teamDisplayedColumns" 
+          }
+          <!-- Team PDF export button -->
+          <button mat-icon-button
+            color="primary"
+            [disabled]="teamRows.length === 0"
+            (click)="exportTeamToPdf()"
+            matTooltip="Izvoz ekipnog poretka u PDF"
+            class="export-button">
+            <mat-icon>download</mat-icon>
+          </button>
+        </div>
+        <!-- Formula explanation -->
+        @if (selectedCategory) {
+          <div class="formula-info">
+            <mat-icon>calculate</mat-icon>
+            <div class="formula-content">
+              <strong>Formula bodovanja (zbroj svih članova):</strong>
+              @if (selectedCategory === 'M') {
+                <span>
+                  TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20
+                </span>
+              }
+              @if (selectedCategory === 'Ž') {
+                <span>
+                  ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33
+                </span>
+              }
+            </div>
+          </div>
+        }
+        @if (teamRows.length === 0) {
+          <div class="empty-state">
+            <mat-icon>sentiment_dissatisfied</mat-icon>
+            <p>Nema dostupnih timova za prikaz</p>
+          </div>
+        }
+        @if (teamRows.length > 0) {
+          <table mat-table [dataSource]="teamRows" class="modern-table">
+            <ng-container matColumnDef="rank">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
+                Rang
+              </th>
+              <td mat-cell *matCellDef="let r">
+                <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="teamName">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
+                Naziv Ekipe
+              </th>
+              <td mat-cell *matCellDef="let r">{{r.team.name}}</td>
+            </ng-container>
+            @for (discipline of getDisciplineColumns(); track discipline) {
+              <ng-container [matColumnDef]="discipline">
+                <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
+                <td mat-cell *matCellDef="let r">
+                  <span [class]="getScoreClass(r.disciplineScores[discipline])">
+                    {{r.disciplineScores[discipline] || 0}}
+                  </span>
+                </td>
+              </ng-container>
+            }
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
+                Ukupno (formula)
+              </th>
+              <td mat-cell *matCellDef="let r">
+                <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="teamDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: teamDisplayedColumns"
             [class]="getRowClass(row.rank)"></tr>
-      </table>
-    </div>
-  `,
-  styles: [`
+          </table>
+        }
+      </div>
+    }
+    `,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`
     .score-high {
       color: #4caf50;
       font-weight: 600;

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,10 +10,9 @@ export const routes = [
 ];
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, MatToolbarModule, MatIconModule, OverviewComponent],
-  template: `
+    selector: 'app-root',
+    imports: [RouterOutlet, MatToolbarModule, MatIconModule, OverviewComponent],
+    template: `
     <div class="header">
       <div class="container">
         <h1>
@@ -26,7 +25,8 @@ export const routes = [
       <router-outlet></router-outlet>
     </div>
   `,
-  styles: [`
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styles: [`
     :host {
       display: block;
       min-height: 100vh;
