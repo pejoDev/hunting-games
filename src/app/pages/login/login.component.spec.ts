@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { LoginComponent } from './login.component';
-import { AuthGateway } from './auth.gateway';
-import { FakeAuthGateway } from './testing/fake-auth.gateway';
+import { AuthGateway } from '../../core/auth.gateway';
+import { FakeAuthGateway } from '../../testing/fake-auth.gateway';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;

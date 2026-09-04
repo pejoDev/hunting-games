@@ -6,8 +6,8 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import { AppComponent, routes } from './app/app.component';
-import { FIREBASE_DATABASE } from './app/firebase-database.token';
-import { FIREBASE_AUTH } from './app/firebase-auth.token';
+import { FIREBASE_DATABASE } from './app/core/firebase-database.token';
+import { FIREBASE_AUTH } from './app/core/firebase-auth.token';
 import { environment } from './environments/environment';
 
 const firebaseApp = initializeApp(environment.firebase);

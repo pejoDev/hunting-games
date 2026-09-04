@@ -7,8 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 
-import { Team, Competitor } from '../models';
-import { CompetitionService } from '../competition.service';
+import { Team, Competitor } from '../../../../core/models';
+import { CompetitionService } from '../../../../core/competition.service';
 
 @Component({
     selector: 'edit-team-dialog',

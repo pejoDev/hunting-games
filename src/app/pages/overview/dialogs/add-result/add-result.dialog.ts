@@ -11,8 +11,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { CompetitionService } from '../competition.service';
-import { Competitor, Discipline, Team } from '../models';
+import { CompetitionService } from '../../../../core/competition.service';
+import { Competitor, Discipline, Team } from '../../../../core/models';
 
 interface CompetitorOption {
   competitor: Competitor;

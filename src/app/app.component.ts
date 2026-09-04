@@ -4,10 +4,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-import { OverviewComponent } from './overview.component';
-import { LoginComponent } from './login.component';
-import { authGuard } from './auth.guard';
-import { AuthService } from './auth.service';
+import { OverviewComponent } from './pages/overview/overview.component';
+import { LoginComponent } from './pages/login/login.component';
+import { authGuard } from './core/auth.guard';
+import { AuthService } from './core/auth.service';
 
 export const routes = [
   { path: '', component: OverviewComponent, canActivate: [authGuard] },

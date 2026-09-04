@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';
 import { AuthGateway } from './auth.gateway';
-import { FakeAuthGateway } from './testing/fake-auth.gateway';
+import { FakeAuthGateway } from '../testing/fake-auth.gateway';
 import { User } from 'firebase/auth';
 
 describe('AuthService', () => {

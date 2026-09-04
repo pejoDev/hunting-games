@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CompetitionService } from './competition.service';
 import { RealtimeDbGateway } from './realtime-db.gateway';
-import { FakeRealtimeDbGateway } from './testing/fake-realtime-db.gateway';
+import { FakeRealtimeDbGateway } from '../testing/fake-realtime-db.gateway';
 import { Team, Discipline, Result } from './models';
 
 describe('CompetitionService', () => {

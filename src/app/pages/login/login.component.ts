@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { AuthService } from './auth.service';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
     selector: 'app-login',

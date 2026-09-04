@@ -2,15 +2,15 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { OverviewComponent } from './overview.component';
-import { CompetitionService } from './competition.service';
-import { RealtimeDbGateway } from './realtime-db.gateway';
-import { FakeRealtimeDbGateway } from './testing/fake-realtime-db.gateway';
-import { PdfReportService } from './pdf-report.service';
-import { AddTeamDialog } from './dialogs/add-team.dialog';
-import { EditTeamDialog } from './dialogs/edit-team.dialog';
-import { AddResultDialog } from './dialogs/add-result.dialog';
-import { EditResultDialog } from './dialogs/edit-result.dialog';
-import { Team, Discipline } from './models';
+import { CompetitionService } from '../../core/competition.service';
+import { RealtimeDbGateway } from '../../core/realtime-db.gateway';
+import { FakeRealtimeDbGateway } from '../../testing/fake-realtime-db.gateway';
+import { PdfReportService } from '../../core/pdf-report.service';
+import { AddTeamDialog } from './dialogs/add-team/add-team.dialog';
+import { EditTeamDialog } from './dialogs/edit-team/edit-team.dialog';
+import { AddResultDialog } from './dialogs/add-result/add-result.dialog';
+import { EditResultDialog } from './dialogs/edit-result/edit-result.dialog';
+import { Team, Discipline } from '../../core/models';
 
 describe('OverviewComponent', () => {
   let component: OverviewComponent;

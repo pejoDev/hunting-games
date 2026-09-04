@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 
-import { Competitor } from '../models';
+import { Competitor } from '../../../../core/models';
 
 @Component({
     selector: 'add-team-dialog',

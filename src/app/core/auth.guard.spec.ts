@@ -3,7 +3,7 @@ import { Router, UrlTree } from '@angular/router';
 import { Observable } from 'rxjs';
 import { authGuard } from './auth.guard';
 import { AuthGateway } from './auth.gateway';
-import { FakeAuthGateway } from './testing/fake-auth.gateway';
+import { FakeAuthGateway } from '../testing/fake-auth.gateway';
 import { User } from 'firebase/auth';
 
 describe('authGuard', () => {
