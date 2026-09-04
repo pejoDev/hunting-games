@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -24,6 +24,9 @@ import { EditResultDialog } from './dialogs/edit-result/edit-result.dialog';
     styleUrl: './overview.component.scss'
 })
 export class OverviewComponent implements OnInit {
+  // Kad je true (javna /pracenje stranica), sakrivaju se sve akcije za uređivanje.
+  @Input() readOnly = false;
+
   viewMode: 'individual' | 'team' = 'individual';
   selectedCategory: 'M' | 'Ž' | '' = '';
 

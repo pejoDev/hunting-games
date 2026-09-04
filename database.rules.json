@@ -1,11 +1,6 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null",
-    "competition-data": {
-      ".read": "auth != null",
-      ".write": "auth != null"
-    }
+    ".read": true,
+    ".write": "auth != null"
   }
 }
-
