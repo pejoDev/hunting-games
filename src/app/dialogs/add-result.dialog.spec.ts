@@ -21,9 +21,9 @@ describe('AddResultDialog', () => {
     members: [{ id: 3, firstName: 'Ana', lastName: 'Ban' }]
   };
   const disciplines: Discipline[] = [
-    { id: 1, name: 'TRAP', category: 'M' },
-    { id: 2, name: 'ZRAČNA PUŠKA', category: 'M' },
-    { id: 3, name: 'PIKADO', category: 'Ž' }
+    { id: 1, name: 'TRAP', category: 'M', maxPoints: 5 },
+    { id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 },
+    { id: 3, name: 'PIKADO', category: 'Ž', maxPoints: 300 }
   ];
 
   beforeEach(() => {
@@ -161,7 +161,7 @@ describe('AddResultDialog', () => {
   });
 
   describe('max points and validation per discipline', () => {
-    it('should use the known max points for TRAP, PRAČKA, ZRAČNA PUŠKA and PIKADO', () => {
+    it('should read max points from the selected discipline record', () => {
       component.disciplineId = 1; // TRAP
       expect(component.getSelectedDisciplineMaxPoints()).toBe(5);
 
@@ -172,16 +172,10 @@ describe('AddResultDialog', () => {
       expect(component.getSelectedDisciplineMaxPoints()).toBe(300);
     });
 
-    it('should use 5 as the max for PRAČKA', () => {
-      gateway.emit({ teams: [sokolovi, orlice], disciplines: [...disciplines, { id: 4, name: 'PRAČKA', category: 'M' }], results: [] });
+    it('should reflect a discipline\'s configured maxPoints regardless of its name', () => {
+      gateway.emit({ teams: [sokolovi, orlice], disciplines: [...disciplines, { id: 4, name: 'NOVA DISCIPLINA', category: 'M', maxPoints: 42 }], results: [] });
       component.disciplineId = 4;
-      expect(component.getSelectedDisciplineMaxPoints()).toBe(5);
-    });
-
-    it('should default to 100 for a discipline name it does not recognize', () => {
-      gateway.emit({ teams: [sokolovi, orlice], disciplines: [{ id: 9, name: 'NEPOZNATA', category: 'M' }], results: [] });
-      component.disciplineId = 9;
-      expect(component.getSelectedDisciplineMaxPoints()).toBe(100);
+      expect(component.getSelectedDisciplineMaxPoints()).toBe(42);
     });
 
     it('should default to 100 max points when no discipline is selected', () => {

@@ -38,9 +38,17 @@
                 [(ngModel)]="points"
                 placeholder="Unesite broj bodova"
                 min="0"
+                [max]="selectedResult.discipline.maxPoints"
                 step="0.1" />
               <mat-icon matSuffix>score</mat-icon>
+              <mat-hint>Maksimalno bodova: {{ selectedResult.discipline.maxPoints }}</mat-hint>
             </mat-form-field>
+            @if (validatePoints()) {
+              <div class="points-error">
+                <mat-icon color="warn">error</mat-icon>
+                <span>{{ validatePoints() }}</span>
+              </div>
+            }
           </div>
           <div class="info-box">
             <mat-icon>info</mat-icon>

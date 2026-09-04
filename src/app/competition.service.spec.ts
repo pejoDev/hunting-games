@@ -20,6 +20,7 @@ describe('CompetitionService', () => {
     id: 1,
     name: 'TRAP',
     category: 'M',
+    maxPoints: 5,
     ...overrides
   });
 
@@ -340,28 +341,28 @@ describe('CompetitionService', () => {
   });
 
   describe('discipline management', () => {
-    it('addDiscipline should assign the next sequential id and trim the name', async () => {
+    it('addDiscipline should assign the next sequential id, trim the name, and persist maxPoints', async () => {
       gateway.emit({ teams: [], disciplines: [discipline({ id: 3 })], results: [] });
 
-      await service.addDiscipline('  PIKADO  ', 'Ž');
+      await service.addDiscipline('  PIKADO  ', 'Ž', 300);
 
       const written = gateway.writes['disciplines'] as Discipline[];
-      expect(written[1]).toEqual({ id: 4, name: 'PIKADO', category: 'Ž' });
+      expect(written[1]).toEqual({ id: 4, name: 'PIKADO', category: 'Ž', maxPoints: 300 });
     });
 
     it('updateDiscipline should return false when the discipline does not exist', async () => {
-      const result = await service.updateDiscipline(999, 'X', 'M');
+      const result = await service.updateDiscipline(999, 'X', 'M', 100);
       expect(result).toBe(false);
     });
 
-    it('updateDiscipline should update name/category in place, preserving the id', async () => {
+    it('updateDiscipline should update name/category/maxPoints in place, preserving the id', async () => {
       gateway.emit({ teams: [], disciplines: [discipline({ id: 1, name: 'TRAP' })], results: [] });
 
-      const result = await service.updateDiscipline(1, 'TRAP NOVI', 'M');
+      const result = await service.updateDiscipline(1, 'TRAP NOVI', 'M', 8);
 
       expect(result).toBe(true);
       const written = gateway.writes['disciplines'] as Discipline[];
-      expect(written[0]).toEqual({ id: 1, name: 'TRAP NOVI', category: 'M' });
+      expect(written[0]).toEqual({ id: 1, name: 'TRAP NOVI', category: 'M', maxPoints: 8 });
     });
 
     it('deleteDiscipline should remove the discipline and cascade-delete results recorded in it', async () => {
@@ -384,7 +385,20 @@ describe('CompetitionService', () => {
   });
 
   describe('calculateTotalPoints', () => {
+    const mensDisciplines: Discipline[] = [
+      discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 }),
+      discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 }),
+      discipline({ id: 3, name: 'PRAČKA', category: 'M', maxPoints: 5 })
+    ];
+    const womensDisciplines: Discipline[] = [
+      discipline({ id: 4, name: 'ZRAČNA PUŠKA', category: 'Ž', maxPoints: 50 }),
+      discipline({ id: 5, name: 'PRAČKA', category: 'Ž', maxPoints: 5 }),
+      discipline({ id: 6, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
+    ];
+
     it('should apply the men\'s formula: TRAP×20 + ZRAČNA PUŠKA×2 + PRAČKA×20', () => {
+      gateway.emit({ teams: [], disciplines: mensDisciplines, results: [] });
+
       const total = service.calculateTotalPoints(
         { 'TRAP': 5, 'ZRAČNA PUŠKA': 50, 'PRAČKA': 5 },
         'M'
@@ -392,27 +406,53 @@ describe('CompetitionService', () => {
       expect(total).toBe(300); // 100 + 100 + 100
     });
 
-    it('should apply the women\'s formula: ZRAČNA PUŠKA×2 + PRAČKA×20 + PIKADO×0.33', () => {
+    it('should apply the women\'s formula, scoring every discipline at its exact max (100/maxPoints), not a rounded coefficient', () => {
+      gateway.emit({ teams: [], disciplines: womensDisciplines, results: [] });
+
       const total = service.calculateTotalPoints(
         { 'ZRAČNA PUŠKA': 50, 'PRAČKA': 5, 'PIKADO': 300 },
         'Ž'
       );
-      expect(total).toBe(299); // 100 + 100 + 99
+      // Previously PIKADO used a rounded ×0.33 coefficient, capping its max contribution at 99
+      // instead of 100. Deriving the coefficient from maxPoints (100/300) fixes that rounding gap.
+      expect(total).toBe(300); // 100 + 100 + 100
     });
 
     it('should treat missing discipline scores as zero rather than throwing', () => {
+      gateway.emit({ teams: [], disciplines: mensDisciplines, results: [] });
+
       const total = service.calculateTotalPoints({}, 'M');
       expect(total).toBe(0);
     });
 
     it('should round the total to 2 decimal places', () => {
+      gateway.emit({ teams: [], disciplines: womensDisciplines, results: [] });
+
       const total = service.calculateTotalPoints({ 'PIKADO': 1 }, 'Ž');
       expect(total).toBe(0.33);
     });
 
-    it('should ignore discipline scores that are not part of the category formula', () => {
+    it('should ignore discipline scores that are not configured for the category', () => {
+      gateway.emit({ teams: [], disciplines: mensDisciplines, results: [] });
+
       const total = service.calculateTotalPoints({ 'IRRELEVANT': 1000 }, 'M');
       expect(total).toBe(0);
+    });
+
+    it('should return 0 when no disciplines are configured for the category', () => {
+      const total = service.calculateTotalPoints({ 'TRAP': 5 }, 'M');
+      expect(total).toBe(0);
+    });
+
+    it('should score any discipline configured for the category by its own maxPoints, not just the four legacy names', () => {
+      gateway.emit({
+        teams: [],
+        disciplines: [discipline({ id: 7, name: 'NOVA DISCIPLINA', category: 'M', maxPoints: 25 })],
+        results: []
+      });
+
+      const total = service.calculateTotalPoints({ 'NOVA DISCIPLINA': 25 }, 'M');
+      expect(total).toBe(100);
     });
   });
 
@@ -431,8 +471,8 @@ describe('CompetitionService', () => {
         ],
         disciplines: [
           discipline({ id: 1, name: 'TRAP', category: 'M' }),
-          discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'M' }),
-          discipline({ id: 3, name: 'PIKADO', category: 'Ž' })
+          discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 }),
+          discipline({ id: 3, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
         ],
         results: [
           { id: 1, competitorId: 1, disciplineId: 1, points: 5 },  // Ivan: TRAP 5 -> 100

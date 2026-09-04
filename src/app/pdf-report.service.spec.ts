@@ -15,8 +15,8 @@ describe('PdfReportService', () => {
   });
 
   const disciplines: Discipline[] = [
-    { id: 1, name: 'TRAP', category: 'M' },
-    { id: 2, name: 'ZRAČNA PUŠKA', category: 'M' }
+    { id: 1, name: 'TRAP', category: 'M', maxPoints: 5 },
+    { id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 }
   ];
 
   // Ranks 1, 2 and 3 are all represented so the gold/silver/bronze podium-highlighting branches

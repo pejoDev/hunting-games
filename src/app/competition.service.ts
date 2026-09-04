@@ -190,13 +190,14 @@ export class CompetitionService {
   }
 
   // Dodavanje discipline
-  async addDiscipline(name: string, category: 'M' | 'Ž') {
+  async addDiscipline(name: string, category: 'M' | 'Ž', maxPoints: number) {
     const s = this.value;
     const newId = Math.max(...s.disciplines.map(d => d.id), 0) + 1;
     const discipline: Discipline = {
       id: newId,
       name: name.trim(),
-      category
+      category,
+      maxPoints
     };
 
     const updatedDisciplines = [...s.disciplines, discipline];
@@ -204,7 +205,7 @@ export class CompetitionService {
   }
 
   // Ažuriranje discipline
-  async updateDiscipline(disciplineId: number, name: string, category: 'M' | 'Ž') {
+  async updateDiscipline(disciplineId: number, name: string, category: 'M' | 'Ž', maxPoints: number) {
     const s = this.value;
     const disciplineIndex = s.disciplines.findIndex(d => d.id === disciplineId);
 
@@ -214,7 +215,8 @@ export class CompetitionService {
     updatedDisciplines[disciplineIndex] = {
       id: disciplineId,
       name: name.trim(),
-      category
+      category,
+      maxPoints
     };
 
     await this.dbGateway.setCollection('disciplines', updatedDisciplines);
@@ -246,28 +248,16 @@ export class CompetitionService {
   }
 
   // Izračun ukupnih bodova prema balansiranoj formuli (na temelju maksimalnih bodova)
+  // Svaka disciplina kategorije nosi jednak maksimalni utjecaj (100 bodova), izveden
+  // iz discipline.maxPoints — nema hardkodiranja po nazivu discipline.
   calculateTotalPoints(disciplineScores: { [disciplineName: string]: number }, category: 'M' | 'Ž'): number {
-    let total = 0;
+    const disciplines = this.getDisciplinesForCategory(category);
 
-    if (category === 'M') {
-      // BALANSIRANA FORMULA za muškarce:
-      // TRAP: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
-      // ZRAČNA: max 50 bodova → koef. 2 (50×2=100 max utjecaj)
-      // PRAČKA: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
-      // Sada sve discipline imaju jednaki maksimalni utjecaj od 100 bodova
-      total = (disciplineScores['TRAP'] || 0) * 20 +
-              (disciplineScores['ZRAČNA PUŠKA'] || 0) * 2 +
-              (disciplineScores['PRAČKA'] || 0) * 20;
-    } else {
-      // BALANSIRANA FORMULA za žene:
-      // ZRAČNA: max 50 bodova → koef. 2 (50×2=100 max utjecaj)
-      // PRAČKA: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
-      // PIKADO: max 300 bodova → koef. 0.33 (300×0.33≈100 max utjecaj)
-      // Sve discipline imaju približno jednaki maksimalni utjecaj od ~100 bodova
-      total = (disciplineScores['ZRAČNA PUŠKA'] || 0) * 2 +
-              (disciplineScores['PRAČKA'] || 0) * 20 +
-              (disciplineScores['PIKADO'] || 0) * 0.33;
-    }
+    const total = disciplines.reduce((sum, discipline) => {
+      const score = disciplineScores[discipline.name] || 0;
+      const coefficient = discipline.maxPoints > 0 ? 100 / discipline.maxPoints : 0;
+      return sum + score * coefficient;
+    }, 0);
 
     // Zaokružuj na 2 decimale
     return Math.round(total * 100) / 100;
