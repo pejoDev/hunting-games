@@ -53,6 +53,22 @@
   margin-left: auto;
 }
 
+.points-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-top: 8px;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.points-error mat-icon {
+  margin: 0;
+}
+
 .info-box {
   display: flex;
   align-items: flex-start;

@@ -124,22 +124,11 @@ export class AddResultDialog implements OnInit {
     return this.competitionService.getDisciplinesForCategory(this.selectedCompetitorCategory);
   }
 
-  // Maksimalni bodovi po disciplini
-  private getMaxPoints(disciplineName: string): number {
-    switch (disciplineName) {
-      case 'TRAP': return 5;
-      case 'PRAČKA': return 5;
-      case 'ZRAČNA PUŠKA': return 50;
-      case 'PIKADO': return 300;
-      default: return 100; // Default maksimum za nepoznate discipline
-    }
-  }
-
   // Dohvaćanje maksimalnih bodova za odabranu disciplinu
   getSelectedDisciplineMaxPoints(): number {
     if (!this.disciplineId) return 100;
     const discipline = this.competitionService.getDisciplines().find(d => d.id === this.disciplineId);
-    return discipline ? this.getMaxPoints(discipline.name) : 100;
+    return discipline ? discipline.maxPoints : 100;
   }
 
   // Validacija unosa bodova

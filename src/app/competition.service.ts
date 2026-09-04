@@ -190,13 +190,14 @@ export class CompetitionService {
   }
 
   // Dodavanje discipline
-  async addDiscipline(name: string, category: 'M' | 'Ž') {
+  async addDiscipline(name: string, category: 'M' | 'Ž', maxPoints: number) {
     const s = this.value;
     const newId = Math.max(...s.disciplines.map(d => d.id), 0) + 1;
     const discipline: Discipline = {
       id: newId,
       name: name.trim(),
-      category
+      category,
+      maxPoints
     };
 
     const updatedDisciplines = [...s.disciplines, discipline];
@@ -204,7 +205,7 @@ export class CompetitionService {
   }
 
   // Ažuriranje discipline
-  async updateDiscipline(disciplineId: number, name: string, category: 'M' | 'Ž') {
+  async updateDiscipline(disciplineId: number, name: string, category: 'M' | 'Ž', maxPoints: number) {
     const s = this.value;
     const disciplineIndex = s.disciplines.findIndex(d => d.id === disciplineId);
 
@@ -214,7 +215,8 @@ export class CompetitionService {
     updatedDisciplines[disciplineIndex] = {
       id: disciplineId,
       name: name.trim(),
-      category
+      category,
+      maxPoints
     };
 
     await this.dbGateway.setCollection('disciplines', updatedDisciplines);
@@ -246,31 +248,116 @@ export class CompetitionService {
   }
 
   // Izračun ukupnih bodova prema balansiranoj formuli (na temelju maksimalnih bodova)
+  // Svaka disciplina kategorije nosi jednak maksimalni utjecaj (100 bodova), izveden
+  // iz discipline.maxPoints — nema hardkodiranja po nazivu discipline.
   calculateTotalPoints(disciplineScores: { [disciplineName: string]: number }, category: 'M' | 'Ž'): number {
-    let total = 0;
+    const disciplines = this.getDisciplinesForCategory(category);
 
-    if (category === 'M') {
-      // BALANSIRANA FORMULA za muškarce:
-      // TRAP: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
-      // ZRAČNA: max 50 bodova → koef. 2 (50×2=100 max utjecaj)
-      // PRAČKA: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
-      // Sada sve discipline imaju jednaki maksimalni utjecaj od 100 bodova
-      total = (disciplineScores['TRAP'] || 0) * 20 +
-              (disciplineScores['ZRAČNA PUŠKA'] || 0) * 2 +
-              (disciplineScores['PRAČKA'] || 0) * 20;
-    } else {
-      // BALANSIRANA FORMULA za žene:
-      // ZRAČNA: max 50 bodova → koef. 2 (50×2=100 max utjecaj)
-      // PRAČKA: max 5 bodova → koef. 20 (5×20=100 max utjecaj)
-      // PIKADO: max 300 bodova → koef. 0.33 (300×0.33≈100 max utjecaj)
-      // Sve discipline imaju približno jednaki maksimalni utjecaj od ~100 bodova
-      total = (disciplineScores['ZRAČNA PUŠKA'] || 0) * 2 +
-              (disciplineScores['PRAČKA'] || 0) * 20 +
-              (disciplineScores['PIKADO'] || 0) * 0.33;
-    }
+    const total = disciplines.reduce((sum, discipline) => {
+      const score = disciplineScores[discipline.name] || 0;
+      const coefficient = discipline.maxPoints > 0 ? 100 / discipline.maxPoints : 0;
+      return sum + score * coefficient;
+    }, 0);
 
     // Zaokružuj na 2 decimale
     return Math.round(total * 100) / 100;
+  }
+
+  // Redoslijed disciplina koje redom razbijaju izjednačenje, po kategoriji - od najteže
+  // (najvažnije) do najlakše. Muškarci: TRAP → PRAČKA → ZRAČNA PUŠKA. Žene: PRAČKA → ZRAČNA
+  // PUŠKA → PIKADO. Kategorija se prepoznaje po prisutnosti PRVE discipline kaskade u
+  // disciplineScores - PRAČKA postoji kod obje kategorije, pa TRAP (samo muški) mora biti
+  // provjeren prvi da bi se muškarci ispravno prepoznali.
+  private readonly TIEBREAK_CASCADES: string[][] = [
+    ['TRAP', 'PRAČKA', 'ZRAČNA PUŠKA'],
+    ['PRAČKA', 'ZRAČNA PUŠKA', 'PIKADO']
+  ];
+
+  private cascadeFor(disciplineScores: { [name: string]: number }): string[] {
+    return this.TIEBREAK_CASCADES.find(cascade => cascade[0] in disciplineScores) ?? [];
+  }
+
+  // Prva disciplina u kaskadi na kojoj se dva rezultata razlikuju; undefined ako su identični
+  // kroz cijelu kaskadu (stvarno, potpuno izjednačeni).
+  private decidingDiscipline(
+    cascade: string[],
+    a: { [name: string]: number },
+    b: { [name: string]: number }
+  ): string | undefined {
+    return cascade.find(discipline => (a[discipline] || 0) !== (b[discipline] || 0));
+  }
+
+  private compareByCascade(
+    a: { disciplineScores: { [name: string]: number } },
+    b: { disciplineScores: { [name: string]: number } }
+  ): number {
+    const cascade = this.cascadeFor(a.disciplineScores).length ? this.cascadeFor(a.disciplineScores) : this.cascadeFor(b.disciplineScores);
+    for (const discipline of cascade) {
+      const diff = (b.disciplineScores[discipline] || 0) - (a.disciplineScores[discipline] || 0);
+      if (diff !== 0) return diff;
+    }
+    return 0;
+  }
+
+  // Objašnjava izjednačene rezultate radi transparentnosti (prikazuje se u overviewu i PDF izvozu).
+  // Grupira uzastopne redove s istim totalPoints (već sortirano opadajuće prema istoj kaskadi) i
+  // za svaki takav red postavlja tieNote - navodi s kime je izjednačen i na kojoj se disciplini
+  // (ako ikojoj) njegov poredak u odnosu na svakog od njih razlikuje.
+  private annotateTies<T extends { totalPoints: number; disciplineScores: { [name: string]: number }; tieNote?: string }>(
+    rankings: T[],
+    nameOf: (row: T) => string
+  ): void {
+    let i = 0;
+    while (i < rankings.length) {
+      let j = i + 1;
+      while (j < rankings.length && rankings[j].totalPoints === rankings[i].totalPoints) j++;
+
+      if (j - i > 1) {
+        const group = rankings.slice(i, j);
+        // Provjerava cijelu skupinu, ne samo prvi red — bitno ako "sve kategorije" prikaz slučajno
+        // spoji muškarca i žene s istim totalPoints u istu skupinu.
+        const cascade = group.map(r => this.cascadeFor(r.disciplineScores)).find(c => c.length > 0) ?? [];
+
+        for (const row of group) {
+          const others = group.filter(r => r !== row);
+
+          if (cascade.length === 0) {
+            const othersList = others.map(nameOf).join(', ');
+            row.tieNote = `Izjednačeno na ${row.totalPoints} bodova s: ${othersList}. Poredak unutar ove skupine je proizvoljan.`;
+            continue;
+          }
+
+          // Za svakog drugog natjecatelja/tim u skupini, pronađi PRVU disciplinu u kaskadi na
+          // kojoj se razlikuju od njega (može biti različita disciplina za različite druge u
+          // istoj skupini). Ako nijedna disciplina u kaskadi ne razlikuje ovaj par, oni ostaju
+          // stvarno, potpuno izjednačeni.
+          const stillTiedWith: string[] = [];
+          const comparisons = others.map(other => {
+            const discipline = this.decidingDiscipline(cascade, row.disciplineScores, other.disciplineScores);
+            if (!discipline) {
+              stillTiedWith.push(nameOf(other));
+              return `${nameOf(other)} (identičan rezultat u disciplinama ${cascade.join(', ')})`;
+            }
+            const rowScore = row.disciplineScores[discipline] || 0;
+            const otherScore = other.disciplineScores[discipline] || 0;
+            return `${nameOf(other)} (${discipline} ${rowScore}:${otherScore})`;
+          });
+
+          let tail: string;
+          if (stillTiedWith.length === others.length) {
+            tail = 'Poredak unutar ove skupine je proizvoljan.';
+          } else if (stillTiedWith.length === 0) {
+            tail = 'Poredak riješen prema navedenim disciplinama.';
+          } else {
+            tail = `Poredak riješen prema navedenim disciplinama, osim u odnosu na ${stillTiedWith.join(', ')} gdje ostaje identičan rezultat u svim promatranim disciplinama i poredak je proizvoljan.`;
+          }
+
+          row.tieNote = `Izjednačeno na ${row.totalPoints} bodova s: ${comparisons.join('; ')}. ${tail}`;
+        }
+      }
+
+      i = j;
+    }
   }
 
   // Izračun pojedinačnog poretka
@@ -308,11 +395,17 @@ export class CompetitionService {
       }
     }
 
-    // Sortiraj po ukupnim bodovima (silazno) i postavi rang
-    rankings.sort((a, b) => b.totalPoints - a.totalPoints);
+    // Sortiraj po ukupnim bodovima (silazno); izjednačen rezultat razbija se kaskadom disciplina
+    // (vidi TIEBREAK_CASCADES) - muškarci TRAP → PRAČKA → ZRAČNA PUŠKA, žene PRAČKA → ZRAČNA
+    // PUŠKA → PIKADO, redom dok se ne pronađe razlika.
+    rankings.sort((a, b) => {
+      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+      return this.compareByCascade(a, b);
+    });
     rankings.forEach((ranking, index) => {
       ranking.rank = index + 1;
     });
+    this.annotateTies(rankings, r => `${r.competitor.firstName} ${r.competitor.lastName}`);
 
     return rankings;
   }
@@ -353,11 +446,17 @@ export class CompetitionService {
       });
     }
 
-    // Sortiraj po ukupnim bodovima (silazno) i postavi rang
-    rankings.sort((a, b) => b.totalPoints - a.totalPoints);
+    // Sortiraj po ukupnim bodovima (silazno); izjednačen rezultat razbija se kaskadom disciplina
+    // (vidi TIEBREAK_CASCADES) - muškarci TRAP → PRAČKA → ZRAČNA PUŠKA, žene PRAČKA → ZRAČNA
+    // PUŠKA → PIKADO, redom dok se ne pronađe razlika.
+    rankings.sort((a, b) => {
+      if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
+      return this.compareByCascade(a, b);
+    });
     rankings.forEach((ranking, index) => {
       ranking.rank = index + 1;
     });
+    this.annotateTies(rankings, r => r.team.name);
 
     return rankings;
   }

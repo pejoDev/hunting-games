@@ -28,8 +28,8 @@ describe('OverviewComponent', () => {
     members: [{ id: 2, firstName: 'Ana', lastName: 'Ban' }]
   };
   const disciplines: Discipline[] = [
-    { id: 1, name: 'TRAP', category: 'M' },
-    { id: 2, name: 'PIKADO', category: 'Ž' }
+    { id: 1, name: 'TRAP', category: 'M', maxPoints: 5 },
+    { id: 2, name: 'PIKADO', category: 'Ž', maxPoints: 300 }
   ];
 
   function openDialogReturning(result: any) {

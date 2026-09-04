@@ -138,6 +138,9 @@
                 </th>
                 <td mat-cell *matCellDef="let r">
                   <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
+                  @if (r.tieNote) {
+                    <mat-icon class="tie-note-icon" [matTooltip]="r.tieNote">balance</mat-icon>
+                  }
                 </td>
               </ng-container>
               <ng-container matColumnDef="name">
@@ -239,6 +242,9 @@
                 </th>
                 <td mat-cell *matCellDef="let r">
                   <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
+                  @if (r.tieNote) {
+                    <mat-icon class="tie-note-icon" [matTooltip]="r.tieNote">balance</mat-icon>
+                  }
                 </td>
               </ng-container>
               <ng-container matColumnDef="teamName">

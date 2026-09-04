@@ -15,7 +15,7 @@ describe('EditResultDialog', () => {
     id: 1, name: 'Sokolovi', category: 'M',
     members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }, { id: 2, firstName: 'Ana', lastName: 'Ban' }]
   };
-  const disciplines: Discipline[] = [{ id: 1, name: 'TRAP', category: 'M' }];
+  const disciplines: Discipline[] = [{ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 }];
   const results: Result[] = [
     { id: 1, competitorId: 1, disciplineId: 1, points: 3 },
     { id: 2, competitorId: 2, disciplineId: 1, points: 5 }
@@ -89,6 +89,38 @@ describe('EditResultDialog', () => {
       component.selectedResult = component.availableResults[0];
       component.points = 0;
       expect(component.canSave()).toBe(true);
+    });
+
+    it('should be false for points above the discipline maximum', () => {
+      component.selectedResult = component.availableResults[0]; // TRAP, max 5
+      component.points = 6;
+      expect(component.canSave()).toBe(false);
+    });
+  });
+
+  describe('validatePoints', () => {
+    it('should return null when no result is selected yet', () => {
+      component.selectedResult = null;
+      component.points = 5;
+      expect(component.validatePoints()).toBeNull();
+    });
+
+    it('should flag negative points as invalid', () => {
+      component.selectedResult = component.availableResults[0];
+      component.points = -1;
+      expect(component.validatePoints()).toBe('Bodovi ne mogu biti negativni');
+    });
+
+    it('should flag points above the discipline maximum as invalid', () => {
+      component.selectedResult = component.availableResults[0]; // TRAP, max 5
+      component.points = 6;
+      expect(component.validatePoints()).toContain('5');
+    });
+
+    it('should accept points within the valid range', () => {
+      component.selectedResult = component.availableResults[0];
+      component.points = 5;
+      expect(component.validatePoints()).toBeNull();
     });
   });
 

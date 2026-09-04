@@ -68,10 +68,22 @@ export class EditResultDialog implements OnInit {
     }
   }
 
+  // Validacija unosa bodova
+  validatePoints(): string | null {
+    if (!this.selectedResult || this.points === null || this.points === undefined || isNaN(this.points)) return null;
+
+    const maxPoints = this.selectedResult.discipline.maxPoints;
+    if (this.points < 0) return 'Bodovi ne mogu biti negativni';
+    if (this.points > maxPoints) return `Maksimalan broj bodova za ovu disciplinu je ${maxPoints}`;
+
+    return null;
+  }
+
   canSave(): boolean {
     return this.selectedResult !== null &&
            this.points >= 0 &&
-           !isNaN(this.points);
+           !isNaN(this.points) &&
+           this.points <= this.selectedResult.discipline.maxPoints;
   }
 
   save() {
