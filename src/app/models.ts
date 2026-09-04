@@ -31,6 +31,9 @@ export interface CompetitorRanking {
   team: string;
   disciplineScores: { [disciplineName: string]: number };
   totalPoints: number;
+  // Set when this row shares totalPoints with at least one other row; explains how (or whether)
+  // the tie was broken, for transparency in the UI and PDF exports.
+  tieNote?: string;
 }
 
 export interface TeamRanking {
@@ -38,6 +41,7 @@ export interface TeamRanking {
   team: Team;
   disciplineScores: { [disciplineName: string]: number };
   totalPoints: number;
+  tieNote?: string;
 }
 
 export interface AppState {

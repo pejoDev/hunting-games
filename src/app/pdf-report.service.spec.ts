@@ -89,6 +89,47 @@ describe('PdfReportService', () => {
       }];
       expect(() => service.exportIndividualRankingToPdf(missingScoreData, disciplines, 'M')).not.toThrow();
     });
+
+    it('should not throw when a tie for 1st/2nd place is broken by TRAP (triggers the tiebreak note)', () => {
+      const tiedAtTop: CompetitorRanking[] = [
+        {
+          rank: 1,
+          competitor: { id: 1, firstName: 'Ivan', lastName: 'Horvat' },
+          team: 'Sokolovi',
+          disciplineScores: { 'TRAP': 5, 'ZRAČNA PUŠKA': 0 },
+          totalPoints: 100
+        },
+        {
+          rank: 2,
+          competitor: { id: 2, firstName: 'Marko', lastName: 'Kos' },
+          team: 'Vukovi',
+          disciplineScores: { 'TRAP': 2, 'ZRAČNA PUŠKA': 30 },
+          totalPoints: 100
+        }
+      ];
+      expect(() => service.exportIndividualRankingToPdf(tiedAtTop, disciplines, 'M')).not.toThrow();
+    });
+
+    it('should not throw when a tie exists outside the top 3 (no tiebreak note expected)', () => {
+      const tiedBelowTop3: CompetitorRanking[] = [
+        ...individualData,
+        {
+          rank: 4,
+          competitor: { id: 4, firstName: 'Josip', lastName: 'Novak' },
+          team: 'Sokolovi',
+          disciplineScores: { 'TRAP': 1, 'ZRAČNA PUŠKA': 5 },
+          totalPoints: 10
+        },
+        {
+          rank: 5,
+          competitor: { id: 5, firstName: 'Luka', lastName: 'Babic' },
+          team: 'Vukovi',
+          disciplineScores: { 'TRAP': 0, 'ZRAČNA PUŠKA': 10 },
+          totalPoints: 10
+        }
+      ];
+      expect(() => service.exportIndividualRankingToPdf(tiedBelowTop3, disciplines, 'M')).not.toThrow();
+    });
   });
 
   describe('exportTeamRankingToPdf', () => {
@@ -129,6 +170,24 @@ describe('PdfReportService', () => {
       }];
       expect(() => service.exportTeamRankingToPdf(emptyRosterTeam, disciplines, 'M')).not.toThrow();
     });
+
+    it('should not throw when two teams are tied for 1st place, broken by TRAP (triggers the tiebreak note)', () => {
+      const tiedTeams: TeamRanking[] = [
+        {
+          rank: 1,
+          team: { id: 1, name: 'Sokolovi', category: 'M', members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }] },
+          disciplineScores: { 'TRAP': 5, 'ZRAČNA PUŠKA': 0 },
+          totalPoints: 100
+        },
+        {
+          rank: 2,
+          team: { id: 2, name: 'Vukovi', category: 'M', members: [{ id: 2, firstName: 'Pero', lastName: 'Peric' }] },
+          disciplineScores: { 'TRAP': 2, 'ZRAČNA PUŠKA': 30 },
+          totalPoints: 100
+        }
+      ];
+      expect(() => service.exportTeamRankingToPdf(tiedTeams, disciplines, 'M')).not.toThrow();
+    });
   });
 
   describe('exportCompleteReportToPdf', () => {
@@ -146,6 +205,40 @@ describe('PdfReportService', () => {
 
     it('should still generate a report when only team data is present', () => {
       expect(() => service.exportCompleteReportToPdf([], teamData, disciplines, 'M')).not.toThrow();
+    });
+
+    it('should not throw when both sections have a top-3 tie broken by TRAP', () => {
+      const tiedIndividual: CompetitorRanking[] = [
+        {
+          rank: 1,
+          competitor: { id: 1, firstName: 'Ivan', lastName: 'Horvat' },
+          team: 'Sokolovi',
+          disciplineScores: { 'TRAP': 5, 'ZRAČNA PUŠKA': 0 },
+          totalPoints: 100
+        },
+        {
+          rank: 2,
+          competitor: { id: 2, firstName: 'Marko', lastName: 'Kos' },
+          team: 'Vukovi',
+          disciplineScores: { 'TRAP': 2, 'ZRAČNA PUŠKA': 30 },
+          totalPoints: 100
+        }
+      ];
+      const tiedTeams: TeamRanking[] = [
+        {
+          rank: 1,
+          team: { id: 1, name: 'Sokolovi', category: 'M', members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }] },
+          disciplineScores: { 'TRAP': 5, 'ZRAČNA PUŠKA': 0 },
+          totalPoints: 100
+        },
+        {
+          rank: 2,
+          team: { id: 2, name: 'Vukovi', category: 'M', members: [{ id: 2, firstName: 'Pero', lastName: 'Peric' }] },
+          disciplineScores: { 'TRAP': 2, 'ZRAČNA PUŠKA': 30 },
+          totalPoints: 100
+        }
+      ];
+      expect(() => service.exportCompleteReportToPdf(tiedIndividual, tiedTeams, disciplines, 'M')).not.toThrow();
     });
   });
 

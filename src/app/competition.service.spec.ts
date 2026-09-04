@@ -514,6 +514,266 @@ describe('CompetitionService', () => {
     });
   });
 
+  describe('tie-breaking on equal totalPoints', () => {
+    it('should rank the man with the better TRAP score first when totalPoints are equal', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'M', name: 'Sokolovi',
+            members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }, { id: 2, firstName: 'Marko', lastName: 'Kos' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 }),
+          discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 })
+        ],
+        results: [
+          // Ivan: TRAP 0 (0) + ZRAČNA 20 (40) = 40
+          { id: 1, competitorId: 1, disciplineId: 1, points: 0 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 20 },
+          // Marko: TRAP 2 (40) + ZRAČNA 0 (0) = 40 -- same total, better TRAP
+          { id: 3, competitorId: 2, disciplineId: 1, points: 2 },
+          { id: 4, competitorId: 2, disciplineId: 2, points: 0 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('M');
+      expect(rankings.map(r => r.competitor.firstName)).toEqual(['Marko', 'Ivan']);
+      expect(rankings.map(r => r.rank)).toEqual([1, 2]);
+      const marko = rankings.find(r => r.competitor.firstName === 'Marko')!;
+      const ivan = rankings.find(r => r.competitor.firstName === 'Ivan')!;
+      expect(marko.tieNote).toContain('Ivan Horvat (TRAP 2:0)');
+      expect(marko.tieNote).toContain('Poredak riješen prema navedenim disciplinama');
+      expect(ivan.tieNote).toContain('Marko Kos (TRAP 0:2)');
+    });
+
+    it('should cascade to PRAČKA when TRAP is also tied (2nd tiebreak level)', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'M', name: 'Sokolovi',
+            members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }, { id: 2, firstName: 'Marko', lastName: 'Kos' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 }),
+          discipline({ id: 2, name: 'PRAČKA', category: 'M', maxPoints: 5 }),
+          discipline({ id: 3, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 })
+        ],
+        results: [
+          // Ivan: TRAP 1 (20) + PRAČKA 0 (0) + ZRAČNA 40 (80) = 100
+          { id: 1, competitorId: 1, disciplineId: 1, points: 1 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 0 },
+          { id: 3, competitorId: 1, disciplineId: 3, points: 40 },
+          // Marko: TRAP 1 (20) + PRAČKA 4 (80) + ZRAČNA 0 (0) = 100 -- same total, same TRAP, better PRAČKA
+          { id: 4, competitorId: 2, disciplineId: 1, points: 1 },
+          { id: 5, competitorId: 2, disciplineId: 2, points: 4 },
+          { id: 6, competitorId: 2, disciplineId: 3, points: 0 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('M');
+      expect(rankings.map(r => r.competitor.firstName)).toEqual(['Marko', 'Ivan']);
+      const marko = rankings.find(r => r.competitor.firstName === 'Marko')!;
+      const ivan = rankings.find(r => r.competitor.firstName === 'Ivan')!;
+      expect(marko.tieNote).toContain('Ivan Horvat (PRAČKA 4:0)');
+      expect(marko.tieNote).toContain('Poredak riješen prema navedenim disciplinama');
+      expect(ivan.tieNote).toContain('Marko Kos (PRAČKA 0:4)');
+    });
+
+    it('should mark both competitors as unresolved (proizvoljan poredak) when even the TRAP score is identical', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'M', name: 'Sokolovi',
+            members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }, { id: 2, firstName: 'Marko', lastName: 'Kos' }]
+          })
+        ],
+        disciplines: [discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 })],
+        results: [
+          { id: 1, competitorId: 1, disciplineId: 1, points: 2 },
+          { id: 2, competitorId: 2, disciplineId: 1, points: 2 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('M');
+      expect(rankings.every(r => r.tieNote?.includes('proizvoljan'))).toBe(true);
+      expect(rankings.every(r => r.tieNote?.includes('identičan rezultat u disciplinama TRAP, PRAČKA, ZRAČNA PUŠKA'))).toBe(true);
+    });
+
+    it('should not set a tieNote for competitors with a unique totalPoints', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'M', name: 'Sokolovi',
+            members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }, { id: 2, firstName: 'Marko', lastName: 'Kos' }]
+          })
+        ],
+        disciplines: [discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 })],
+        results: [
+          { id: 1, competitorId: 1, disciplineId: 1, points: 5 },
+          { id: 2, competitorId: 2, disciplineId: 1, points: 1 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('M');
+      expect(rankings.every(r => r.tieNote === undefined)).toBe(true);
+    });
+
+    it('should flag only the genuinely-identical pair within a 3-way tie, not the whole group', () => {
+      // Ivan (TRAP 2) is fully separated; Vinko and Filip both have TRAP 0 and remain
+      // genuinely tied with each other even after applying the TRAP tiebreak.
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'M', name: 'Sokolovi',
+            members: [
+              { id: 1, firstName: 'Ivan', lastName: 'Miser' },
+              { id: 2, firstName: 'Vinko', lastName: 'Pongrac' },
+              { id: 3, firstName: 'Filip', lastName: 'Sulj' }
+            ]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 }),
+          discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 })
+        ],
+        results: [
+          { id: 1, competitorId: 1, disciplineId: 1, points: 2 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 0 },
+          { id: 3, competitorId: 2, disciplineId: 1, points: 0 },
+          { id: 4, competitorId: 2, disciplineId: 2, points: 20 },
+          { id: 5, competitorId: 3, disciplineId: 1, points: 0 },
+          { id: 6, competitorId: 3, disciplineId: 2, points: 20 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('M');
+      const ivan = rankings.find(r => r.competitor.firstName === 'Ivan')!;
+      const vinko = rankings.find(r => r.competitor.firstName === 'Vinko')!;
+      const filip = rankings.find(r => r.competitor.firstName === 'Filip')!;
+
+      expect(ivan.tieNote).toContain('Poredak riješen prema navedenim disciplinama');
+      expect(ivan.tieNote).not.toContain('proizvoljan');
+
+      expect(vinko.tieNote).toContain('osim u odnosu na Filip Sulj');
+      expect(vinko.tieNote).toContain('poredak je proizvoljan');
+      expect(filip.tieNote).toContain('osim u odnosu na Vinko Pongrac');
+    });
+
+    it('should rank the woman with the better PRAČKA score first when totalPoints are equal', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 2, category: 'Ž', name: 'Orlice',
+            members: [{ id: 1, firstName: 'Ana', lastName: 'Ban' }, { id: 2, firstName: 'Iva', lastName: 'Novak' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'PRAČKA', category: 'Ž', maxPoints: 5 }),
+          discipline({ id: 2, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
+        ],
+        results: [
+          // Ana: PRAČKA 0 (0) + PIKADO 150 (50) = 50
+          { id: 1, competitorId: 1, disciplineId: 1, points: 0 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 150 },
+          // Iva: PRAČKA 2 (40) + PIKADO 30 (10) = 50 -- same total, better PRAČKA
+          { id: 3, competitorId: 2, disciplineId: 1, points: 2 },
+          { id: 4, competitorId: 2, disciplineId: 2, points: 30 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('Ž');
+      expect(rankings.map(r => r.competitor.firstName)).toEqual(['Iva', 'Ana']);
+      const ana = rankings.find(r => r.competitor.firstName === 'Ana')!;
+      const iva = rankings.find(r => r.competitor.firstName === 'Iva')!;
+      expect(iva.tieNote).toContain('Ana Ban (PRAČKA 2:0)');
+      expect(iva.tieNote).toContain('Poredak riješen prema navedenim disciplinama');
+      expect(ana.tieNote).toContain('Iva Novak (PRAČKA 0:2)');
+    });
+
+    it('should cascade to ZRAČNA PUŠKA when PRAČKA is also tied (2nd tiebreak level)', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 2, category: 'Ž', name: 'Orlice',
+            members: [{ id: 1, firstName: 'Ana', lastName: 'Ban' }, { id: 2, firstName: 'Iva', lastName: 'Novak' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'PRAČKA', category: 'Ž', maxPoints: 5 }),
+          discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'Ž', maxPoints: 50 }),
+          discipline({ id: 3, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
+        ],
+        results: [
+          // Ana: PRAČKA 1 (20) + ZRAČNA 10 (20) + PIKADO 180 (60) = 100
+          { id: 1, competitorId: 1, disciplineId: 1, points: 1 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 10 },
+          { id: 3, competitorId: 1, disciplineId: 3, points: 180 },
+          // Iva: PRAČKA 1 (20) + ZRAČNA 30 (60) + PIKADO 60 (20) = 100 -- same total, same PRAČKA, better ZRAČNA
+          { id: 4, competitorId: 2, disciplineId: 1, points: 1 },
+          { id: 5, competitorId: 2, disciplineId: 2, points: 30 },
+          { id: 6, competitorId: 2, disciplineId: 3, points: 60 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('Ž');
+      expect(rankings.map(r => r.competitor.firstName)).toEqual(['Iva', 'Ana']);
+      const ana = rankings.find(r => r.competitor.firstName === 'Ana')!;
+      const iva = rankings.find(r => r.competitor.firstName === 'Iva')!;
+      expect(iva.tieNote).toContain('Ana Ban (ZRAČNA PUŠKA 30:10)');
+      expect(iva.tieNote).toContain('Poredak riješen prema navedenim disciplinama');
+      expect(ana.tieNote).toContain('Iva Novak (ZRAČNA PUŠKA 10:30)');
+    });
+
+    it('should mark both women as unresolved when even PRAČKA is identical', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 2, category: 'Ž', name: 'Orlice',
+            members: [{ id: 1, firstName: 'Ana', lastName: 'Ban' }, { id: 2, firstName: 'Iva', lastName: 'Novak' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'PRAČKA', category: 'Ž', maxPoints: 5 }),
+          discipline({ id: 2, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
+        ],
+        results: [
+          { id: 1, competitorId: 1, disciplineId: 1, points: 1 },
+          { id: 2, competitorId: 2, disciplineId: 1, points: 1 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('Ž');
+      expect(rankings.every(r => r.tieNote?.includes('proizvoljan'))).toBe(true);
+      expect(rankings.every(r => r.tieNote?.includes('identičan rezultat u disciplinama PRAČKA, ZRAČNA PUŠKA, PIKADO'))).toBe(true);
+    });
+
+    it('should fall back to an arbitrary order when the discipline set has neither TRAP nor PRAČKA', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 2, category: 'Ž', name: 'Orlice',
+            members: [{ id: 1, firstName: 'Ana', lastName: 'Ban' }, { id: 2, firstName: 'Iva', lastName: 'Novak' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
+        ],
+        results: [
+          { id: 1, competitorId: 1, disciplineId: 1, points: 150 },
+          { id: 2, competitorId: 2, disciplineId: 1, points: 150 }
+        ]
+      });
+
+      const rankings = service.getCompetitorRankings('Ž');
+      expect(rankings.map(r => r.totalPoints)).toEqual([50, 50]);
+      expect(rankings.map(r => r.competitor.firstName)).toEqual(['Ana', 'Iva']);
+      expect(rankings.every(r => r.tieNote?.includes('proizvoljan'))).toBe(true);
+      expect(rankings.every(r => r.tieNote && !r.tieNote.includes('disciplini'))).toBe(true);
+    });
+  });
+
   describe('getTeamRankings', () => {
     beforeEach(() => {
       gateway.emit({
@@ -558,6 +818,75 @@ describe('CompetitionService', () => {
       const rankings = service.getTeamRankings();
       expect(rankings[0].disciplineScores['TRAP']).toBe(0);
       expect(rankings[0].totalPoints).toBe(0);
+    });
+
+    it('should rank the team with the better combined TRAP score first when totalPoints are equal', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'M', name: 'Sokolovi',
+            members: [{ id: 1, firstName: 'Ivan', lastName: 'Horvat' }]
+          }),
+          team({
+            id: 2, category: 'M', name: 'Vukovi',
+            members: [{ id: 2, firstName: 'Pero', lastName: 'Peric' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'TRAP', category: 'M', maxPoints: 5 }),
+          discipline({ id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 })
+        ],
+        results: [
+          // Sokolovi: TRAP 0 (0) + ZRAČNA 20 (40) = 40
+          { id: 1, competitorId: 1, disciplineId: 1, points: 0 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 20 },
+          // Vukovi: TRAP 2 (40) + ZRAČNA 0 (0) = 40 -- same total, better TRAP
+          { id: 3, competitorId: 2, disciplineId: 1, points: 2 },
+          { id: 4, competitorId: 2, disciplineId: 2, points: 0 }
+        ]
+      });
+
+      const rankings = service.getTeamRankings('M');
+      expect(rankings.map(r => r.team.name)).toEqual(['Vukovi', 'Sokolovi']);
+      expect(rankings.map(r => r.rank)).toEqual([1, 2]);
+      const vukovi = rankings.find(r => r.team.name === 'Vukovi')!;
+      const sokolovi = rankings.find(r => r.team.name === 'Sokolovi')!;
+      expect(vukovi.tieNote).toContain('Sokolovi (TRAP 2:0)');
+      expect(sokolovi.tieNote).toContain('Vukovi (TRAP 0:2)');
+    });
+
+    it('should rank the women\'s team with the better combined PRAČKA score first when totalPoints are equal', () => {
+      gateway.emit({
+        teams: [
+          team({
+            id: 1, category: 'Ž', name: 'Orlice',
+            members: [{ id: 1, firstName: 'Ana', lastName: 'Ban' }]
+          }),
+          team({
+            id: 2, category: 'Ž', name: 'Vučice',
+            members: [{ id: 2, firstName: 'Iva', lastName: 'Novak' }]
+          })
+        ],
+        disciplines: [
+          discipline({ id: 1, name: 'PRAČKA', category: 'Ž', maxPoints: 5 }),
+          discipline({ id: 2, name: 'PIKADO', category: 'Ž', maxPoints: 300 })
+        ],
+        results: [
+          // Orlice: PRAČKA 0 (0) + PIKADO 150 (50) = 50
+          { id: 1, competitorId: 1, disciplineId: 1, points: 0 },
+          { id: 2, competitorId: 1, disciplineId: 2, points: 150 },
+          // Vučice: PRAČKA 2 (40) + PIKADO 30 (10) = 50 -- same total, better PRAČKA
+          { id: 3, competitorId: 2, disciplineId: 1, points: 2 },
+          { id: 4, competitorId: 2, disciplineId: 2, points: 30 }
+        ]
+      });
+
+      const rankings = service.getTeamRankings('Ž');
+      expect(rankings.map(r => r.team.name)).toEqual(['Vučice', 'Orlice']);
+      const orlice = rankings.find(r => r.team.name === 'Orlice')!;
+      const vucice = rankings.find(r => r.team.name === 'Vučice')!;
+      expect(vucice.tieNote).toContain('Orlice (PRAČKA 2:0)');
+      expect(orlice.tieNote).toContain('Vučice (PRAČKA 0:2)');
     });
   });
 

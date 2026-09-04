@@ -33,6 +33,70 @@ export class PdfReportService {
     return text.replace(/[čćđšžČĆĐŠŽ]/g, (match) => replacements[match] || match);
   }
 
+  /**
+   * Prints one line per row that carries a tieNote under an optional subheading, starting at
+   * (x, y); returns the y position after the block. Advances to a new page mid-list if a long
+   * list would overflow the current one. No-op (returns y unchanged) if nothing in the list is
+   * tied.
+   */
+  private writeTieNoteLines(
+    doc: jsPDF,
+    rows: { rank: number; tieNote?: string; name: string }[],
+    x: number,
+    y: number,
+    maxWidth: number,
+    heading: string
+  ): number {
+    const tied = rows.filter(r => r.tieNote);
+    if (tied.length === 0) return y;
+
+    if (heading) {
+      doc.setFontSize(11);
+      doc.setTextColor(150, 60, 0);
+      doc.text(this.normalizeText(heading), x, y);
+      y += 7;
+    }
+
+    doc.setFontSize(8);
+    doc.setTextColor(80);
+    for (const row of tied) {
+      if (y > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        y = 20;
+      }
+      const lines = doc.splitTextToSize(this.normalizeText(`${row.rank}. ${row.name}: ${row.tieNote}`), maxWidth);
+      doc.text(lines, x, y);
+      y += lines.length * 4 + 2;
+    }
+
+    return y + 4;
+  }
+
+  /**
+   * Puts every tie explanation on its own fresh page at the end of the document (never sharing
+   * a page with the ranking table), for full transparency on why one tied competitor/team ranks
+   * above another. No-op (no extra page added) when nothing in any section is tied.
+   */
+  private addTieNotesPage(
+    doc: jsPDF,
+    sections: { heading: string; rows: { rank: number; tieNote?: string; name: string }[] }[]
+  ): void {
+    const hasAnyTie = sections.some(s => s.rows.some(r => r.tieNote));
+    if (!hasAnyTie) return;
+
+    doc.addPage();
+    let y = 20;
+
+    doc.setFontSize(14);
+    doc.setTextColor(40);
+    doc.text(this.normalizeText('Napomene o izjednačenim rezultatima'), 15, y);
+    y += 12;
+
+    for (const section of sections) {
+      y = this.writeTieNoteLines(doc, section.rows, 15, y, 180, section.heading);
+    }
+  }
+
   exportIndividualRankingToPdf(
     data: CompetitorRanking[],
     disciplines: Discipline[],
@@ -58,13 +122,15 @@ export class PdfReportService {
     }
 
     // Formula explanation
+    let textY = 50;
     if (category) {
       doc.setFontSize(10);
       doc.setTextColor(60);
       const formula = category === 'M'
         ? 'Formula bodovanja: TRAP × 20 + ZRACNA PUSKA × 2 + PRACKA × 20'
         : 'Formula bodovanja: ZRACNA PUSKA × 2 + PRACKA × 20 + PIKADO × 0,33';
-      doc.text(this.normalizeText(formula), 105, 50, { align: 'center' });
+      doc.text(this.normalizeText(formula), 105, textY, { align: 'center' });
+      textY += 10;
     }
 
     // Prepare table data - normalize all text content
@@ -88,7 +154,7 @@ export class PdfReportService {
     autoTable(doc, {
       head: [columns],
       body: rows,
-      startY: category ? 60 : 50,
+      startY: category ? textY : 50,
       styles: {
         fontSize: 9,
         cellPadding: 3,
@@ -119,6 +185,14 @@ export class PdfReportService {
         }
       }
     });
+
+    // Napomene o izjednačenim rezultatima, na zasebnoj stranici (transparentnost: zašto je netko ispred nekoga)
+    const tieRows = data.map(row => ({
+      rank: row.rank,
+      tieNote: row.tieNote,
+      name: `${row.competitor.firstName} ${row.competitor.lastName}`
+    }));
+    this.addTieNotesPage(doc, [{ heading: '', rows: tieRows }]);
 
     // Footer
     const pageCount = doc.getNumberOfPages();
@@ -161,13 +235,15 @@ export class PdfReportService {
     }
 
     // Formula explanation
+    let textY = 50;
     if (category) {
       doc.setFontSize(10);
       doc.setTextColor(60);
       const formula = category === 'M'
         ? 'Formula bodovanja (zbroj svih članova): TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20'
         : 'Formula bodovanja (zbroj svih članova): ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33';
-      doc.text(this.normalizeText(formula), 105, 50, { align: 'center' });
+      doc.text(this.normalizeText(formula), 105, textY, { align: 'center' });
+      textY += 10;
     }
 
     // Prepare table data - normalize all text content
@@ -189,7 +265,7 @@ export class PdfReportService {
     autoTable(doc, {
       head: [columns],
       body: rows,
-      startY: category ? 60 : 50,
+      startY: category ? textY : 50,
       styles: {
         fontSize: 10,
         cellPadding: 4,
@@ -248,6 +324,10 @@ export class PdfReportService {
       currentY += 5 + (lines.length * 4) + 5;
     });
 
+    // Napomene o izjednačenim rezultatima, na zasebnoj stranici (transparentnost: zašto je netko ispred nekoga)
+    const tieRows = data.map(row => ({ rank: row.rank, tieNote: row.tieNote, name: row.team.name }));
+    this.addTieNotesPage(doc, [{ heading: '', rows: tieRows }]);
+
     // Footer
     const pageCount = doc.getNumberOfPages();
     doc.setFontSize(8);
@@ -293,6 +373,8 @@ export class PdfReportService {
     }
 
     let currentY = 70;
+    let individualTieRows: { rank: number; tieNote?: string; name: string }[] = [];
+    let teamTieRows: { rank: number; tieNote?: string; name: string }[] = [];
 
     // Individual ranking
     if (individualData.length > 0) {
@@ -302,7 +384,8 @@ export class PdfReportService {
       currentY += 10;
 
       const columns = ['Rang', 'Ime', 'Tim', ...disciplineColumns, 'Ukupno'].map(col => this.normalizeText(col));
-      const rows = individualData.slice(0, 10).map(row => [
+      const topIndividual = individualData.slice(0, 10);
+      const rows = topIndividual.map(row => [
         row.rank.toString(),
         this.normalizeText(`${row.competitor.firstName} ${row.competitor.lastName}`),
         this.normalizeText(row.team),
@@ -322,6 +405,11 @@ export class PdfReportService {
         }
       });
 
+      individualTieRows = topIndividual.map(row => ({
+        rank: row.rank,
+        tieNote: row.tieNote,
+        name: `${row.competitor.firstName} ${row.competitor.lastName}`
+      }));
       currentY = (doc as any).lastAutoTable.finalY + 15;
     }
 
@@ -338,7 +426,8 @@ export class PdfReportService {
       currentY += 10;
 
       const columns = ['Rang', 'Ekipa', ...disciplineColumns, 'Ukupno'].map(col => this.normalizeText(col));
-      const rows = teamData.slice(0, 10).map(row => [
+      const topTeams = teamData.slice(0, 10);
+      const rows = topTeams.map(row => [
         row.rank.toString(),
         this.normalizeText(row.team.name),
         ...originalDisciplineNames.map(disciplineName => (row.disciplineScores[disciplineName] || 0).toString()),
@@ -357,8 +446,15 @@ export class PdfReportService {
         }
       });
 
+      teamTieRows = topTeams.map(row => ({ rank: row.rank, tieNote: row.tieNote, name: row.team.name }));
       currentY = (doc as any).lastAutoTable.finalY + 10;
     }
+
+    // Napomene o izjednačenim rezultatima, na zasebnoj stranici na kraju izvještaja
+    this.addTieNotesPage(doc, [
+      { heading: 'Pojedinačni poredak:', rows: individualTieRows },
+      { heading: 'Ekipni poredak:', rows: teamTieRows }
+    ]);
 
     // Footer on all pages
     const pageCount = doc.getNumberOfPages();
