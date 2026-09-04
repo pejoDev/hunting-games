@@ -129,7 +129,7 @@ describe('OverviewComponent', () => {
 
       component.openAddTeam();
 
-      expect(dialog.open).toHaveBeenCalledWith(AddTeamDialog, { width: '600px' });
+      expect(dialog.open).toHaveBeenCalledWith(AddTeamDialog, { width: '600px', maxWidth: '95vw' });
       expect(competitionService.addTeam).toHaveBeenCalledWith('Vukovi', 'M', []);
     });
 

@@ -12,25 +12,8 @@ export const routes = [
 @Component({
     selector: 'app-root',
     imports: [RouterOutlet, MatToolbarModule, MatIconModule, OverviewComponent],
-    template: `
-    <div class="header">
-      <div class="container">
-        <h1>
-          <mat-icon style="vertical-align: middle; margin-right: 12px;">emoji_events</mat-icon>
-          Sustav za Praćenje Rezultata Međudruštvenog Natjecanja
-        </h1>
-      </div>
-    </div>
-    <div class="container">
-      <router-outlet></router-outlet>
-    </div>
-  `,
+    templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-    }
-  `]
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {}
