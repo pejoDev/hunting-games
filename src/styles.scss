@@ -1,4 +1,27 @@
-@import "@angular/material/prebuilt-themes/indigo-pink.css";
+@use '@angular/material' as mat;
+
+// Lovačka paleta boja: šumsko zelena, koža/smeđa, lovački zlatni akcent
+$hunt-green-dark: #1b4332;
+$hunt-green: #2d6a4f;
+$hunt-green-mid: #40916c;
+$hunt-green-light: #52b788;
+$hunt-brown: #6b4423;
+$hunt-brown-light: #8b5e34;
+$hunt-rust: #a0522d;
+$hunt-rust-dark: #7c3f1d;
+$hunt-gold: #c9a227;
+$hunt-gold-light: #e0c25e;
+$hunt-cream: #f7f4ec;
+
+@include mat.theme((
+  color: (
+    theme-type: light,
+    primary: mat.$green-palette,
+    tertiary: mat.$orange-palette,
+  ),
+  typography: 'Roboto',
+  density: 0,
+));
 
 /* Global styles */
 * {
@@ -8,7 +31,7 @@
 body {
   margin: 0;
   font-family: 'Roboto', sans-serif;
-  background-color: #f8f9fa;
+  background-color: $hunt-cream;
   color: #212529;
 }
 
@@ -22,22 +45,23 @@ body {
 .card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(27, 67, 50, 0.12);
   padding: 24px;
   margin-bottom: 24px;
   transition: box-shadow 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 20px rgba(27, 67, 50, 0.18);
 }
 
 /* Header styling */
 .header {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  background: linear-gradient(135deg, $hunt-green-dark 0%, $hunt-green 100%);
   color: white;
   padding: 24px 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border-bottom: 3px solid $hunt-gold;
 }
 
 .header h1 {
@@ -46,6 +70,15 @@ body {
   font-weight: 300;
   text-align: center;
   color: white !important;
+}
+
+.header-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 /* Control panel */
@@ -57,8 +90,9 @@ body {
   padding: 20px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(27, 67, 50, 0.1);
   margin-bottom: 24px;
+  border-top: 3px solid $hunt-brown-light;
 }
 
 .control-panel button {
@@ -78,11 +112,11 @@ body {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(27, 67, 50, 0.12);
 }
 
 .modern-table .mat-mdc-header-row {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+  background: linear-gradient(135deg, $hunt-green-dark 0%, $hunt-green 100%) !important;
 }
 
 .modern-table .mat-mdc-header-cell {
@@ -99,7 +133,7 @@ body {
 }
 
 .modern-table .mat-mdc-row:hover {
-  background-color: #f8f9fa !important;
+  background-color: #f1f6f2 !important;
 }
 
 .modern-table .mat-mdc-cell {
@@ -109,7 +143,7 @@ body {
   background-color: transparent !important;
 }
 
-/* Ranking styles - improved visibility */
+/* Ranking styles - improved visibility (zlato/srebro/bronca ostaju trofejne boje) */
 .rank-cell {
   font-weight: bold;
   text-align: center;
@@ -154,7 +188,7 @@ body {
 
 .section-header h3 {
   margin: 0;
-  color: #1976d2 !important;
+  color: $hunt-green-dark !important;
   font-size: 24px;
   font-weight: 500;
 }
@@ -169,11 +203,11 @@ body {
 }
 
 .category-badge.male {
-  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  background: linear-gradient(135deg, $hunt-green-mid 0%, $hunt-green-dark 100%);
 }
 
 .category-badge.female {
-  background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+  background: linear-gradient(135deg, $hunt-rust 0%, $hunt-rust-dark 100%);
 }
 
 /* Dialog improvements - better contrast */
@@ -196,7 +230,7 @@ body {
 
 .dialog-header h2 {
   margin: 0;
-  color: #1976d2 !important;
+  color: $hunt-green-dark !important;
   font-size: 24px;
   font-weight: 500;
   display: flex;
@@ -248,8 +282,8 @@ body {
 }
 
 .row-podium {
-  background-color: #f3e5f5 !important;
-  border-left: 4px solid #9c27b0 !important;
+  background-color: #f3ece0 !important;
+  border-left: 4px solid $hunt-brown-light !important;
 }
 
 /* Material Icons fix */
@@ -296,6 +330,11 @@ body {
   .header h1 {
     font-size: 20px;
   }
+
+  .header-logo {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 /* Loading and empty states - improved contrast */
@@ -322,8 +361,8 @@ body {
 
 /* Formula information styling */
 .formula-info {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-  border-left: 4px solid #2196f3;
+  background: linear-gradient(135deg, #eef5ee 0%, #f7f0e3 100%);
+  border-left: 4px solid $hunt-green;
   padding: 16px;
   margin-bottom: 20px;
   border-radius: 8px;
@@ -334,7 +373,7 @@ body {
 }
 
 .formula-info mat-icon {
-  color: #2196f3 !important;
+  color: $hunt-green !important;
   font-size: 24px;
   width: 24px;
   height: 24px;
@@ -349,7 +388,7 @@ body {
 }
 
 .formula-content strong {
-  color: #1976d2 !important;
+  color: $hunt-green-dark !important;
   font-weight: 600;
   margin-bottom: 4px;
 }
@@ -359,7 +398,7 @@ body {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 4px 8px;
   border-radius: 4px;
-  border: 1px solid rgba(33, 150, 243, 0.3);
+  border: 1px solid rgba(45, 106, 79, 0.3);
   color: #333 !important;
 }
 
@@ -367,9 +406,9 @@ body {
 .total-points {
   font-weight: bold !important;
   font-size: 1.2em !important;
-  color: #1976d2 !important;
+  color: $hunt-green-dark !important;
   padding: 4px 8px;
-  background-color: #e3f2fd;
+  background-color: #e8f3ec;
   border-radius: 4px;
-  border: 2px solid #2196f3;
+  border: 2px solid $hunt-green-mid;
 }

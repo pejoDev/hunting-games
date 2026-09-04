@@ -13,6 +13,21 @@
 .login-card {
   width: 100%;
   max-width: 360px;
+  border-top: 4px solid #c9a227;
+}
+
+.login-logo-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: 24px;
+}
+
+.login-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 10px rgba(27, 67, 50, 0.25);
 }
 
 .full-width {
