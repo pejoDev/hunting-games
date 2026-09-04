@@ -41,7 +41,7 @@
             "codeCoverageExclude": [
               "src/main.ts",
               "src/environments/**",
-              "src/app/realtime-db.gateway.ts"
+              "src/app/core/realtime-db.gateway.ts"
             ]
           }
         }

@@ -2,10 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { skip } from 'rxjs/operators';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AddResultDialog } from './add-result.dialog';
-import { CompetitionService } from '../competition.service';
-import { RealtimeDbGateway } from '../realtime-db.gateway';
-import { FakeRealtimeDbGateway } from '../testing/fake-realtime-db.gateway';
-import { Team, Discipline } from '../models';
+import { CompetitionService } from '../../../../core/competition.service';
+import { RealtimeDbGateway } from '../../../../core/realtime-db.gateway';
+import { FakeRealtimeDbGateway } from '../../../../testing/fake-realtime-db.gateway';
+import { Team, Discipline } from '../../../../core/models';
 
 describe('AddResultDialog', () => {
   let component: AddResultDialog;

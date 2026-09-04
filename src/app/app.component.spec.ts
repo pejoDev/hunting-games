@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent, routes } from './app.component';
-import { CompetitionService } from './competition.service';
-import { RealtimeDbGateway } from './realtime-db.gateway';
+import { CompetitionService } from './core/competition.service';
+import { RealtimeDbGateway } from './core/realtime-db.gateway';
 import { FakeRealtimeDbGateway } from './testing/fake-realtime-db.gateway';
-import { AuthGateway } from './auth.gateway';
+import { AuthGateway } from './core/auth.gateway';
 import { FakeAuthGateway } from './testing/fake-auth.gateway';
 import { provideRouter } from '@angular/router';
-import { OverviewComponent } from './overview.component';
-import { LoginComponent } from './login.component';
+import { OverviewComponent } from './pages/overview/overview.component';
+import { LoginComponent } from './pages/login/login.component';
 
 describe('AppComponent', () => {
   beforeEach(() => {

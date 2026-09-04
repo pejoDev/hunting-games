@@ -8,13 +8,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { CompetitionService } from './competition.service';
-import { PdfReportService } from './pdf-report.service';
-import { AddTeamDialog } from './dialogs/add-team.dialog';
-import { EditTeamDialog } from './dialogs/edit-team.dialog';
-import { AddResultDialog } from './dialogs/add-result.dialog';
-import { CompetitorRanking, TeamRanking } from './models';
-import { EditResultDialog } from './dialogs/edit-result.dialog';
+import { CompetitionService } from '../../core/competition.service';
+import { PdfReportService } from '../../core/pdf-report.service';
+import { AddTeamDialog } from './dialogs/add-team/add-team.dialog';
+import { EditTeamDialog } from './dialogs/edit-team/edit-team.dialog';
+import { AddResultDialog } from './dialogs/add-result/add-result.dialog';
+import { CompetitorRanking, TeamRanking } from '../../core/models';
+import { EditResultDialog } from './dialogs/edit-result/edit-result.dialog';
 
 @Component({
     selector: 'overview',

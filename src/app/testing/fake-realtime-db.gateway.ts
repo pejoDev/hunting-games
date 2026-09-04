@@ -1,4 +1,4 @@
-import { AppState } from '../models';
+import { AppState } from '../core/models';
 
 /**
  * In-memory stand-in for RealtimeDbGateway. Mirrors real Firebase RTDB semantics that the

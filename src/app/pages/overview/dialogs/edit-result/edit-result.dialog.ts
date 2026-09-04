@@ -7,8 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 
-import { CompetitionService } from '../competition.service';
-import { Result, Competitor, Discipline, Team } from '../models';
+import { CompetitionService } from '../../../../core/competition.service';
+import { Result, Competitor, Discipline, Team } from '../../../../core/models';
 
 interface CompetitorResult {
   result: Result;

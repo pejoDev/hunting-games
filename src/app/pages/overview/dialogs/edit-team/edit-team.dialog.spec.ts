@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { EditTeamDialog } from './edit-team.dialog';
-import { CompetitionService } from '../competition.service';
-import { RealtimeDbGateway } from '../realtime-db.gateway';
-import { FakeRealtimeDbGateway } from '../testing/fake-realtime-db.gateway';
-import { Team } from '../models';
+import { CompetitionService } from '../../../../core/competition.service';
+import { RealtimeDbGateway } from '../../../../core/realtime-db.gateway';
+import { FakeRealtimeDbGateway } from '../../../../testing/fake-realtime-db.gateway';
+import { Team } from '../../../../core/models';
 
 describe('EditTeamDialog', () => {
   let component: EditTeamDialog;
