@@ -1,0 +1,191 @@
+.score-high {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.score-medium {
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.score-low {
+  color: #f44336;
+}
+
+.row-winner {
+  background-color: #fff3e0 !important;
+}
+
+.row-podium {
+  background-color: #f3e5f5 !important;
+}
+
+.control-panel {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pdf-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pdf-button {
+  min-width: 140px;
+}
+
+.export-button {
+  margin-left: auto;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.section-header mat-icon {
+  font-size: 24px;
+  margin-right: 8px;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.category-badge.male {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.category-badge.female {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #999;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 8px;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 12px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-controls mat-form-field {
+    width: 100%;
+  }
+
+  .pdf-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pdf-button, .control-panel > button {
+    width: 100%;
+  }
+
+  .export-button {
+    margin-left: 0;
+  }
+
+  .section-header {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+}
+
+.modern-table th, .modern-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.modern-table th {
+  background-color: #f5f5f5;
+  font-weight: 500;
+}
+
+.rank-cell {
+  display: flex;
+  align-items: center;
+}
+
+.rank-1 {
+  color: #ffd700;
+}
+
+.rank-2 {
+  color: #c0c0c0;
+}
+
+.rank-3 {
+  color: #cd7f32;
+}
+
+.total-points {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.formula-info {
+  background-color: #f9f9f9;
+  border-left: 4px solid #2196f3;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formula-content {
+  font-size: 14px;
+  color: #333;
+}
+
+.formula-explanation {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}

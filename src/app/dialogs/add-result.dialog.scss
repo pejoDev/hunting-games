@@ -1,0 +1,134 @@
+.dialog-content {
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 599px) {
+  .dialog-content {
+    padding: 16px;
+    min-width: 0;
+  }
+}
+
+.competitor-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.competitor-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.competitor-name {
+  font-weight: 500;
+}
+
+.team-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.category-icon.male {
+  color: #1976d2;
+}
+
+.category-icon.female {
+  color: #e91e63;
+}
+
+.no-results {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  padding: 16px 0;
+  justify-content: center;
+}
+
+.selected-competitor-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border-left: 4px solid #1976d2;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-content span {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.team-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.filter-label {
+  font-weight: 500;
+  color: #333;
+}
+
+mat-chip-option {
+  cursor: pointer;
+}
+
+.selected {
+  background-color: #1976d2 !important;
+  color: white !important;
+}
+
+.clear-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f44336;
+  color: white;
+}
+
+.discipline-info {
+  font-weight: 500;
+  color: #333;
+  margin-left: 4px;
+}
+
+.validation-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e8f5e9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.validation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.discipline-details {
+  font-size: 0.9em;
+  color: #666;
+}
