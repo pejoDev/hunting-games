@@ -206,6 +206,19 @@ interface CompetitorOption {
     `,
     changeDetection: ChangeDetectionStrategy.Eager,
     styles: [`
+    .dialog-content {
+      max-height: 80vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 599px) {
+      .dialog-content {
+        padding: 16px;
+        min-width: 0;
+      }
+    }
+
     .competitor-option {
       display: flex;
       justify-content: space-between;

@@ -151,53 +151,55 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
           </div>
         }
         @if (competitorRows.length > 0) {
-          <table mat-table [dataSource]="competitorRows" class="modern-table">
-            <ng-container matColumnDef="rank">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
-                Rang
-              </th>
-              <td mat-cell *matCellDef="let r">
-                <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">badge</mat-icon>
-                Ime i Prezime
-              </th>
-              <td mat-cell *matCellDef="let r">{{r.competitor.firstName}} {{r.competitor.lastName}}</td>
-            </ng-container>
-            <ng-container matColumnDef="team">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
-                Tim
-              </th>
-              <td mat-cell *matCellDef="let r">{{r.team}}</td>
-            </ng-container>
-            @for (discipline of getDisciplineColumns(); track discipline) {
-              <ng-container [matColumnDef]="discipline">
-                <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="competitorRows" class="modern-table">
+              <ng-container matColumnDef="rank">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
+                  Rang
+                </th>
                 <td mat-cell *matCellDef="let r">
-                  <span [class]="getScoreClass(r.disciplineScores[discipline])">
-                    {{r.disciplineScores[discipline] || 0}}
-                  </span>
+                  <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
                 </td>
               </ng-container>
-            }
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
-                Ukupno (formula)
-              </th>
-              <td mat-cell *matCellDef="let r">
-                <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="individualDisplayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: individualDisplayedColumns"
-            [class]="getRowClass(row.rank)"></tr>
-          </table>
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">badge</mat-icon>
+                  Ime i Prezime
+                </th>
+                <td mat-cell *matCellDef="let r">{{r.competitor.firstName}} {{r.competitor.lastName}}</td>
+              </ng-container>
+              <ng-container matColumnDef="team">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
+                  Tim
+                </th>
+                <td mat-cell *matCellDef="let r">{{r.team}}</td>
+              </ng-container>
+              @for (discipline of getDisciplineColumns(); track discipline) {
+                <ng-container [matColumnDef]="discipline">
+                  <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
+                  <td mat-cell *matCellDef="let r">
+                    <span [class]="getScoreClass(r.disciplineScores[discipline])">
+                      {{r.disciplineScores[discipline] || 0}}
+                    </span>
+                  </td>
+                </ng-container>
+              }
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
+                  Ukupno (formula)
+                </th>
+                <td mat-cell *matCellDef="let r">
+                  <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="individualDisplayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: individualDisplayedColumns"
+              [class]="getRowClass(row.rank)"></tr>
+            </table>
+          </div>
         }
       </div>
     }
@@ -250,46 +252,48 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
           </div>
         }
         @if (teamRows.length > 0) {
-          <table mat-table [dataSource]="teamRows" class="modern-table">
-            <ng-container matColumnDef="rank">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
-                Rang
-              </th>
-              <td mat-cell *matCellDef="let r">
-                <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="teamName">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
-                Naziv Ekipe
-              </th>
-              <td mat-cell *matCellDef="let r">{{r.team.name}}</td>
-            </ng-container>
-            @for (discipline of getDisciplineColumns(); track discipline) {
-              <ng-container [matColumnDef]="discipline">
-                <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="teamRows" class="modern-table">
+              <ng-container matColumnDef="rank">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
+                  Rang
+                </th>
                 <td mat-cell *matCellDef="let r">
-                  <span [class]="getScoreClass(r.disciplineScores[discipline])">
-                    {{r.disciplineScores[discipline] || 0}}
-                  </span>
+                  <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
                 </td>
               </ng-container>
-            }
-            <ng-container matColumnDef="total">
-              <th mat-header-cell *matHeaderCellDef>
-                <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
-                Ukupno (formula)
-              </th>
-              <td mat-cell *matCellDef="let r">
-                <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
-              </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="teamDisplayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: teamDisplayedColumns"
-            [class]="getRowClass(row.rank)"></tr>
-          </table>
+              <ng-container matColumnDef="teamName">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">group</mat-icon>
+                  Naziv Ekipe
+                </th>
+                <td mat-cell *matCellDef="let r">{{r.team.name}}</td>
+              </ng-container>
+              @for (discipline of getDisciplineColumns(); track discipline) {
+                <ng-container [matColumnDef]="discipline">
+                  <th mat-header-cell *matHeaderCellDef>{{discipline}}</th>
+                  <td mat-cell *matCellDef="let r">
+                    <span [class]="getScoreClass(r.disciplineScores[discipline])">
+                      {{r.disciplineScores[discipline] || 0}}
+                    </span>
+                  </td>
+                </ng-container>
+              }
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
+                  Ukupno (formula)
+                </th>
+                <td mat-cell *matCellDef="let r">
+                  <span class="total-points">{{formatPoints(r.totalPoints)}}</span>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="teamDisplayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: teamDisplayedColumns"
+              [class]="getRowClass(row.rank)"></tr>
+            </table>
+          </div>
         }
       </div>
     }
@@ -389,9 +393,48 @@ import { EditResultDialog } from './dialogs/edit-result.dialog';
       color: #999;
     }
 
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+    }
+
     .modern-table {
       width: 100%;
       border-collapse: collapse;
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 12px;
+      }
+
+      .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-controls mat-form-field {
+        width: 100%;
+      }
+
+      .pdf-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .pdf-button, .control-panel > button {
+        width: 100%;
+      }
+
+      .export-button {
+        margin-left: 0;
+      }
+
+      .section-header {
+        flex-wrap: wrap;
+        row-gap: 8px;
+      }
     }
 
     .modern-table th, .modern-table td {
@@ -507,7 +550,8 @@ export class OverviewComponent implements OnInit {
 
   openAddTeam() {
     const dialogRef = this.dialog.open(AddTeamDialog, {
-      width: '600px' // Povećaj širinu zbog dodanih članova
+      width: '600px', // Povećaj širinu zbog dodanih članova
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -519,7 +563,8 @@ export class OverviewComponent implements OnInit {
 
   openEditTeamSelector() {
     const dialogRef = this.dialog.open(EditTeamDialog, {
-      width: '600px'
+      width: '600px',
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -537,7 +582,8 @@ export class OverviewComponent implements OnInit {
 
   openAddResult() {
     const dialogRef = this.dialog.open(AddResultDialog, {
-      width: '500px'
+      width: '500px',
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -549,7 +595,8 @@ export class OverviewComponent implements OnInit {
 
   openEditResult() {
     const dialogRef = this.dialog.open(EditResultDialog, {
-      width: '500px'
+      width: '500px',
+      maxWidth: '95vw'
     });
 
     dialogRef.afterClosed().subscribe(result => {

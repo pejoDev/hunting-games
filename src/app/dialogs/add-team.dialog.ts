@@ -100,8 +100,31 @@ import { Competitor } from '../models';
     styles: [`
     .dialog-content {
       padding: 24px;
-      min-width: 500px;
       max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 600px) {
+      .dialog-content {
+        min-width: 500px;
+      }
+    }
+
+    @media (max-width: 599px) {
+      .dialog-content {
+        padding: 16px;
+      }
+
+      .member-item {
+        flex-wrap: wrap;
+      }
+
+      .member-item mat-form-field {
+        flex: 1 1 100% !important;
+        margin-right: 0 !important;
+      }
     }
 
     .dialog-header {
