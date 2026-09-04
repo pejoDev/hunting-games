@@ -11,7 +11,9 @@ import { AuthService } from './core/auth.service';
 
 export const routes = [
   { path: '', component: OverviewComponent, canActivate: [authGuard] },
-  { path: 'login', component: LoginComponent }
+  { path: 'login', component: LoginComponent },
+  // Javna, nezaštićena stranica za praćenje rezultata uživo (bez prijave)
+  { path: 'pracenje', component: OverviewComponent, data: { readOnly: true } }
 ];
 
 @Component({

@@ -1,41 +1,45 @@
     <!-- Control Panel -->
     <div class="control-panel">
-      <button mat-raised-button color="primary" (click)="openAddTeam()">
-        <mat-icon>group_add</mat-icon>
-        Dodaj tim
-      </button>
-      <button mat-raised-button color="accent" (click)="openEditTeamSelector()">
-        <mat-icon>edit</mat-icon>
-        Editiraj tim
-      </button>
-      <button mat-raised-button color="warn" (click)="openAddResult()">
-        <mat-icon>edit</mat-icon>
-        Unos rezultata
-      </button>
+      @if (!readOnly) {
+        <button mat-raised-button color="primary" (click)="openAddTeam()">
+          <mat-icon>group_add</mat-icon>
+          Dodaj tim
+        </button>
+        <button mat-raised-button color="accent" (click)="openEditTeamSelector()">
+          <mat-icon>edit</mat-icon>
+          Editiraj tim
+        </button>
+        <button mat-raised-button color="warn" (click)="openAddResult()">
+          <mat-icon>edit</mat-icon>
+          Unos rezultata
+        </button>
 
-      <button mat-raised-button color="warn" (click)="openEditResult()">
-        <mat-icon>edit_note</mat-icon>
-        Editiraj rezultat
-      </button>
+        <button mat-raised-button color="warn" (click)="openEditResult()">
+          <mat-icon>edit_note</mat-icon>
+          Editiraj rezultat
+        </button>
+      }
       <!-- PDF Export buttons -->
-      <div class="pdf-controls">
-        <button mat-raised-button
-          color="primary"
-          [disabled]="!hasData()"
-          (click)="exportCurrentViewToPdf()"
-          class="pdf-button">
-          <mat-icon>picture_as_pdf</mat-icon>
-          Izvoz u PDF
-        </button>
-        <button mat-raised-button
-          color="accent"
-          [disabled]="!hasData()"
-          (click)="exportCompleteReport()"
-          class="pdf-button">
-          <mat-icon>description</mat-icon>
-          Kompletan izvještaj
-        </button>
-      </div>
+      @if (!readOnly) {
+        <div class="pdf-controls">
+          <button mat-raised-button
+            color="primary"
+            [disabled]="!hasData()"
+            (click)="exportCurrentViewToPdf()"
+            class="pdf-button">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Izvoz u PDF
+          </button>
+          <button mat-raised-button
+            color="accent"
+            [disabled]="!hasData()"
+            (click)="exportCompleteReport()"
+            class="pdf-button">
+            <mat-icon>description</mat-icon>
+            Kompletan izvještaj
+          </button>
+        </div>
+      }
 
       <div class="filter-controls">
         <mat-form-field appearance="outline">
@@ -82,14 +86,16 @@
             </span>
           }
           <!-- Individual PDF export button -->
-          <button mat-icon-button
-            color="primary"
-            [disabled]="competitorRows.length === 0"
-            (click)="exportIndividualToPdf()"
-            matTooltip="Izvoz pojedinačnog poretka u PDF"
-            class="export-button">
-            <mat-icon>download</mat-icon>
-          </button>
+          @if (!readOnly) {
+            <button mat-icon-button
+              color="primary"
+              [disabled]="competitorRows.length === 0"
+              (click)="exportIndividualToPdf()"
+              matTooltip="Izvoz pojedinačnog poretka u PDF"
+              class="export-button">
+              <mat-icon>download</mat-icon>
+            </button>
+          }
         </div>
         <!-- Formula explanation -->
         @if (selectedCategory) {
@@ -198,14 +204,16 @@
             </span>
           }
           <!-- Team PDF export button -->
-          <button mat-icon-button
-            color="primary"
-            [disabled]="teamRows.length === 0"
-            (click)="exportTeamToPdf()"
-            matTooltip="Izvoz ekipnog poretka u PDF"
-            class="export-button">
-            <mat-icon>download</mat-icon>
-          </button>
+          @if (!readOnly) {
+            <button mat-icon-button
+              color="primary"
+              [disabled]="teamRows.length === 0"
+              (click)="exportTeamToPdf()"
+              matTooltip="Izvoz ekipnog poretka u PDF"
+              class="export-button">
+              <mat-icon>download</mat-icon>
+            </button>
+          }
         </div>
         <!-- Formula explanation -->
         @if (selectedCategory) {

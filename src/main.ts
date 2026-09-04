@@ -1,6 +1,6 @@
 import { provideZoneChangeDetection } from "@angular/core";
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
@@ -15,7 +15,7 @@ const firebaseApp = initializeApp(environment.firebase);
 bootstrapApplication(AppComponent, {
   providers: [
     provideZoneChangeDetection(),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withXhr()),
     { provide: FIREBASE_DATABASE, useValue: getDatabase(firebaseApp) },
     { provide: FIREBASE_AUTH, useValue: getAuth(firebaseApp) }

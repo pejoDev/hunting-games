@@ -4,7 +4,7 @@ Ovaj dokument je popis test slučajeva (TC) za manualnu provjeru cijele aplikaci
 
 Svaki TC ima: korake, očekivani rezultat i prazan stupac za rezultat (✅/❌) i napomenu. Kopiraj tablice i popuni ih tijekom testiranja.
 
-> ⚠️ **VAŽNO — baza je PRODUKCIJSKA.** Dev (`npm start`) i produkcija koriste **isti** Firebase projekt (`hunting-games-fe57e`), a pravila baze su potpuno otvorena (`.read`/`.write: true`). Svaki tim/rezultat koji dodaš tijekom testiranja odmah je vidljiv svima (uključivo eventualne druge korisnike koji trenutno gledaju aplikaciju).
+> ⚠️ **VAŽNO — baza je PRODUKCIJSKA.** Dev (`npm start`) i produkcija koriste **isti** Firebase projekt (`hunting-games-fe57e`). Pravila baze (`database.rules.json`) su: `.read: true` (svatko može čitati, bez prijave — omogućuje javnu `/pracenje` stranicu iz sekcije K), `.write: "auth != null"` (samo prijavljeni admin može mijenjati podatke). Svaki tim/rezultat koji dodaš tijekom testiranja odmah je vidljiv svima (uključivo eventualne druge korisnike koji trenutno gledaju aplikaciju, i sve neprijavljene posjetitelje `/pracenje` stranice).
 >
 > **Prije testiranja:**
 > 1. Sve testne timove nazivaj s prefiksom **`TEST_`** (npr. `TEST_Ekipa1`) da ih lako pronađeš i obrišeš nakon testiranja.
@@ -186,6 +186,25 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | J3 | U "Unos rezultata" i "Editiraj rezultat" provjeri da je max limit povučen iz `discipline.maxPoints` (baza), a NE hardkodiran u kodu | Promjena `maxPoints` u bazi (vidi E8) odmah mijenja i validacijski limit u oba dialoga | ☐ |
 | J4 | Provjeri formula-info panel u overview (plavi info blok iznad tablice kad je kategorija odabrana) | Tekst "TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20" (M) / "ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33" (Ž) odgovara STVARNOM izračunu (ovaj tekst je statičan u HTML-u — ako se ikad promijene maxPoints vrijednosti u bazi na nešto drugo, ovaj opis treba ručno ažurirati, on se NE generira dinamički) | ☐ |
 
+## K. Javna stranica za praćenje uživo — `/pracenje` (bez prijave)
+
+Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/`), ali bez `authGuard`-a i s ulazom `readOnly=true` (proslijeđeno kroz `data: { readOnly: true }` u routingu). Namijenjena je natjecateljima da uživo prate rezultate bez prijave, uz sve akcije za izmjenu podataka uklonjene iz sučelja. Stvarna zaštita od izmjena dolazi iz Firebase pravila (`.write: "auth != null"`), NE iz skrivanja gumba — sekcija K to eksplicitno provjerava.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| K1 | Otvori `http://localhost:4200/pracenje` (ili produkcijski URL) u privatnom/incognito prozoru (garantirano bez prijave) | Stranica se učitava BEZ preusmjeravanja na `/login`; prikazuje se poredak sa stvarnim, trenutnim podacima (real-time), bez odgode/greške | ☐ |
+| K2 | Provjeri header na `/pracenje` u neprijavljenom stanju | NEMA prikaza e-mail adrese niti gumba za odjavu (isti header kao i inače kad `authService.currentUser` nije postavljen) | ☐ |
+| K3 | Provjeri kontrolnu traku na `/pracenje` | NEMA gumba "Dodaj tim", "Editiraj tim", "Unos rezultata", "Editiraj rezultat" — vidljivi su samo filteri "Prikaz" i "Kategorija" | ☐ |
+| K4 | Provjeri kontrolnu traku na `/pracenje` | NEMA gumba "Izvoz u PDF" ni "Kompletan izvještaj" | ☐ |
+| K5 | Provjeri naslove tablica ("Pojedinačni Poredak" / "Ekipni Poredak") na `/pracenje` | NEMA ikone za download (PDF) pored naslova, u oba prikaza | ☐ |
+| K6 | Na `/pracenje`, promijeni "Prikaz" (Pojedinačni ↔ Ekipni) i "Kategorija" (Sve/Muškarci/Žene) | Filteri rade identično kao na admin stranici — filtriranje, stupci disciplina i formula-info blok se ispravno prikazuju | ☐ |
+| K7 | Otvori `/pracenje` u jednom tabu (neprijavljen) i admin sučelje `/` u drugom tabu (prijavljen); u admin tabu unesi novi rezultat ili dodaj tim | Tab s `/pracenje` se automatski ažurira BEZ ručnog refresha u par sekundi (Firebase `onValue` real-time radi i za neprijavljene korisnike jer je `.read: true`) | ☐ |
+| K8 | U istom neprijavljenom prozoru u kojem gledaš `/pracenje`, pokušaj otvoriti `/` (root) | Preusmjerava na `/login` — samo `/pracenje` je javna ruta, admin ruta ostaje zaštićena `authGuard`-om | ☐ |
+| K9 | (Sigurnosna provjera) Prijavljen kao admin, otvori `/pracenje` u ISTOM prozoru (dakle s aktivnom admin sesijom) | Gumbi za izmjenu i PDF izvoz i dalje NISU vidljivi — `readOnly` skriva akcije bez obzira na status prijave (nije vezano uz `authGuard`) | ☐ |
+| K10 | (Sigurnosna provjera, opcionalno/tehnički) U neprijavljenom prozoru na `/pracenje`, otvori DevTools → Console i pokušaj izvršiti upis u bazu izravno preko Firebase SDK-a (zaobilazeći UI) | Očekuje se `PERMISSION_DENIED` — potvrđuje da `.write: "auth != null"` sprječava izmjene neovisno o tome što UI prikazuje; NE pokušavaj ovo na način koji stvarno mijenja produkcijske podatke | ☐ |
+| K11 | Firebase konzola → Realtime Database → Rules | Potvrdi da su deployana pravila `.read: true` / `.write: "auth != null"` (bez zastarjelog `competition-data` bloka) — mora odgovarati `database.rules.json` u repou | ☐ |
+| K12 | Otvori `/pracenje` na mobitelu (stvarni uređaj ili responsive mode) | Tablica i filteri su čitljivi/upotrebljivi na malom ekranu, bez admin kontrola | ☐ |
+
 ---
 
 ## Sažetak / sign-off
@@ -202,7 +221,8 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | H — PDF izvoz | 11 | | | |
 | I — Real-time/konkurentnost | 4 | | | |
 | J — Regresija refaktoringa | 4 | | | |
-| **UKUPNO** | **92** | | | |
+| K — Javna `/pracenje` stranica | 12 | | | |
+| **UKUPNO** | **104** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
