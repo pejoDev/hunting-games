@@ -1,0 +1,28 @@
+<div class="dialog-content">
+  <div class="dialog-header">
+    <h2>
+      <mat-icon color="warn">warning</mat-icon>
+      Provjera rezultata pronašla je nepravilnosti
+    </h2>
+  </div>
+
+  <p class="dialog-intro">
+    Preporučujemo da prije preuzimanja PDF-a provjeriš i po mogućnosti ispraviš sljedeće:
+  </p>
+
+  <mat-list>
+    @for (issue of issues; track issue.message) {
+      <mat-list-item [class.issue-error]="issue.severity === 'error'" [class.issue-warning]="issue.severity === 'warning'">
+        <mat-icon matListItemIcon [color]="issue.severity === 'error' ? 'warn' : 'accent'">
+          {{ issue.severity === 'error' ? 'error' : 'info' }}
+        </mat-icon>
+        <span matListItemTitle class="issue-text">{{ issue.message }}</span>
+      </mat-list-item>
+    }
+  </mat-list>
+
+  <div class="dialog-actions">
+    <button mat-button (click)="cancel()">Odustani</button>
+    <button mat-raised-button color="warn" (click)="downloadAnyway()">Preuzmi ipak</button>
+  </div>
+</div>

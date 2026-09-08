@@ -171,6 +171,22 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | H10 | Otvori PDF na 30+ redova (puno natjecatelja) | Automatsko prelamanje na novu stranicu (autoTable), header/footer se ponavlja na svakoj stranici s brojem stranice i datumom | ☐ |
 | H11 | Provjeri da su dugmad za pojedinačni/ekipni brzi export disabled kad je odgovarajuća tablica prazna (`competitorRows.length===0` / `teamRows.length===0`) | Da | ☐ |
 
+### H.V — Verifikacija podataka prije preuzimanja PDF-a
+
+`ResultsVerificationService` prije SVAKOG PDF exporta (pojedinačni, ekipni, kompletan izvještaj — svi prolaze kroz `verifyThenExport()` u `overview.component.ts`) neovisno provjerava integritet podataka (dupli ID-evi natjecatelja/timova/disciplina/rezultata, dupli rezultat za isti par natjecatelj+disciplina, rezultati koji upućuju na nepostojećeg natjecatelja/disciplinu, i da rangovi u oba poretka čine uzastopan niz 1..N). Namjerno NE ponovno računa `calculateTotalPoints` niti poretke — formula ne provjerava samu sebe.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| HV1 | Podaci bez nepravilnosti (produkcijsko/uredno testno stanje), klikni bilo koji PDF export gumb | Prikazuje se zeleni/uspješni snackbar "Rezultati uspješno verificirani. Preuzimanje slijedi." (bez dijaloga), PDF se odmah preuzima | ☐ |
+| HV2 | Kroz Firebase konzolu (ili privremeni test-scenarij) uvedi dva natjecatelja s istim ID-em (npr. ponovi poznati bug iz sekcije "ID duplikacija"), zatim klikni export | Umjesto snackbara otvara se dijalog "Provjera rezultata pronašla je nepravilnosti" s redom koji imenom navodi oba natjecatelja i objašnjava rizik ("rezultati jednog mogu curiti na sve ostale") | ☐ |
+| HV3 | U dijalogu iz HV2 klikni "Odustani" | Dijalog se zatvara, PDF se NE preuzima | ☐ |
+| HV4 | Ponovi HV2, u dijalogu klikni "Preuzmi ipak" | Dijalog se zatvara, PDF se ipak preuzima (verifikacija upozorava, ne blokira) | ☐ |
+| HV5 | Rezultat koji referencira nepostojećeg natjecatelja ili nepostojeću disciplinu | Dijalog prikazuje nalaz kao upozorenje (plavkasta/info ikona, ne crvena) uz napomenu da se taj rezultat neće prikazati ni u jednom poretku | ☐ |
+| HV6 | Dva zapisa rezultata za istog natjecatelja u istoj disciplini (isti competitorId+disciplineId, različit id rezultata) | Dijalog prijavljuje da se u poretku koristi samo prvi pronađeni zapis, ostali se tiho ignoriraju | ☐ |
+| HV7 | Nakon svake ručne izmjene testnih podataka iz HV2/HV5/HV6, obriši testne zapise i ponovno pokreni export | Snackbar uspjeha se vraća, dijalog se više ne pojavljuje | ☐ |
+
+> ⚠️ HV2/HV5/HV6 namjerno kvare integritet podataka radi testiranja — izvodi ih SAMO na test podacima (`TEST_` prefiks) i vrati/obriši ih odmah nakon provjere, isto kao i za ostatak dokumenta.
+
 ## I. Real-time sinkronizacija i konkurentnost
 
 | # | Korak | Očekivano | Rezultat |
