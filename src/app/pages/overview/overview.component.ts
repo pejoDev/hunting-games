@@ -67,8 +67,13 @@ export class OverviewComponent implements OnInit {
       return this.competitionService.getDisciplinesForCategory(category).map(d => d.name);
     }
 
-    // Ako nema kategorije, prikaži sve discipline
-    return this.competitionService.getDisciplines().map(d => d.name);
+    // Ako nema kategorije, prikaži jedan stupac po JEDINSTVENOM nazivu discipline.
+    // "ZRAČNA PUŠKA" i "PRAČKA" postoje kao odvojene M i Ž discipline s istim imenom, a
+    // disciplineScores je također ključan po imenu, pa dupli matColumnDef po istom imenu
+    // ruši/miješa mat-table stupce - svaki redak ionako ispravno nosi svoju (M ili Ž) vrijednost
+    // pod tim imenom.
+    const names = this.competitionService.getDisciplines().map(d => d.name);
+    return Array.from(new Set(names));
   }
 
   updateIndividualColumns() {
