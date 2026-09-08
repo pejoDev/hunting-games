@@ -109,7 +109,7 @@ export class PdfReportService {
     // Header
     doc.setFontSize(20);
     doc.setTextColor(40);
-    doc.text(this.normalizeText('LOVACKO NATJECANJE'), 105, 20, { align: 'center' });
+    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), 105, 20, { align: 'center' });
 
     doc.setFontSize(16);
     doc.text(this.normalizeText('Pojedinacni Poredak'), 105, 30, { align: 'center' });
@@ -222,7 +222,7 @@ export class PdfReportService {
     // Header
     doc.setFontSize(20);
     doc.setTextColor(40);
-    doc.text(this.normalizeText('LOVAČKO NATJECANJE'), 105, 20, { align: 'center' });
+    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), 105, 20, { align: 'center' });
 
     doc.setFontSize(16);
     doc.text(this.normalizeText('Ekipni Poredak'), 105, 30, { align: 'center' });
@@ -357,7 +357,7 @@ export class PdfReportService {
     // Main header
     doc.setFontSize(24);
     doc.setTextColor(40);
-    doc.text(this.normalizeText('LOVAČKO NATJECANJE'), 105, 25, { align: 'center' });
+    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), 105, 25, { align: 'center' });
 
     doc.setFontSize(18);
     doc.text(this.normalizeText('Kompletan Izvještaj Rezultata'), 105, 35, { align: 'center' });

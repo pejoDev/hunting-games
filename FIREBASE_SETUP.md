@@ -37,22 +37,21 @@
    };
    ```
 
-5. **Postavite sigurnosna pravila:**
-   - U Realtime Database > Rules postavite:
+5. **Postavite sigurnosna pravila** (vidi `database.rules.json` u repou — ovo je trenutno stanje):
    ```json
    {
      "rules": {
        ".read": true,
-       ".write": true
+       ".write": "auth != null"
      }
    }
    ```
-   *Napomena: Ova pravila omogućavaju svima čitanje/pisanje. Za produkciju postavite stroža pravila.*
+   *Čitanje je javno (potrebno za `/pracenje`, read-only stranicu za praćenje uživo bez prijave). Pisanje smije samo prijavljeni Firebase korisnik — nema dodatnih rola, pa svaki prijavljeni račun ima puna prava nad podacima. Kreirajte korisničke račune organizatora u Firebase Console > Authentication > Users (Email/Password provider).*
 
-6. **Uploadajte početne podatke:**
-   - Pokrenite aplikaciju (`ng serve`)
-   - Kliknite gumb "Upload JSON u Firebase"
-   - Podaci će se uploadati u Firebase
+6. **Pokrenite aplikaciju:**
+   - `ng serve` (ili `npm start`)
+   - Prijavite se na `/login` s računom kreiranim u koraku 5
+   - Podaci (momčadi, discipline, rezultati) unose se kroz sučelje i odmah se spremaju u Firebase — nema posebnog uvoza JSON datoteke.
 
 ## Prednosti Firebase implementacije
 
@@ -64,12 +63,13 @@
 
 ## Struktura podataka u Firebase
 
+`teams`, `disciplines` i `results` su top-level ključevi na korijenu baze (nema `competition-data/` sloja):
+
 ```
-hunting-games-db/
-└── competition-data/
-    ├── teams/
-    ├── disciplines/
-    └── results/
+/
+├── teams/
+├── disciplines/
+└── results/
 ```
 
-Sve CRUD operacije sada rade direktno s Firebase bazom umjesto s lokalnim JSON datotekama.
+Svaka CRUD operacija u `CompetitionService` čita cijelu kolekciju, mijenja je u memoriji i piše je natrag u cijelosti (`set()` na `/teams`, `/disciplines` ili `/results`) — nema per-record zapisa.
