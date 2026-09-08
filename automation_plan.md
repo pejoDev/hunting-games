@@ -100,7 +100,7 @@ Svaka faza ima: **Cilj**, **Opseg** (TC-ovi), **Preduvjeti**, **Deliverables** (
 - Commit napravljen, git hash upisan u §6
 
 **Status:** ✅ Gotovo
-**Git hash:** vidi §6
+**Git hash:** `ccaa8e4`
 
 **Napomene / odstupanja od plana:**
 - **Java nije bila instalirana** na ovom stroju (`java -version` → "Unable to locate a Java Runtime"). Database emulator je JVM proces (Auth emulator nije), pa je bez toga bio hard blocker. Riješeno s `brew install openjdk`; `emulators` skripta u `package.json` sama prependa `$(brew --prefix openjdk)/bin` na `PATH` samo za taj proces, tako da `npm start`/`ng serve` ostaju nedirani i nije trebalo mijenjati korisnikov `~/.zshrc`.
@@ -308,7 +308,7 @@ Ako se tijekom faze otkrije **pravi bug** u aplikaciji (ne u testu) — zabilje�
 | Faza | Status | Datum | Git hash | Sesija / napomena |
 |---|---|---|---|---|
 | Plan (ovaj dokument) | ✅ Izrađen | 2026-09-08 | — | Plan kreiran, faze 0–8 definirane, nijedna još nije izvršena |
-| 0 — Infrastruktura | ✅ Gotovo | 2026-09-08 | (vidi commit odmah nakon plana) | Playwright + Firebase Emulator Suite postavljeni; Java instalirana putem brewa (nije bila na stroju); seed disciplina promijenjen s id-keyed objekta na pravi JSON niz (RTDB inače ubacuje null na indeks 0); smoke test gađa `/pracenje` (javna ruta) jer `authGuard`/login flow dolazi tek u Fazi 1 |
+| 0 — Infrastruktura | ✅ Gotovo | 2026-09-08 | `ccaa8e4` | Playwright + Firebase Emulator Suite postavljeni; Java instalirana putem brewa (nije bila na stroju); seed disciplina promijenjen s id-keyed objekta na pravi JSON niz (RTDB inače ubacuje null na indeks 0); smoke test gađa `/pracenje` (javna ruta) jer `authGuard`/login flow dolazi tek u Fazi 1 |
 | 1 — Auth + `/pracenje` | ⬜ Nije započeto | | | |
 | 2 — Timovi (A+B) | ⬜ Nije započeto | | | |
 | 3 — Rezultati (C+D) | ⬜ Nije započeto | | | |
