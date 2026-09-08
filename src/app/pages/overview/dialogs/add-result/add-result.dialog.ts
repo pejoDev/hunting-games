@@ -6,10 +6,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { CompetitionService } from '../../../../core/competition.service';
 import { Competitor, Discipline, Team } from '../../../../core/models';
@@ -23,7 +22,7 @@ interface CompetitorOption {
 
 @Component({
     selector: 'add-result-dialog',
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatAutocompleteModule, MatChipsModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatAutocompleteModule],
     templateUrl: './add-result.dialog.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './add-result.dialog.scss'
@@ -32,20 +31,34 @@ export class AddResultDialog implements OnInit {
   competitorSearchControl = new FormControl('');
   filteredCompetitors: Observable<CompetitorOption[]>;
 
+  teamFilterControl = new FormControl('');
+  filteredTeamOptions: Observable<string[]>;
+  private teamFilterSubject = new BehaviorSubject<string | null>(null);
+
   competitorOptions: CompetitorOption[] = [];
   selectedCompetitor: CompetitorOption | null = null;
   disciplineId: number | null = null;
   points: number | null = null;
   selectedCompetitorCategory: 'M' | 'Ž' | null = null;
-  selectedTeamFilter: string | null = null;
+
+  get selectedTeamFilter(): string | null {
+    return this.teamFilterSubject.value;
+  }
 
   constructor(
     private ref: MatDialogRef<AddResultDialog>,
     public competitionService: CompetitionService
   ) {
-    this.filteredCompetitors = this.competitorSearchControl.valueChanges.pipe(
+    this.filteredCompetitors = combineLatest([
+      this.competitorSearchControl.valueChanges.pipe(startWith('')),
+      this.teamFilterSubject
+    ]).pipe(
+      map(([value, teamFilter]) => this._filterCompetitors(value || '', teamFilter))
+    );
+
+    this.filteredTeamOptions = this.teamFilterControl.valueChanges.pipe(
       startWith(''),
-      map(value => this._filterCompetitors(value || ''))
+      map(value => this._filterTeams(value || ''))
     );
   }
 
@@ -69,7 +82,7 @@ export class AddResultDialog implements OnInit {
     }
   }
 
-  private _filterCompetitors(value: string | CompetitorOption): CompetitorOption[] {
+  private _filterCompetitors(value: string | CompetitorOption, teamFilter: string | null): CompetitorOption[] {
     if (typeof value !== 'string') {
       return this.competitorOptions;
     }
@@ -79,9 +92,9 @@ export class AddResultDialog implements OnInit {
     // Ako je odabran team filter, prvo filtriraj po timu, zatim po search termu
     let filteredOptions = this.competitorOptions;
 
-    if (this.selectedTeamFilter) {
+    if (teamFilter) {
       filteredOptions = this.competitorOptions.filter(option =>
-        option.teamName === this.selectedTeamFilter
+        option.teamName === teamFilter
       );
     }
 
@@ -161,16 +174,23 @@ export class AddResultDialog implements OnInit {
     return Array.from(new Set(teamNames));
   }
 
+  private _filterTeams(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.getUniqueTeams().filter(team => team.toLowerCase().includes(filterValue));
+  }
+
+  onTeamSelected(event: MatAutocompleteSelectedEvent) {
+    this.filterByTeam(event.option.value);
+  }
+
   filterByTeam(team: string) {
-    this.selectedTeamFilter = team;
-    this.competitorSearchControl.setValue(team);
-    // Filtriranje će se automatski obaviti kroz valueChanges observable
+    this.teamFilterSubject.next(team);
+    this.teamFilterControl.setValue(team);
   }
 
   clearTeamFilter() {
-    this.selectedTeamFilter = null;
-    this.competitorSearchControl.setValue('');
-    // Filtriranje će se automatski obaviti kroz valueChanges observable
+    this.teamFilterSubject.next(null);
+    this.teamFilterControl.setValue('');
   }
 
   getSelectedDisciplineName(): string {

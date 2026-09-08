@@ -78,19 +78,20 @@ Za sve TC-ove koristi timove iz sekcije A (`TEST_EkipaM1`, `TEST_EkipaŽ1`).
 |---|-------|-----------|----------|
 | C1 | Otvori "Unos rezultata", upiši dio imena natjecatelja u pretragu | Autocomplete filtrira po imenu/prezimenu/timu (case-insensitive) | ☐ |
 | C2 | Upiši naziv tima u pretragu | Autocomplete filtrira sve članove tog tima | ☐ |
-| C3 | Klikni chip s nazivom tima ("Brza pretraga po timu") | Pretraga se automatski postavlja na taj tim, prikazuju se samo njegovi članovi | ☐ |
-| C4 | Klikni "Očisti" nakon C3 | Filter po timu se uklanja, prikazuju se svi natjecatelji | ☐ |
-| C5 | Odaberi natjecatelja iz `TEST_EkipaM1` (M) | Padajući izbornik "Disciplina" se otključava i prikazuje samo M discipline: TRAP, ZRAČNA PUŠKA, PRAČKA | ☐ |
-| C6 | Odaberi natjecatelja iz `TEST_EkipaŽ1` (Ž) | Disciplina prikazuje samo: ZRAČNA PUŠKA, PRAČKA, PIKADO | ☐ |
-| C7 | Odaberi disciplinu TRAP, upiši bodove `5` | Hint "Maksimalno bodova: 5 (TRAP)" prikazan, nema greške, gumb "Spremi rezultat" enabled | ☐ |
-| C8 | Odaberi TRAP, upiši `6` (> maxPoints) | Prikazuje se `mat-error`: "Maksimalan broj bodova za ovu disciplinu je 5"; gumb "Spremi rezultat" je disabled | ☐ |
-| C9 | Odaberi TRAP, upiši `-1` | Error "Bodovi ne mogu biti negativni"; gumb disabled | ☐ |
-| C10 | Odaberi ZRAČNA PUŠKA, upiši `50` | Prihvaćeno (na granici maxPoints), nema greške | ☐ |
-| C11 | Odaberi PIKADO (za natjecateljicu), upiši `300` | Prihvaćeno (max), doprinosi točno 100,00 bodova ukupno (provjeri u tablici poretka) | ☐ |
-| C12 | Spremi rezultat za natjecatelja/disciplinu koja VEĆ ima rezultat, s drugom vrijednosti bodova | Ne stvara duplikat — postojeći rezultat se ažurira (provjeri u "Editiraj rezultat" da postoji samo 1 zapis za tu kombinaciju) | ☐ |
-| C13 | Klikni "Odustani" | Dialog se zatvara, ništa se ne sprema | ☐ |
-| C14 | Promijeni odabranog natjecatelja NAKON što je disciplina već odabrana | `disciplineId` se resetira na `null` (mora se ponovno odabrati disciplina) | ☐ |
-| C15 | Upiši bodove za natjecatelja BEZ odabrane discipline | Gumb "Spremi rezultat" ostaje disabled dok disciplina nije odabrana | ☐ |
+| C3 | Klikni u polje "Filtriraj po timu" i upiši dio naziva tima | Padajući izbornik (autocomplete) prikazuje timove čiji naziv odgovara upisanom tekstu (case-insensitive) | ☐ |
+| C4 | Odaberi tim iz padajućeg izbornika "Filtriraj po timu" | Pretraga natjecatelja se automatski ograničava na članove tog tima; u polju se pojavljuje gumb "Očisti" (X ikona) umjesto ikone grupe | ☐ |
+| C5 | Klikni gumb "Očisti" (X) nakon C4 | Filter po timu se uklanja, polje se prazni, prikazuju se svi natjecatelji | ☐ |
+| C6 | Odaberi natjecatelja iz `TEST_EkipaM1` (M) | Padajući izbornik "Disciplina" se otključava i prikazuje samo M discipline: TRAP, ZRAČNA PUŠKA, PRAČKA | ☐ |
+| C7 | Odaberi natjecatelja iz `TEST_EkipaŽ1` (Ž) | Disciplina prikazuje samo: ZRAČNA PUŠKA, PRAČKA, PIKADO | ☐ |
+| C8 | Odaberi disciplinu TRAP, upiši bodove `5` | Hint "Maksimalno bodova: 5 (TRAP)" prikazan, nema greške, gumb "Spremi rezultat" enabled | ☐ |
+| C9 | Odaberi TRAP, upiši `6` (> maxPoints) | Prikazuje se `mat-error`: "Maksimalan broj bodova za ovu disciplinu je 5"; gumb "Spremi rezultat" je disabled | ☐ |
+| C10 | Odaberi TRAP, upiši `-1` | Error "Bodovi ne mogu biti negativni"; gumb disabled | ☐ |
+| C11 | Odaberi ZRAČNA PUŠKA, upiši `50` | Prihvaćeno (na granici maxPoints), nema greške | ☐ |
+| C12 | Odaberi PIKADO (za natjecateljicu), upiši `300` | Prihvaćeno (max), doprinosi točno 100,00 bodova ukupno (provjeri u tablici poretka) | ☐ |
+| C13 | Spremi rezultat za natjecatelja/disciplinu koja VEĆ ima rezultat, s drugom vrijednosti bodova | Ne stvara duplikat — postojeći rezultat se ažurira (provjeri u "Editiraj rezultat" da postoji samo 1 zapis za tu kombinaciju) | ☐ |
+| C14 | Klikni "Odustani" | Dialog se zatvara, ništa se ne sprema | ☐ |
+| C15 | Promijeni odabranog natjecatelja NAKON što je disciplina već odabrana | `disciplineId` se resetira na `null` (mora se ponovno odabrati disciplina) | ☐ |
+| C16 | Upiši bodove za natjecatelja BEZ odabrane discipline | Gumb "Spremi rezultat" ostaje disabled dok disciplina nije odabrana | ☐ |
 
 ## D. Uređivanje rezultata — "Editiraj rezultat"
 
@@ -139,16 +140,18 @@ Za sve TC-ove koristi timove iz sekcije A (`TEST_EkipaM1`, `TEST_EkipaŽ1`).
 
 Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: TRAP → PRAČKA → ZRAČNA PUŠKA**, **Ž: PRAČKA → ZRAČNA PUŠKA → PIKADO**.
 
+> ⚠️ **Strukturna napomena (otkriveno tijekom automatiziranog testiranja 2026-09-08):** i M i Ž kategorija imaju točno 3 discipline koje linearno pridonose totalu (`total = disc1×k1 + disc2×k2 + disc3×k3`). Posljedica: ako su prve DVIJE discipline u kaskadi identične između dva natjecatelja s istim totalom, TREĆA disciplina je matematički PRISILJENA biti identična i ona (nema četvrte komponente koja bi mogla kompenzirati razliku). Zato treća razina kaskade nikad ne može biti stvarni razdjelnik — ako se dođe do usporedbe na toj razini, ishod je uvijek "identično" (pa scenarij prelazi u G4, ne u "riješeno na 3. razini"). Testni primjeri ispod su usklađeni s ovim ograničenjem.
+
 | # | Scenarij (M primjer, isto ponovi za Ž s odgovarajućim redoslijedom u G8) | Očekivano | Rezultat |
 |---|---|---|---|
 | G1 | A: TRAP=5,PRAČKA=0,ZRAČNA=0 (total 100). B: TRAP=0,PRAČKA=5,ZRAČNA=0 (total 100). Isti total, RAZLIČIT TRAP. | A ispred B (viši TRAP). Oba imaju ikonu ⚖️ kod ranga; tooltip: "...Poredak riješen prema navedenim disciplinama." s napomenom "TRAP 5:0" | ☐ |
-| G2 | A: TRAP=5,PRAČKA=0,ZRAČNA=10. B: TRAP=5,PRAČKA=5,ZRAČNA=0. Isti total (100), isti TRAP, RAZLIČITA PRAČKA. | A i B se razdvajaju na 2. razini kaskade (PRAČKA) — B ispred (viša PRAČKA). Tooltip navodi "PRAČKA 0:5" (ne TRAP, jer je TRAP identičan) | ☐ |
-| G3 | A: TRAP=5,PRAČKA=5,ZRAČNA=0. B: TRAP=5,PRAČKA=5,ZRAČNA=10. Isti total, isti TRAP, ista PRAČKA, RAZLIČITA ZRAČNA. | Razdvajanje na 3. (zadnjoj) razini — B ispred. Tooltip navodi "ZRAČNA PUŠKA X:Y" | ☐ |
+| G2 | A: TRAP=5,PRAČKA=0,ZRAČNA=50 (total 200). B: TRAP=5,PRAČKA=5,ZRAČNA=0 (total 200). Isti total, isti TRAP, RAZLIČITA PRAČKA. | A i B se razdvajaju na 2. razini kaskade (PRAČKA) — B ispred (viša PRAČKA). Tooltip navodi "PRAČKA 0:5" (ne TRAP, jer je TRAP identičan) | ☐ |
+| G3 | **Strukturno neostvarivo, vidi napomenu iznad** — ne postoji kombinacija bodova gdje su TRAP i PRAČKA identični, total identičan, a ZRAČNA PUŠKA različita (total ih matematički prisiljava biti jednaki). Umjesto pokušaja da se ovo postavi, PROVJERI da se identičan TRAP + identična PRAČKA (npr. oba A i B: TRAP=5,PRAČKA=5) uvijek završi s identičnom ZRAČNOM PUŠKOM ako je total isti, i da aplikacija u tom slučaju ispravno prijavi "proizvoljan poredak" (G4), a NE lažno "riješeno na ZRAČNOJ PUŠKI". | Aplikacija NIKAD ne prikazuje "riješeno prema ZRAČNA PUŠKA" kad su TRAP i PRAČKA već identični — takav slučaj uvijek pada u G4 ponašanje | ☐ |
 | G4 | A i B: TRAP=5,PRAČKA=5,ZRAČNA=10 — identično u SVE tri discipline, isti total. | Tooltip: "...Poredak unutar ove skupine je proizvoljan." — NEMA lažnog "riješeno" objašnjenja | ☐ |
-| G5 | Tri natjecatelja s istim totalom: A i B se razdvajaju na TRAP-u, A i C ostaju identični kroz cijelu kaskadu, B i C se razdvajaju na PRAČKA. | Tooltip za SVAKOG od njih navodi **različito objašnjenje po paru** (npr. A-ov tooltip: "...B (TRAP 5:0); C (identičan rezultat...)..."). Ovo je scenarij koji je ranije imao bug (netočno "riješeno" za par koji je stvarno izjednačen) — pažljivo provjeri točan tekst | ☐ |
-| G6 | Isto kao G1-G5, ali u EKIPNOM poretku (timovi umjesto pojedinaca) | Identično ponašanje — kaskada i tieNote rade i na `TeamRanking` | ☐ |
+| G5 | Tri natjecatelja s istim totalom (200): A: TRAP=5,PRAČKA=3,ZRAČNA=20 (100+60+40=200). B: TRAP=3,PRAČKA=4,ZRAČNA=30 (60+80+60=200). C: TRAP=5,PRAČKA=5,ZRAČNA=0 (100+100+0=200). A-B se razdvajaju na TRAP-u (5:3), A-C se razdvajaju na PRAČKA-i (3:5, jer im je TRAP jednak 5:5), B-C se razdvajaju na TRAP-u (3:5). | Tooltip za SVAKOG od njih navodi **različito objašnjenje po paru** ovisno o tome koja ih disciplina razdvaja (A-ov tooltip spominje TRAP za par s B i PRAČKA za par s C). Pažljivo provjeri da se tekst računa po paru, ne globalno za cijelu grupu | ☐ |
+| G6 | Isto kao G1-G5 (koristi ispravljene brojke), ali u EKIPNOM poretku (timovi umjesto pojedinaca) | Identično ponašanje — kaskada i tieNote rade i na `TeamRanking` | ☐ |
 | G7 | Postavi da natjecatelj (M) i natjecateljica (Ž) imaju identičan total (npr. oboje 150,00) dok je filter "Sve kategorije" | ⚠️ Rubni slučaj: trenutna implementacija grupira redove PO TOTAL POINTS bez obzira na kategoriju. Provjeri stvarno ponašanje — hoće li se M i Ž natjecatelj prikazati kao "izjednačeni" i pokušati usporediti kroz M kaskadu (TRAP), unatoč tome što Ž natjecateljica nema TRAP rezultat (tretira se kao 0). Zabilježi je li rezultirajući tooltip smislen ili zbunjujuć — ovo je poznato ograničenje, ne nužno blocker, ali treba biti svjestan prije produkcije. | ☐ |
-| G8 | Ponovi G1-G4 za ŽENSKU kategoriju s redoslijedom PRAČKA→ZRAČNA PUŠKA→PIKADO (npr. izjednačen total uz različitu PRAČKU odmah razdvaja; identična PRAČKA+ZRAČNA razdvaja PIKADO; identično u sve 3 → proizvoljno) | Ista logika, ispravan redoslijed disciplina u tooltipovima | ☐ |
+| G8 | Ponovi G1, G2, G4, G5 (ispravljene inačice) za ŽENSKU kategoriju s redoslijedom PRAČKA→ZRAČNA PUŠKA→PIKADO (npr. izjednačen total uz različitu PRAČKU odmah razdvaja na 1. razini; identična PRAČKA + različita ZRAČNA PUŠKA razdvaja na 2. razini; identično u sve 3 → proizvoljno). **Ne pokušavaj G3-analogni scenarij** ("identična PRAČKA+ZRAČNA razdvaja PIKADO") — isto strukturno ograničenje iz napomene iznad vrijedi i za Ž kategoriju (i ona ima točno 3 discipline u formuli), pa treća razina (PIKADO) nikad ne može biti stvaran razdjelnik. | Ista logika, ispravan redoslijed disciplina u tooltipovima | ☐ |
 | G9 | Najbolji test na STVARNIM produkcijskim podacima (bez izmjena): otvori "Sve kategorije" → "Pojedinačni poredak" i potraži postojeće izjednačene rezultate iz prošlog natjecanja | Provjeri barem 1 stvaran primjer da tooltip ima smisla (npr. poznati parovi Antun Mustac/Ljubo Poljak, Filip Sulj/Vinko Pongrac ako podaci nisu mijenjani) | ☐ |
 | G10 | Hover/tap na ⚖️ ikonu na mobitelu (touch uređaj) | Tooltip se prikazuje i na touch ekranima (tap), ne samo na hover mišem — provjeri na stvarnom telefonu jer je app rađen "mobile friendly" | ☐ |
 
@@ -168,6 +171,22 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | H10 | Otvori PDF na 30+ redova (puno natjecatelja) | Automatsko prelamanje na novu stranicu (autoTable), header/footer se ponavlja na svakoj stranici s brojem stranice i datumom | ☐ |
 | H11 | Provjeri da su dugmad za pojedinačni/ekipni brzi export disabled kad je odgovarajuća tablica prazna (`competitorRows.length===0` / `teamRows.length===0`) | Da | ☐ |
 
+### H.V — Verifikacija podataka prije preuzimanja PDF-a
+
+`ResultsVerificationService` prije SVAKOG PDF exporta (pojedinačni, ekipni, kompletan izvještaj — svi prolaze kroz `verifyThenExport()` u `overview.component.ts`) neovisno provjerava integritet podataka (dupli ID-evi natjecatelja/timova/disciplina/rezultata, dupli rezultat za isti par natjecatelj+disciplina, rezultati koji upućuju na nepostojećeg natjecatelja/disciplinu, i da rangovi u oba poretka čine uzastopan niz 1..N). Namjerno NE ponovno računa `calculateTotalPoints` niti poretke — formula ne provjerava samu sebe.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| HV1 | Podaci bez nepravilnosti (produkcijsko/uredno testno stanje), klikni bilo koji PDF export gumb | Prikazuje se zeleni/uspješni snackbar "Rezultati uspješno verificirani. Preuzimanje slijedi." (bez dijaloga), PDF se odmah preuzima | ☐ |
+| HV2 | Kroz Firebase konzolu (ili privremeni test-scenarij) uvedi dva natjecatelja s istim ID-em (npr. ponovi poznati bug iz sekcije "ID duplikacija"), zatim klikni export | Umjesto snackbara otvara se dijalog "Provjera rezultata pronašla je nepravilnosti" s redom koji imenom navodi oba natjecatelja i objašnjava rizik ("rezultati jednog mogu curiti na sve ostale") | ☐ |
+| HV3 | U dijalogu iz HV2 klikni "Odustani" | Dijalog se zatvara, PDF se NE preuzima | ☐ |
+| HV4 | Ponovi HV2, u dijalogu klikni "Preuzmi ipak" | Dijalog se zatvara, PDF se ipak preuzima (verifikacija upozorava, ne blokira) | ☐ |
+| HV5 | Rezultat koji referencira nepostojećeg natjecatelja ili nepostojeću disciplinu | Dijalog prikazuje nalaz kao upozorenje (plavkasta/info ikona, ne crvena) uz napomenu da se taj rezultat neće prikazati ni u jednom poretku | ☐ |
+| HV6 | Dva zapisa rezultata za istog natjecatelja u istoj disciplini (isti competitorId+disciplineId, različit id rezultata) | Dijalog prijavljuje da se u poretku koristi samo prvi pronađeni zapis, ostali se tiho ignoriraju | ☐ |
+| HV7 | Nakon svake ručne izmjene testnih podataka iz HV2/HV5/HV6, obriši testne zapise i ponovno pokreni export | Snackbar uspjeha se vraća, dijalog se više ne pojavljuje | ☐ |
+
+> ⚠️ HV2/HV5/HV6 namjerno kvare integritet podataka radi testiranja — izvodi ih SAMO na test podacima (`TEST_` prefiks) i vrati/obriši ih odmah nakon provjere, isto kao i za ostatak dokumenta.
+
 ## I. Real-time sinkronizacija i konkurentnost
 
 | # | Korak | Očekivano | Rezultat |
@@ -175,7 +194,8 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | I1 | Otvori aplikaciju u 2 taba (ili 2 različita browsera) | Oba prikazuju isto stanje | ☐ |
 | I2 | U tabu 1 dodaj rezultat, ne radi ništa u tabu 2 | Tab 2 se automatski ažurira BEZ manualnog refresha (Firebase `onValue` real-time) u par sekundi | ☐ |
 | I3 | U tabu 1 obriši tim, gledaj tab 2 | Tim i njegovi rezultati nestaju iz tab 2 prikaza automatski | ☐ |
-| I4 | ⚠️ Simuliraj konkurentnu izmjenu: u tabu 1 otvori "Unos rezultata" i NE spremaj još; u tabu 2 dodaj rezultat za DRUGOG natjecatelja i spremi; zatim u tabu 1 spremi svoj rezultat | Provjeri je li rezultat iz tab 2 sačuvan nakon što tab 1 spremi svoje — servis piše **cijelu** `results` kolekciju (`set()`), pa ako tab 1 ima zastarjelu lokalnu kopiju state-a u trenutku spremanja, teoretski može prepisati/izgubiti izmjenu iz tab 2. Ovo je poznati arhitekturalni rizik (nema per-record write) — zabilježi stvarno ponašanje, posebno važno tijekom natjecanja kad više ljudi može istovremeno unositi rezultate. | ☐ |
+| I4 | ⚠️ Simuliraj konkurentnu izmjenu: u tabu 1 otvori "Unos rezultata" i NE spremaj još; u tabu 2 dodaj rezultat za DRUGOG natjecatelja i spremi; zatim u tabu 1 spremi svoj rezultat | Provjeri je li rezultat iz tab 2 sačuvan nakon što tab 1 spremi svoje — servis piše **cijelu** `results` kolekciju (`set()`), pa ako tab 1 ima zastarjelu lokalnu kopiju state-a u trenutku spremanja, teoretski može prepisati/izgubiti izmjenu iz tab 2. Ovo je i dalje otvoren arhitekturalni rizik (nema per-record write, nema locking-a) — zabilježi stvarno ponašanje, posebno važno tijekom natjecanja kad više ljudi može istovremeno unositi rezultate. **Napomena:** ovo je RAZLIČIT rizik od I5 ispod — I4 je o dva klijenta koja pišu u ISTU kolekciju, I5 je o jednom klijentu čiji zapis u DVIJE kolekcije unutar iste mutacije nije atoman. | ☐ |
+| I5 | ✅ (fiksano) Prekini mrežnu vezu (DevTools → Network → Offline) NAKON što klikneš "Obriši tim"/"Editiraj tim" (uklanjanje člana)/"Obriši disciplinu", ali provjeri da se zahtjev stigao poslati kao JEDAN atomarni multi-path `update()` poziv, ne dva odvojena `set()` poziva | Prije 2026-09-08 su `deleteTeam`/`updateTeam`/`removeCompetitorFromTeam`/`deleteDiscipline` slali DVA odvojena `set()` poziva (`Promise.all`) za pogođene kolekcije (npr. `teams` + `results`) — prekid mreže između njih mogao je ostaviti natjecatelja bez tima ALI s rezultatima koji i dalje postoje (točno ovaj scenarij se dogodio i proizveo "ghost" natjecatelja s osirotjelim rezultatima, otkriveno kroz `ResultsVerificationService`, vidi H.V). Popravljeno u `RealtimeDbGateway.setCollections()` — sad je to JEDAN atomaran `update(ref(db), {...})` poziv, pa ili se promijene OBJE kolekcije ili NIJEDNA. Provjeri u Network tabu da postoji samo JEDAN PATCH zahtjev prema Firebase-u za ove akcije, ne dva. | ☐ |
 
 ## J. Regresija specifična za refaktoring (max-points / formula)
 
@@ -213,16 +233,16 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 |---|---|---|---|---|
 | A — Dodaj tim | 10 | | | |
 | B — Editiraj tim | 10 | | | |
-| C — Unos rezultata | 15 | | | |
+| C — Unos rezultata | 16 | | | |
 | D — Editiraj rezultat | 9 | | | |
 | E — Formula | 8 | | | |
 | F — Poredak/prikaz | 11 | | | |
 | G — Izjednačeni rezultati | 10 | | | |
-| H — PDF izvoz | 11 | | | |
-| I — Real-time/konkurentnost | 4 | | | |
+| H — PDF izvoz | 18 | | | |
+| I — Real-time/konkurentnost | 5 | | | |
 | J — Regresija refaktoringa | 4 | | | |
 | K — Javna `/pracenje` stranica | 12 | | | |
-| **UKUPNO** | **104** | | | |
+| **UKUPNO** | **113** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 

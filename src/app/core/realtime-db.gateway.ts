@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { Database, ref, onValue, set } from 'firebase/database';
+import { Database, ref, onValue, set, update } from 'firebase/database';
 import { FIREBASE_DATABASE } from './firebase-database.token';
 
 /**
@@ -17,5 +17,12 @@ export class RealtimeDbGateway {
 
   setCollection(path: 'teams' | 'disciplines' | 'results', value: unknown): Promise<void> {
     return set(ref(this.db, path), value);
+  }
+
+  // Piše u više top-level kolekcija u JEDNOM atomarnom zahtjevu (Firebase multi-path update) -
+  // ili se promijene sve navedene kolekcije, ili nijedna, za razliku od više odvojenih set()
+  // poziva (npr. Promise.all) koji mogu djelomično uspjeti ako mreža ispadne između njih.
+  setCollections(updates: Partial<Record<'teams' | 'disciplines' | 'results', unknown>>): Promise<void> {
+    return update(ref(this.db), updates);
   }
 }

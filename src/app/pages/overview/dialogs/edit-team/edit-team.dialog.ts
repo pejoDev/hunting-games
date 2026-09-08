@@ -52,9 +52,13 @@ export class EditTeamDialog implements OnInit {
   addMember() {
     if (!this.selectedTeam) return;
 
-    // Generiraj novi ID
-    const allMembers = this.competitionService.getAllCompetitors();
-    const newId = Math.max(...allMembers.map(m => m.id), 0) + 1;
+    // Generiraj novi ID - uzmi u obzir i članove već dodane u ovoj (nespremljenoj) edit sesiji,
+    // ne samo trenutno stanje baze, da dva nova člana ne dobiju isti ID
+    const allIds = [
+      ...this.competitionService.getAllCompetitors().map(m => m.id),
+      ...this.teamMembers.map(m => m.id)
+    ];
+    const newId = Math.max(...allIds, 0) + 1;
 
     this.teamMembers.push({
       id: newId,

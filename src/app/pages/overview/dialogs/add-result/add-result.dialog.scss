@@ -76,34 +76,8 @@
   font-size: 0.9em;
 }
 
-.team-filter-chips {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+.team-filter-group {
   margin-top: 8px;
-}
-
-.filter-label {
-  font-weight: 500;
-  color: #333;
-}
-
-mat-chip-option {
-  cursor: pointer;
-}
-
-.selected {
-  background-color: #1976d2 !important;
-  color: white !important;
-}
-
-.clear-filter {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background-color: #f44336;
-  color: white;
 }
 
 .discipline-info {

@@ -7,14 +7,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { CompetitionService } from '../../core/competition.service';
 import { PdfReportService } from '../../core/pdf-report.service';
+import { ResultsVerificationService } from '../../core/results-verification.service';
 import { AddTeamDialog } from './dialogs/add-team/add-team.dialog';
 import { EditTeamDialog } from './dialogs/edit-team/edit-team.dialog';
 import { AddResultDialog } from './dialogs/add-result/add-result.dialog';
 import { CompetitorRanking, TeamRanking } from '../../core/models';
 import { EditResultDialog } from './dialogs/edit-result/edit-result.dialog';
+import { VerificationIssuesDialog } from './dialogs/verification-issues/verification-issues.dialog';
 
 @Component({
     selector: 'overview',
@@ -39,7 +42,9 @@ export class OverviewComponent implements OnInit {
   constructor(
     private competitionService: CompetitionService,
     private dialog: MatDialog,
-    private pdfReportService: PdfReportService
+    private pdfReportService: PdfReportService,
+    private resultsVerificationService: ResultsVerificationService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
@@ -67,8 +72,13 @@ export class OverviewComponent implements OnInit {
       return this.competitionService.getDisciplinesForCategory(category).map(d => d.name);
     }
 
-    // Ako nema kategorije, prikaži sve discipline
-    return this.competitionService.getDisciplines().map(d => d.name);
+    // Ako nema kategorije, prikaži jedan stupac po JEDINSTVENOM nazivu discipline.
+    // "ZRAČNA PUŠKA" i "PRAČKA" postoje kao odvojene M i Ž discipline s istim imenom, a
+    // disciplineScores je također ključan po imenu, pa dupli matColumnDef po istom imenu
+    // ruši/miješa mat-table stupce - svaki redak ionako ispravno nosi svoju (M ili Ž) vrijednost
+    // pod tim imenom.
+    const names = this.competitionService.getDisciplines().map(d => d.name);
+    return Array.from(new Set(names));
   }
 
   updateIndividualColumns() {
@@ -157,7 +167,9 @@ export class OverviewComponent implements OnInit {
     const data = this.competitionService.getCompetitorRankings(category as 'M' | 'Ž');
     const disciplines = this.competitionService.getDisciplinesForCategory(category as 'M' | 'Ž');
 
-    this.pdfReportService.exportIndividualRankingToPdf(data, disciplines, this.selectedCategory);
+    this.verifyThenExport(() =>
+      this.pdfReportService.exportIndividualRankingToPdf(data, disciplines, this.selectedCategory)
+    );
   }
 
   exportTeamToPdf() {
@@ -165,7 +177,9 @@ export class OverviewComponent implements OnInit {
     const data = this.competitionService.getTeamRankings(category as 'M' | 'Ž');
     const disciplines = this.competitionService.getDisciplinesForCategory(category as 'M' | 'Ž');
 
-    this.pdfReportService.exportTeamRankingToPdf(data, disciplines, this.selectedCategory);
+    this.verifyThenExport(() =>
+      this.pdfReportService.exportTeamRankingToPdf(data, disciplines, this.selectedCategory)
+    );
   }
 
   exportCompleteReport() {
@@ -174,7 +188,34 @@ export class OverviewComponent implements OnInit {
     const teamData = this.competitionService.getTeamRankings(category as 'M' | 'Ž');
     const disciplines = this.competitionService.getDisciplinesForCategory(category as 'M' | 'Ž');
 
-    this.pdfReportService.exportCompleteReportToPdf(individualData, teamData, disciplines, this.selectedCategory);
+    this.verifyThenExport(() =>
+      this.pdfReportService.exportCompleteReportToPdf(individualData, teamData, disciplines, this.selectedCategory)
+    );
+  }
+
+  // Provjerava integritet podataka prije preuzimanja PDF-a. Ne blokira preuzimanje u
+  // potpunosti - organizator na natjecanju može hitno trebati dokument i unatoč nalazu - nego
+  // pri problemu otvara dijalog s popisom nalaza i traži eksplicitnu potvrdu za nastavak.
+  private verifyThenExport(doExport: () => void) {
+    const verification = this.resultsVerificationService.verify();
+
+    if (verification.ok) {
+      this.snackBar.open('Rezultati uspješno verificirani. Preuzimanje slijedi.', undefined, { duration: 3000 });
+      doExport();
+      return;
+    }
+
+    const dialogRef = this.dialog.open(VerificationIssuesDialog, {
+      width: '600px',
+      maxWidth: '95vw',
+      data: { issues: verification.issues }
+    });
+
+    dialogRef.afterClosed().subscribe(proceed => {
+      if (proceed) {
+        doExport();
+      }
+    });
   }
 
   hasData(): boolean {

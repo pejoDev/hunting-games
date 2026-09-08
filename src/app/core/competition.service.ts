@@ -68,7 +68,20 @@ export class CompetitionService {
     const updatedTeams = [...s.teams];
     updatedTeams[teamIndex] = updatedTeam;
 
-    await this.dbGateway.setCollection('teams', updatedTeams);
+    // Obriši rezultate natjecatelja koji su uklonjeni iz tima uređivanjem,
+    // da njihov ID ne "naslijedi" stare bodove ako se kasnije ponovno dodijeli
+    const remainingMemberIds = updatedTeam.members.map(m => m.id);
+    const removedMemberIds = s.teams[teamIndex].members
+      .map(m => m.id)
+      .filter(id => !remainingMemberIds.includes(id));
+    const updatedResults = removedMemberIds.length > 0
+      ? s.results.filter(r => !removedMemberIds.includes(r.competitorId))
+      : s.results;
+
+    await this.dbGateway.setCollections({
+      teams: updatedTeams,
+      ...(removedMemberIds.length > 0 ? { results: updatedResults } : {})
+    });
     return true;
   }
 
@@ -157,10 +170,7 @@ export class CompetitionService {
     // Obriši sve rezultate natjecatelja iz ovog tima
     const updatedResults = s.results.filter(r => !memberIds.includes(r.competitorId));
 
-    await Promise.all([
-      this.dbGateway.setCollection('teams', updatedTeams),
-      this.dbGateway.setCollection('results', updatedResults)
-    ]);
+    await this.dbGateway.setCollections({ teams: updatedTeams, results: updatedResults });
   }
 
   // Brisanje natjecatelja iz tima
@@ -176,10 +186,7 @@ export class CompetitionService {
     // Također obriši sve rezultate ovog natjecatelja
     const updatedResults = s.results.filter(r => r.competitorId !== competitorId);
 
-    await Promise.all([
-      this.dbGateway.setCollection('teams', updatedTeams),
-      this.dbGateway.setCollection('results', updatedResults)
-    ]);
+    await this.dbGateway.setCollections({ teams: updatedTeams, results: updatedResults });
   }
 
   // Brisanje rezultata
@@ -231,10 +238,7 @@ export class CompetitionService {
     // Također obriši sve rezultate u ovoj disciplini
     const updatedResults = s.results.filter(r => r.disciplineId !== disciplineId);
 
-    await Promise.all([
-      this.dbGateway.setCollection('disciplines', updatedDisciplines),
-      this.dbGateway.setCollection('results', updatedResults)
-    ]);
+    await this.dbGateway.setCollections({ disciplines: updatedDisciplines, results: updatedResults });
   }
 
   // Dohvaćanje svih rezultata

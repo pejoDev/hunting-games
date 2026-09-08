@@ -21,6 +21,14 @@ export class FakeRealtimeDbGateway {
     return Promise.resolve();
   }
 
+  setCollections(updates: Partial<Record<'teams' | 'disciplines' | 'results', unknown>>): Promise<void> {
+    for (const [path, value] of Object.entries(updates)) {
+      this.writes[path as 'teams' | 'disciplines' | 'results'] = value;
+      this.writeCalls.push({ path, value });
+    }
+    return Promise.resolve();
+  }
+
   /** Simulates Firebase pushing data to the onValue listener (initial load or another client's write). */
   emit(data: Partial<AppState> | null): void {
     this.callback?.(data);

@@ -169,6 +169,22 @@ describe('CompetitionService', () => {
       const written = gateway.writes['teams'] as Team[];
       expect(written.find(t => t.id === 1)!.members).toEqual(newMembers);
     });
+
+    it('should write teams and results atomically in one setCollections call when a member is removed, never as two separate setCollection calls', async () => {
+      spyOn(gateway, 'setCollections').and.callThrough();
+      spyOn(gateway, 'setCollection').and.callThrough();
+
+      await service.updateTeam(1, 'Sokolovi', 'M', []);
+
+      expect(gateway.setCollections).toHaveBeenCalledTimes(1);
+      expect(gateway.setCollection).not.toHaveBeenCalled();
+    });
+
+    it('should write only teams (not results) when no member was removed', async () => {
+      await service.updateTeam(1, 'Sokolovi', 'M');
+
+      expect(gateway.writeCalls.map(c => c.path)).toEqual(['teams']);
+    });
   });
 
   describe('addCompetitorToTeam', () => {
@@ -297,6 +313,17 @@ describe('CompetitionService', () => {
 
       expect(gateway.writes['results']).toEqual([]);
     });
+
+    it('should write teams and results atomically in one setCollections call, never as two separate setCollection calls', async () => {
+      gateway.emit({ teams: [team({ id: 1 })], disciplines: [], results: [] });
+      spyOn(gateway, 'setCollections').and.callThrough();
+      spyOn(gateway, 'setCollection').and.callThrough();
+
+      await service.deleteTeam(1);
+
+      expect(gateway.setCollections).toHaveBeenCalledTimes(1);
+      expect(gateway.setCollection).not.toHaveBeenCalled();
+    });
   });
 
   describe('removeCompetitorFromTeam', () => {
@@ -321,6 +348,17 @@ describe('CompetitionService', () => {
       expect(teams.find(t => t.id === 1)!.members.map(m => m.id)).toEqual([2]);
       expect(teams.find(t => t.id === 2)).toEqual(otherTeam);
       expect(results.map(r => r.id)).toEqual([2]);
+    });
+
+    it('should write teams and results atomically in one setCollections call, never as two separate setCollection calls', async () => {
+      gateway.emit({ teams: [team({ id: 1 })], disciplines: [], results: [] });
+      spyOn(gateway, 'setCollections').and.callThrough();
+      spyOn(gateway, 'setCollection').and.callThrough();
+
+      await service.removeCompetitorFromTeam(1, 1);
+
+      expect(gateway.setCollections).toHaveBeenCalledTimes(1);
+      expect(gateway.setCollection).not.toHaveBeenCalled();
     });
   });
 
@@ -381,6 +419,17 @@ describe('CompetitionService', () => {
       const results = gateway.writes['results'] as Result[];
       expect(disciplines.map(d => d.id)).toEqual([2]);
       expect(results.map(r => r.id)).toEqual([2]);
+    });
+
+    it('deleteDiscipline should write disciplines and results atomically in one setCollections call, never as two separate setCollection calls', async () => {
+      gateway.emit({ teams: [], disciplines: [discipline({ id: 1 })], results: [] });
+      spyOn(gateway, 'setCollections').and.callThrough();
+      spyOn(gateway, 'setCollection').and.callThrough();
+
+      await service.deleteDiscipline(1);
+
+      expect(gateway.setCollections).toHaveBeenCalledTimes(1);
+      expect(gateway.setCollection).not.toHaveBeenCalled();
     });
   });
 
