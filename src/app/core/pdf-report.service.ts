@@ -73,27 +73,79 @@ export class PdfReportService {
   }
 
   /**
-   * Puts every tie explanation on its own fresh page at the end of the document (never sharing
-   * a page with the ranking table), for full transparency on why one tied competitor/team ranks
-   * above another. No-op (no extra page added) when nothing in any section is tied.
+   * Opisuje, riječima, točno pravilo po kojem se određuje poredak - i za osnovni slučaj (ukupni
+   * bodovi) i za razbijanje izjednačenja (kaskada disciplina, vidi CompetitionService.TIEBREAK_CASCADES).
+   * Ispisuje se uvijek (bez obzira ima li stvarnih izjednačenja u ovom izvještaju) kako bi svaki
+   * natjecatelj mogao sam provjeriti zašto je pozicioniran gdje jest. `category` je 'M', 'Ž' ili
+   * '' (sve kategorije, pa se navode oba pravila). `includeTeamSumNote` dodaje napomenu da se za
+   * ekipni poredak prvo zbrajaju rezultati svih članova ekipe po disciplini (koristi se u ekipnom
+   * i kompletnom izvještaju, ne u čisto pojedinačnom).
+   */
+  private generalRankingRuleLines(category: string, includeTeamSumNote: boolean): string[] {
+    const lines: string[] = [
+      '1) Poredak se određuje prema ukupnom broju bodova, od najvišeg prema najnižem.',
+      '2) Ukupni bodovi zbrajaju se iz svih disciplina kategorije, pri čemu svaka disciplina nosi maksimalno 100 bodova, po formuli:'
+    ];
+    if (category === 'M' || !category) {
+      lines.push('    - Muškarci: TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20');
+    }
+    if (category === 'Ž' || !category) {
+      lines.push('    - Žene: ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33');
+    }
+    if (includeTeamSumNote) {
+      lines.push('    Za ekipni poredak prvo se zbroje rezultati svih članova ekipe u svakoj disciplini, a zatim se na taj zbroj primijeni gornja formula.');
+    }
+    lines.push('3) Ako dva ili više natjecatelja/ekipa imaju jednak ukupan broj bodova, izjednačenje se razbija usporedbom rezultata u sljedećim disciplinama, tim redoslijedom, sve dok se ne pronađe razlika:');
+    if (category === 'M' || !category) {
+      lines.push('    - Muškarci: TRAP, zatim PRAČKA, zatim ZRAČNA PUŠKA');
+    }
+    if (category === 'Ž' || !category) {
+      lines.push('    - Žene: PRAČKA, zatim ZRAČNA PUŠKA, zatim PIKADO');
+    }
+    lines.push('4) Ako je rezultat identičan u svim navedenim disciplinama i izjednačenje se odnosi na plasman unutar prva tri mjesta (npr. 1. i 2., 2. i 3., ili 1., 2. i 3. mjesto), o konačnom poretku odlučuje raspucavanje - dodatno gađanje discipline PRAČKA na 5 meta.');
+    lines.push('5) Izvan prva tri mjesta, ako izjednačenje ostane neriješeno ni nakon usporedbe po disciplinama, poredak unutar te skupine je proizvoljan.');
+    return lines;
+  }
+
+  /**
+   * Uvijek dodaje zasebnu stranicu na kraju izvještaja s objašnjenjem pravila poretka (vidi
+   * generalRankingRuleLines), a zatim - ako postoje stvarna izjednačenja - i konkretnu bilješku
+   * po natjecatelju/ekipi (vidi writeTieNoteLines), za punu transparentnost prema natjecateljima
+   * zašto je netko ispred, odnosno iza, nekoga.
    */
   private addTieNotesPage(
     doc: jsPDF,
-    sections: { heading: string; rows: { rank: number; tieNote?: string; name: string }[] }[]
+    sections: { heading: string; rows: { rank: number; tieNote?: string; name: string }[] }[],
+    category: string,
+    includeTeamSumNote: boolean
   ): void {
-    const hasAnyTie = sections.some(s => s.rows.some(r => r.tieNote));
-    if (!hasAnyTie) return;
-
     doc.addPage();
     let y = 20;
 
     doc.setFontSize(14);
     doc.setTextColor(40);
-    doc.text(this.normalizeText('Napomene o izjednačenim rezultatima'), 15, y);
-    y += 12;
+    doc.text(this.normalizeText('Napomene o poretku'), 15, y);
+    y += 10;
 
-    for (const section of sections) {
-      y = this.writeTieNoteLines(doc, section.rows, 15, y, 180, section.heading);
+    doc.setFontSize(9);
+    doc.setTextColor(60);
+    for (const line of this.generalRankingRuleLines(category, includeTeamSumNote)) {
+      const wrapped = doc.splitTextToSize(this.normalizeText(line), 180);
+      doc.text(wrapped, 15, y);
+      y += wrapped.length * 4 + 2;
+    }
+    y += 6;
+
+    const hasAnyTie = sections.some(s => s.rows.some(r => r.tieNote));
+    if (hasAnyTie) {
+      doc.setFontSize(12);
+      doc.setTextColor(150, 60, 0);
+      doc.text(this.normalizeText('Izjednačeni rezultati u ovom izvještaju:'), 15, y);
+      y += 8;
+
+      for (const section of sections) {
+        y = this.writeTieNoteLines(doc, section.rows, 15, y, 180, section.heading);
+      }
     }
   }
 
@@ -192,7 +244,7 @@ export class PdfReportService {
       tieNote: row.tieNote,
       name: `${row.competitor.firstName} ${row.competitor.lastName}`
     }));
-    this.addTieNotesPage(doc, [{ heading: '', rows: tieRows }]);
+    this.addTieNotesPage(doc, [{ heading: '', rows: tieRows }], category, false);
 
     // Footer
     const pageCount = doc.getNumberOfPages();
@@ -326,7 +378,7 @@ export class PdfReportService {
 
     // Napomene o izjednačenim rezultatima, na zasebnoj stranici (transparentnost: zašto je netko ispred nekoga)
     const tieRows = data.map(row => ({ rank: row.rank, tieNote: row.tieNote, name: row.team.name }));
-    this.addTieNotesPage(doc, [{ heading: '', rows: tieRows }]);
+    this.addTieNotesPage(doc, [{ heading: '', rows: tieRows }], category, true);
 
     // Footer
     const pageCount = doc.getNumberOfPages();
@@ -454,7 +506,7 @@ export class PdfReportService {
     this.addTieNotesPage(doc, [
       { heading: 'Pojedinačni poredak:', rows: individualTieRows },
       { heading: 'Ekipni poredak:', rows: teamTieRows }
-    ]);
+    ], category, true);
 
     // Footer on all pages
     const pageCount = doc.getNumberOfPages();
