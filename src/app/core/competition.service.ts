@@ -68,7 +68,20 @@ export class CompetitionService {
     const updatedTeams = [...s.teams];
     updatedTeams[teamIndex] = updatedTeam;
 
-    await this.dbGateway.setCollection('teams', updatedTeams);
+    // Obriši rezultate natjecatelja koji su uklonjeni iz tima uređivanjem,
+    // da njihov ID ne "naslijedi" stare bodove ako se kasnije ponovno dodijeli
+    const remainingMemberIds = updatedTeam.members.map(m => m.id);
+    const removedMemberIds = s.teams[teamIndex].members
+      .map(m => m.id)
+      .filter(id => !remainingMemberIds.includes(id));
+    const updatedResults = removedMemberIds.length > 0
+      ? s.results.filter(r => !removedMemberIds.includes(r.competitorId))
+      : s.results;
+
+    await Promise.all([
+      this.dbGateway.setCollection('teams', updatedTeams),
+      ...(removedMemberIds.length > 0 ? [this.dbGateway.setCollection('results', updatedResults)] : [])
+    ]);
     return true;
   }
 
