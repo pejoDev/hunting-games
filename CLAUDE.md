@@ -13,9 +13,23 @@ npm install          # install dependencies
 npm start             # ng serve — dev server
 npm run build         # ng build — production output to dist/app/browser
 npm test              # ng test — karma.conf.js + *.spec.ts files exist (src/app/core, src/app/pages/login)
+npm run test:e2e      # playwright test — Playwright E2E suite (see below)
+npm run test:e2e:ui   # same, with Playwright's UI runner
+npm run emulators     # firebase emulators:start --only auth,database — standalone, for manual poking
 ```
 
-There is no lint script configured. `angular.json` defines only a default (non-production) `build` configuration — there is no `production` configuration block, so `ng build --configuration production` will fail; plain `ng build` is what CI/deploy should use.
+There is no lint script configured. `angular.json` defines only a default (non-production) `build` configuration — there is no `production` configuration block, so `ng build --configuration production` will fail; plain `ng build` is what CI/deploy should use. `angular.json` also defines an `e2e` build/serve configuration (see below) — this one exists, `ng build --configuration e2e` / `ng serve --configuration=e2e` both work.
+
+### E2E tests (Playwright + Firebase Local Emulator Suite)
+
+`npm run test:e2e` runs Playwright, which itself starts everything it needs via its `webServer` array in `playwright.config.ts`: `firebase emulators:start --only auth,database` (Auth on `9099`, Realtime Database on `9000`, using the project's real `database.rules.json`) and `ng serve --configuration=e2e --port=4300` (Angular built with `fileReplacements` swapping in `src/environments/environment.e2e.ts`, which sets `useEmulators: true`). `main.ts` calls `connectDatabaseEmulator`/`connectAuthEmulator` when that flag is set, so the app under test never reaches the real `hunting-games-fe57e` project — **E2E tests only ever touch `127.0.0.1:9000`/`9099`**, never the production database described elsewhere in this file. Both processes are torn down automatically when the run ends.
+
+The Realtime Database emulator is a JVM process (the Auth emulator is pure Node and doesn't need this) — a JRE must be on `PATH` for `npm run emulators` / `npm run test:e2e` to work. This machine didn't have one; `brew install openjdk` fixed it, and the `emulators` script in `package.json` prepends `$(brew --prefix openjdk)/bin` to `PATH` itself so `npm start`/`ng serve` remain unaffected and no shell profile edit was needed. If Java is genuinely missing on a machine, the emulator start step fails fast with an explicit "Unable to locate a Java Runtime" error — not a silent hang.
+
+- `e2e/support/emulator.ts` — REST helpers against the emulators (`resetEmulatorData`, `seedDisciplines`/`resetToBaseline` for the 6 disciplines from TC 0.4 in `docs/MANUALNO-TESTIRANJE.md`, `createTestAdminUser`, `patchDisciplineMaxPoints`). Writes use the emulator-only `access_token=owner` REST param, which bypasses `database.rules.json` the same way the Admin SDK would (doesn't exist against production). Collections are seeded as plain JSON arrays, matching how `competition.service.ts` actually writes them (`setCollection('disciplines', updatedDisciplines)` — a JS array, not an object keyed by `id`).
+- `e2e/pages/*.page.ts` — Page Object Model, one per screen/dialog (`overview.page.ts` so far).
+- `e2e/tests/*.spec.ts` — one file per phase/section of `docs/MANUALNO-TESTIRANJE.md`, TC codes in test names for traceability.
+- Full roadmap, phase-by-phase status, and the prompt for the next session live in `automation_plan.md` (root) — read that before starting new E2E work.
 
 `environment.prod.ts` is not swapped in during build (no `fileReplacements` in `angular.json`) — its only difference from `environment.ts` is `production: true/false`; the Firebase config values are otherwise identical, so this doesn't affect deploys.
 

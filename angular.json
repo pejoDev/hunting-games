@@ -20,12 +20,27 @@
             "styles": ["src/styles.scss"],
             "scripts": [],
             "browser": "src/main.ts"
+          },
+          "configurations": {
+            "e2e": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.e2e.ts"
+                }
+              ]
+            }
           }
         },
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
             "buildTarget": "app:build"
+          },
+          "configurations": {
+            "e2e": {
+              "buildTarget": "app:build:e2e"
+            }
           }
         },
         "test": {

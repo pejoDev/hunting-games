@@ -6,7 +6,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test"
+    "test": "ng test",
+    "emulators": "PATH=\"$(brew --prefix openjdk 2>/dev/null)/bin:$PATH\" firebase emulators:start --only auth,database --project hunting-games-fe57e",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@angular/common": "^22.1.4",
@@ -27,6 +30,7 @@
     "@angular/build": "^22.1.6",
     "@angular/cli": "^22.1.6",
     "@angular/compiler-cli": "^22.1.4",
+    "@playwright/test": "^1.63.0",
     "@types/jasmine": "~5.1.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jasmine-core": "~5.1.0",

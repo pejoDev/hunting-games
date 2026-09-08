@@ -1,6 +1,10 @@
+// Koristi se isključivo za Playwright E2E testove (ng serve --configuration=e2e).
+// `firebase` polje se ne koristi za stvarnu mrežnu komunikaciju kad je useEmulators true —
+// Firebase SDK preusmjerava sve pozive na lokalne emulatore (main.ts), tako da testovi
+// nikad ne diraju produkcijsku bazu.
 export const environment = {
-  production: true,
-  useEmulators: false,
+  production: false,
+  useEmulators: true,
   firebase: {
     apiKey: "AIzaSyB4DM8WHI2g4oL9wmy09wk2_oKWXmBBPRs",
     authDomain: "hunting-games-fe57e.firebaseapp.com",

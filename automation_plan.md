@@ -2,7 +2,7 @@
 
 > Prati i nadograđuje `docs/MANUALNO-TESTIRANJE.md`. Cilj: pokriti Playwright E2E testovima sve test slučajeve (TC) iz manualnog dokumenta koji se realno mogu automatizirati, po fazama — **jedna faza = jedna radna sesija**. Manualni dokument se ne briše: ostaje kao fallback za TC-ove koji genuinski trebaju čovjeka (fizički uređaj, vizualna inspekcija boje, ručna provjera na produkcijskim podacima) i kao pre-event "dimni test" prije stvarnog natjecanja.
 
-Status na `2026-09-08`: **plan izrađen, faza 0 još nije započeta.** Ovaj dokument piše i ažurira svaka sesija koja odradi jednu fazu — vidi [§6 Status log](#6-status-log) i [§7 Prompt za sljedeću sesiju](#7-prompt-za-sljedeću-sesiju).
+Status na `2026-09-08`: **Faza 0 gotova**, Faza 1 sljedeća na redu. Ovaj dokument piše i ažurira svaka sesija koja odradi jednu fazu — vidi [§6 Status log](#6-status-log) i [§7 Prompt za sljedeću sesiju](#7-prompt-za-sljedeću-sesiju).
 
 ---
 
@@ -99,8 +99,15 @@ Svaka faza ima: **Cilj**, **Opseg** (TC-ovi), **Preduvjeti**, **Deliverables** (
 - `npm run build` i dalje prolazi (nedirano)
 - Commit napravljen, git hash upisan u §6
 
-**Status:** ⬜ Nije započeto
-**Git hash:** —
+**Status:** ✅ Gotovo
+**Git hash:** vidi §6
+
+**Napomene / odstupanja od plana:**
+- **Java nije bila instalirana** na ovom stroju (`java -version` → "Unable to locate a Java Runtime"). Database emulator je JVM proces (Auth emulator nije), pa je bez toga bio hard blocker. Riješeno s `brew install openjdk`; `emulators` skripta u `package.json` sama prependa `$(brew --prefix openjdk)/bin` na `PATH` samo za taj proces, tako da `npm start`/`ng serve` ostaju nedirani i nije trebalo mijenjati korisnikov `~/.zshrc`.
+- **Seed format za `disciplines` promijenjen usred faze**: prvi pokušaj je seedao objekt keyiran po `id`-u (`{"1": {...}, "2": {...}, ...}`) preko REST-a — Realtime Database ga je pretvorio u niz s umetnutim `null` na indeksu 0 (7 elemenata umjesto 6), jer RTDB uzastopne numeričke ključeve uvijek tretira kao niz. `competition.service.ts` ionako piše kolekcije kao plain JS nizove (`setCollection('disciplines', updatedDisciplines)`), pa je `seedDisciplines()` promijenjen da šalje pravi JSON niz — sada vjerno oponaša stvarni format podataka koji app piše.
+- **Smoke test gađa `/pracenje`, ne `/`** — `''` ruta je iza `authGuard` (vidi `app.component.ts`), a auth flow je tek Faza 1. `/pracenje` je javna i dovoljna za "app se učitava, header vidljiv, prazan poredak, nema konzolnih grešaka" bez potrebe za login helperima.
+- Discipline seed podaci koriste **trenutne** nazive/redoslijed iz TC 0.4 (`docs/MANUALNO-TESTIRANJE.md`), koji se poklapaju sa stvarnim UI tekstom u `overview.component.html` (provjereno ručno tijekom faze).
+- CLAUDE.md ažuriran (Commands sekcija) s novim skriptama i objašnjenjem Java preduvjeta — pogledaj tamo za detalje ako sljedeća sesija bude na drugom stroju.
 
 ---
 
@@ -301,7 +308,7 @@ Ako se tijekom faze otkrije **pravi bug** u aplikaciji (ne u testu) — zabilje�
 | Faza | Status | Datum | Git hash | Sesija / napomena |
 |---|---|---|---|---|
 | Plan (ovaj dokument) | ✅ Izrađen | 2026-09-08 | — | Plan kreiran, faze 0–8 definirane, nijedna još nije izvršena |
-| 0 — Infrastruktura | ⬜ Nije započeto | | | |
+| 0 — Infrastruktura | ✅ Gotovo | 2026-09-08 | (vidi commit odmah nakon plana) | Playwright + Firebase Emulator Suite postavljeni; Java instalirana putem brewa (nije bila na stroju); seed disciplina promijenjen s id-keyed objekta na pravi JSON niz (RTDB inače ubacuje null na indeks 0); smoke test gađa `/pracenje` (javna ruta) jer `authGuard`/login flow dolazi tek u Fazi 1 |
 | 1 — Auth + `/pracenje` | ⬜ Nije započeto | | | |
 | 2 — Timovi (A+B) | ⬜ Nije započeto | | | |
 | 3 — Rezultati (C+D) | ⬜ Nije započeto | | | |
@@ -313,6 +320,10 @@ Ako se tijekom faze otkrije **pravi bug** u aplikaciji (ne u testu) — zabilje�
 
 ## 7. Prompt za sljedeću sesiju
 
-Sljedeća sesija treba odraditi **Fazu 0** iz ovog plana. Kopiraj/zalijepi ovo kao prompt:
+Sljedeća sesija treba odraditi **Fazu 1** iz ovog plana. Kopiraj/zalijepi ovo kao prompt:
 
-> Radi na `automation_plan.md` u rootu repozitorija `hunting-games` — odradi **Fazu 0 (Infrastruktura: Playwright + Firebase Emulator Suite)**, točno kako je opisano u tom fajlu (Cilj/Opseg/Preduvjeti/Deliverables/Definition of Done). Ukratko: dodaj `@playwright/test`, `playwright.config.ts` koji kroz `webServer` sam diže `firebase emulators:start --only auth,database` i `ng serve --configuration=e2e` (nova Angular build konfiguracija s `fileReplacements` na novi `src/environments/environment.e2e.ts`), dodaj `emulators` blok u `firebase.json` (koristeći postojeći `database.rules.json`), minimalno i uvjetno proširi `main.ts` da se spoji na emulatore kad je `environment.useEmulators === true` (bez utjecaja na postojeći `npm start`/`npm run build`), napravi `e2e/support/emulator.ts` s helperima za reset/seed podataka preko emulator REST API-ja, `e2e/pages/overview.page.ts` skeleton, i jedan smoke test (`e2e/tests/00-smoke.spec.ts`) koji potvrđuje da se app učitava protiv emulatora bez konzolnih grešaka. Dodaj `test:e2e`/`test:e2e:ui`/`emulators` skripte u `package.json`. **Kritično: testovi ne smiju nikad dirati produkcijsku Firebase bazu** — provjeri to prije nego proglasiš fazu gotovom. Nakon implementacije pokreni i potvrdi da prolaze: novi smoke test (min. 3 uzastopna pokretanja bez flakea), `ng test --watch=false --browsers=ChromeHeadless`, i `npm run build`. Zatim commitaj, upiši git hash u `automation_plan.md` (status Faze 0 → Gotovo, popuni §6 Status log), i ažuriraj §7 s pripremljenim promptom za Fazu 1 (Autentikacija i `/pracenje`). Ne kreći u Fazu 1 u istoj sesiji osim ako te se eksplicitno zamoli.
+> Radi na `automation_plan.md` u rootu repozitorija `hunting-games` — odradi **Fazu 1 (Autentikacija i javna `/pracenje` ruta)**, točno kako je opisano u tom fajlu (Cilj/Opseg/Preduvjeti/Deliverables/Definition of Done). Faza 0 (Playwright + Firebase Emulator Suite) je gotova — pročitaj njene bilješke ("Napomene/odstupanja od plana" ispod DoD-a Faze 0) prije početka, posebno: (1) Java (JVM) mora biti na `PATH` da bi Database emulator radio — na ovom stroju je instalirana preko `brew install openjdk`, a `npm run emulators`/`npm run test:e2e` to sami rješavaju bez diranja `~/.zshrc`, ali provjeri da je i dalje tako ako radiš na drugom stroju; (2) `e2e/support/emulator.ts` već ima `createTestAdminUser()`, `resetToBaseline()` i konstante `E2E_ADMIN_EMAIL`/`E2E_ADMIN_PASSWORD` — iskoristi ih umjesto pisanja novih; (3) `''` ruta je iza `authGuard`, `/pracenje` je javna (vidi `app.component.ts`); (4) postojeći `e2e/pages/overview.page.ts` je tek skeleton (header, control panel gumbi, empty-state/tablica pojedinačnog poretka) — proširi ga po potrebi umjesto pisanja duplikata lokatora.
+>
+> Ukratko opseg: `e2e/pages/login.page.ts` (POM za login formu), `e2e/tests/10-auth-and-public-route.spec.ts` pokrivajući K1–K12 iz `docs/MANUALNO-TESTIRANJE.md` (K10 kao `page.evaluate()` pokušaj izravnog upisa preko Firebase SDK-a s očekivanim `PERMISSION_DENIED`, K11 kao provjera da `firebase.json`/`database.rules.json` sadrže očekivana pravila, K12 kao Playwright mobilni viewport uz napomenu da ne zamjenjuje pravi uređaj) + uspješna/neuspješna prijava. Po potrebi proširi `e2e/support/emulator.ts` (npr. `storageState` helper za brže "već prijavljen" scenarije).
+>
+> **Kritično: testovi ne smiju nikad dirati produkcijsku Firebase bazu.** Nakon implementacije pokreni **cijeli** dotadašnji paket (Faza 0 smoke test + nova Faza 1 test datoteka), ne samo nove testove, pa i `ng test --watch=false --browsers=ChromeHeadless` — oba moraju ostati zelena. Zatim commitaj, upiši git hash u `automation_plan.md` (status Faze 1 → Gotovo, popuni §6 Status log, zabilježi eventualna odstupanja od plana), i ažuriraj §7 s pripremljenim promptom za Fazu 2 (Upravljanje timovima — sekcije A+B). Ne kreći u Fazu 2 u istoj sesiji osim ako te se eksplicitno zamoli. Ako tijekom faze otkriješ pravi bug u aplikaciji (ne u testu), zabilježi ga u planu uz TC oznaku ali ga ne popravljaj usput osim ako je trivijalan — prioritet je pokrivenost testovima.

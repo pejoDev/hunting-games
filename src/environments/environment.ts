@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  useEmulators: false,
   firebase: {
     apiKey: "AIzaSyB4DM8WHI2g4oL9wmy09wk2_oKWXmBBPRs",
     authDomain: "hunting-games-fe57e.firebaseapp.com",
@@ -11,4 +12,3 @@ export const environment = {
     measurementId: "G-J4RBNB35Q8"
   }
 };
-
