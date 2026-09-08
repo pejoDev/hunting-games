@@ -104,7 +104,7 @@ describe('AddResultDialog', () => {
     });
   });
 
-  describe('team quick-filter chips', () => {
+  describe('team filter dropdown', () => {
     it('getUniqueTeams should list each distinct team name once', () => {
       expect(component.getUniqueTeams()).toEqual(['Sokolovi', 'Orlice']);
     });

@@ -54,27 +54,31 @@
           </mat-autocomplete>
         </mat-form-field>
 
-        <!-- Quick team filter buttons -->
+        <!-- Team filter dropdown with search -->
         @if (competitorOptions.length > 0) {
-          <div class="team-filter-chips">
-            <span class="filter-label">Brza pretraga po timu:</span>
-            <mat-chip-set>
-              @for (team of getUniqueTeams(); track team) {
-                <mat-chip
-                  (click)="filterByTeam(team)"
-                  [class.selected]="selectedTeamFilter === team">
-                  {{ team }}
-                </mat-chip>
+          <div class="team-filter-group">
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-label>Filtriraj po timu</mat-label>
+              <input matInput
+                [formControl]="teamFilterControl"
+                [matAutocomplete]="teamAuto"
+                placeholder="Pretraži i odaberi tim...">
+              @if (!selectedTeamFilter) {
+                <mat-icon matSuffix>group</mat-icon>
               }
               @if (selectedTeamFilter) {
-                <mat-chip
+                <button mat-icon-button matSuffix type="button"
                   (click)="clearTeamFilter()"
-                  class="clear-filter">
+                  aria-label="Očisti filter tima">
                   <mat-icon>clear</mat-icon>
-                  Očisti
-                </mat-chip>
+                </button>
               }
-            </mat-chip-set>
+              <mat-autocomplete #teamAuto="matAutocomplete" (optionSelected)="onTeamSelected($event)">
+                @for (team of filteredTeamOptions | async; track team) {
+                  <mat-option [value]="team">{{ team }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
           </div>
         }
       </div>

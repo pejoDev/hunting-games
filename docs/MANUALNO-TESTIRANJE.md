@@ -78,19 +78,20 @@ Za sve TC-ove koristi timove iz sekcije A (`TEST_EkipaM1`, `TEST_EkipaŽ1`).
 |---|-------|-----------|----------|
 | C1 | Otvori "Unos rezultata", upiši dio imena natjecatelja u pretragu | Autocomplete filtrira po imenu/prezimenu/timu (case-insensitive) | ☐ |
 | C2 | Upiši naziv tima u pretragu | Autocomplete filtrira sve članove tog tima | ☐ |
-| C3 | Klikni chip s nazivom tima ("Brza pretraga po timu") | Pretraga se automatski postavlja na taj tim, prikazuju se samo njegovi članovi | ☐ |
-| C4 | Klikni "Očisti" nakon C3 | Filter po timu se uklanja, prikazuju se svi natjecatelji | ☐ |
-| C5 | Odaberi natjecatelja iz `TEST_EkipaM1` (M) | Padajući izbornik "Disciplina" se otključava i prikazuje samo M discipline: TRAP, ZRAČNA PUŠKA, PRAČKA | ☐ |
-| C6 | Odaberi natjecatelja iz `TEST_EkipaŽ1` (Ž) | Disciplina prikazuje samo: ZRAČNA PUŠKA, PRAČKA, PIKADO | ☐ |
-| C7 | Odaberi disciplinu TRAP, upiši bodove `5` | Hint "Maksimalno bodova: 5 (TRAP)" prikazan, nema greške, gumb "Spremi rezultat" enabled | ☐ |
-| C8 | Odaberi TRAP, upiši `6` (> maxPoints) | Prikazuje se `mat-error`: "Maksimalan broj bodova za ovu disciplinu je 5"; gumb "Spremi rezultat" je disabled | ☐ |
-| C9 | Odaberi TRAP, upiši `-1` | Error "Bodovi ne mogu biti negativni"; gumb disabled | ☐ |
-| C10 | Odaberi ZRAČNA PUŠKA, upiši `50` | Prihvaćeno (na granici maxPoints), nema greške | ☐ |
-| C11 | Odaberi PIKADO (za natjecateljicu), upiši `300` | Prihvaćeno (max), doprinosi točno 100,00 bodova ukupno (provjeri u tablici poretka) | ☐ |
-| C12 | Spremi rezultat za natjecatelja/disciplinu koja VEĆ ima rezultat, s drugom vrijednosti bodova | Ne stvara duplikat — postojeći rezultat se ažurira (provjeri u "Editiraj rezultat" da postoji samo 1 zapis za tu kombinaciju) | ☐ |
-| C13 | Klikni "Odustani" | Dialog se zatvara, ništa se ne sprema | ☐ |
-| C14 | Promijeni odabranog natjecatelja NAKON što je disciplina već odabrana | `disciplineId` se resetira na `null` (mora se ponovno odabrati disciplina) | ☐ |
-| C15 | Upiši bodove za natjecatelja BEZ odabrane discipline | Gumb "Spremi rezultat" ostaje disabled dok disciplina nije odabrana | ☐ |
+| C3 | Klikni u polje "Filtriraj po timu" i upiši dio naziva tima | Padajući izbornik (autocomplete) prikazuje timove čiji naziv odgovara upisanom tekstu (case-insensitive) | ☐ |
+| C4 | Odaberi tim iz padajućeg izbornika "Filtriraj po timu" | Pretraga natjecatelja se automatski ograničava na članove tog tima; u polju se pojavljuje gumb "Očisti" (X ikona) umjesto ikone grupe | ☐ |
+| C5 | Klikni gumb "Očisti" (X) nakon C4 | Filter po timu se uklanja, polje se prazni, prikazuju se svi natjecatelji | ☐ |
+| C6 | Odaberi natjecatelja iz `TEST_EkipaM1` (M) | Padajući izbornik "Disciplina" se otključava i prikazuje samo M discipline: TRAP, ZRAČNA PUŠKA, PRAČKA | ☐ |
+| C7 | Odaberi natjecatelja iz `TEST_EkipaŽ1` (Ž) | Disciplina prikazuje samo: ZRAČNA PUŠKA, PRAČKA, PIKADO | ☐ |
+| C8 | Odaberi disciplinu TRAP, upiši bodove `5` | Hint "Maksimalno bodova: 5 (TRAP)" prikazan, nema greške, gumb "Spremi rezultat" enabled | ☐ |
+| C9 | Odaberi TRAP, upiši `6` (> maxPoints) | Prikazuje se `mat-error`: "Maksimalan broj bodova za ovu disciplinu je 5"; gumb "Spremi rezultat" je disabled | ☐ |
+| C10 | Odaberi TRAP, upiši `-1` | Error "Bodovi ne mogu biti negativni"; gumb disabled | ☐ |
+| C11 | Odaberi ZRAČNA PUŠKA, upiši `50` | Prihvaćeno (na granici maxPoints), nema greške | ☐ |
+| C12 | Odaberi PIKADO (za natjecateljicu), upiši `300` | Prihvaćeno (max), doprinosi točno 100,00 bodova ukupno (provjeri u tablici poretka) | ☐ |
+| C13 | Spremi rezultat za natjecatelja/disciplinu koja VEĆ ima rezultat, s drugom vrijednosti bodova | Ne stvara duplikat — postojeći rezultat se ažurira (provjeri u "Editiraj rezultat" da postoji samo 1 zapis za tu kombinaciju) | ☐ |
+| C14 | Klikni "Odustani" | Dialog se zatvara, ništa se ne sprema | ☐ |
+| C15 | Promijeni odabranog natjecatelja NAKON što je disciplina već odabrana | `disciplineId` se resetira na `null` (mora se ponovno odabrati disciplina) | ☐ |
+| C16 | Upiši bodove za natjecatelja BEZ odabrane discipline | Gumb "Spremi rezultat" ostaje disabled dok disciplina nije odabrana | ☐ |
 
 ## D. Uređivanje rezultata — "Editiraj rezultat"
 
@@ -215,7 +216,7 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 |---|---|---|---|---|
 | A — Dodaj tim | 10 | | | |
 | B — Editiraj tim | 10 | | | |
-| C — Unos rezultata | 15 | | | |
+| C — Unos rezultata | 16 | | | |
 | D — Editiraj rezultat | 9 | | | |
 | E — Formula | 8 | | | |
 | F — Poredak/prikaz | 11 | | | |
@@ -224,7 +225,7 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 | I — Real-time/konkurentnost | 4 | | | |
 | J — Regresija refaktoringa | 4 | | | |
 | K — Javna `/pracenje` stranica | 12 | | | |
-| **UKUPNO** | **104** | | | |
+| **UKUPNO** | **105** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
