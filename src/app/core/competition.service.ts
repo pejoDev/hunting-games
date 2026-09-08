@@ -78,10 +78,10 @@ export class CompetitionService {
       ? s.results.filter(r => !removedMemberIds.includes(r.competitorId))
       : s.results;
 
-    await Promise.all([
-      this.dbGateway.setCollection('teams', updatedTeams),
-      ...(removedMemberIds.length > 0 ? [this.dbGateway.setCollection('results', updatedResults)] : [])
-    ]);
+    await this.dbGateway.setCollections({
+      teams: updatedTeams,
+      ...(removedMemberIds.length > 0 ? { results: updatedResults } : {})
+    });
     return true;
   }
 
@@ -170,10 +170,7 @@ export class CompetitionService {
     // Obriši sve rezultate natjecatelja iz ovog tima
     const updatedResults = s.results.filter(r => !memberIds.includes(r.competitorId));
 
-    await Promise.all([
-      this.dbGateway.setCollection('teams', updatedTeams),
-      this.dbGateway.setCollection('results', updatedResults)
-    ]);
+    await this.dbGateway.setCollections({ teams: updatedTeams, results: updatedResults });
   }
 
   // Brisanje natjecatelja iz tima
@@ -189,10 +186,7 @@ export class CompetitionService {
     // Također obriši sve rezultate ovog natjecatelja
     const updatedResults = s.results.filter(r => r.competitorId !== competitorId);
 
-    await Promise.all([
-      this.dbGateway.setCollection('teams', updatedTeams),
-      this.dbGateway.setCollection('results', updatedResults)
-    ]);
+    await this.dbGateway.setCollections({ teams: updatedTeams, results: updatedResults });
   }
 
   // Brisanje rezultata
@@ -244,10 +238,7 @@ export class CompetitionService {
     // Također obriši sve rezultate u ovoj disciplini
     const updatedResults = s.results.filter(r => r.disciplineId !== disciplineId);
 
-    await Promise.all([
-      this.dbGateway.setCollection('disciplines', updatedDisciplines),
-      this.dbGateway.setCollection('results', updatedResults)
-    ]);
+    await this.dbGateway.setCollections({ disciplines: updatedDisciplines, results: updatedResults });
   }
 
   // Dohvaćanje svih rezultata

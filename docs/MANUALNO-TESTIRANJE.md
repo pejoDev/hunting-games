@@ -194,7 +194,8 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | I1 | Otvori aplikaciju u 2 taba (ili 2 različita browsera) | Oba prikazuju isto stanje | ☐ |
 | I2 | U tabu 1 dodaj rezultat, ne radi ništa u tabu 2 | Tab 2 se automatski ažurira BEZ manualnog refresha (Firebase `onValue` real-time) u par sekundi | ☐ |
 | I3 | U tabu 1 obriši tim, gledaj tab 2 | Tim i njegovi rezultati nestaju iz tab 2 prikaza automatski | ☐ |
-| I4 | ⚠️ Simuliraj konkurentnu izmjenu: u tabu 1 otvori "Unos rezultata" i NE spremaj još; u tabu 2 dodaj rezultat za DRUGOG natjecatelja i spremi; zatim u tabu 1 spremi svoj rezultat | Provjeri je li rezultat iz tab 2 sačuvan nakon što tab 1 spremi svoje — servis piše **cijelu** `results` kolekciju (`set()`), pa ako tab 1 ima zastarjelu lokalnu kopiju state-a u trenutku spremanja, teoretski može prepisati/izgubiti izmjenu iz tab 2. Ovo je poznati arhitekturalni rizik (nema per-record write) — zabilježi stvarno ponašanje, posebno važno tijekom natjecanja kad više ljudi može istovremeno unositi rezultate. | ☐ |
+| I4 | ⚠️ Simuliraj konkurentnu izmjenu: u tabu 1 otvori "Unos rezultata" i NE spremaj još; u tabu 2 dodaj rezultat za DRUGOG natjecatelja i spremi; zatim u tabu 1 spremi svoj rezultat | Provjeri je li rezultat iz tab 2 sačuvan nakon što tab 1 spremi svoje — servis piše **cijelu** `results` kolekciju (`set()`), pa ako tab 1 ima zastarjelu lokalnu kopiju state-a u trenutku spremanja, teoretski može prepisati/izgubiti izmjenu iz tab 2. Ovo je i dalje otvoren arhitekturalni rizik (nema per-record write, nema locking-a) — zabilježi stvarno ponašanje, posebno važno tijekom natjecanja kad više ljudi može istovremeno unositi rezultate. **Napomena:** ovo je RAZLIČIT rizik od I5 ispod — I4 je o dva klijenta koja pišu u ISTU kolekciju, I5 je o jednom klijentu čiji zapis u DVIJE kolekcije unutar iste mutacije nije atoman. | ☐ |
+| I5 | ✅ (fiksano) Prekini mrežnu vezu (DevTools → Network → Offline) NAKON što klikneš "Obriši tim"/"Editiraj tim" (uklanjanje člana)/"Obriši disciplinu", ali provjeri da se zahtjev stigao poslati kao JEDAN atomarni multi-path `update()` poziv, ne dva odvojena `set()` poziva | Prije 2026-09-08 su `deleteTeam`/`updateTeam`/`removeCompetitorFromTeam`/`deleteDiscipline` slali DVA odvojena `set()` poziva (`Promise.all`) za pogođene kolekcije (npr. `teams` + `results`) — prekid mreže između njih mogao je ostaviti natjecatelja bez tima ALI s rezultatima koji i dalje postoje (točno ovaj scenarij se dogodio i proizveo "ghost" natjecatelja s osirotjelim rezultatima, otkriveno kroz `ResultsVerificationService`, vidi H.V). Popravljeno u `RealtimeDbGateway.setCollections()` — sad je to JEDAN atomaran `update(ref(db), {...})` poziv, pa ili se promijene OBJE kolekcije ili NIJEDNA. Provjeri u Network tabu da postoji samo JEDAN PATCH zahtjev prema Firebase-u za ove akcije, ne dva. | ☐ |
 
 ## J. Regresija specifična za refaktoring (max-points / formula)
 
@@ -237,11 +238,11 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 | E — Formula | 8 | | | |
 | F — Poredak/prikaz | 11 | | | |
 | G — Izjednačeni rezultati | 10 | | | |
-| H — PDF izvoz | 11 | | | |
-| I — Real-time/konkurentnost | 4 | | | |
+| H — PDF izvoz | 18 | | | |
+| I — Real-time/konkurentnost | 5 | | | |
 | J — Regresija refaktoringa | 4 | | | |
 | K — Javna `/pracenje` stranica | 12 | | | |
-| **UKUPNO** | **105** | | | |
+| **UKUPNO** | **113** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
