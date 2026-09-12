@@ -101,7 +101,7 @@ export class PdfReportService {
       lines.push('    - Muškarci: TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20');
     }
     if (category === 'Ž' || !category) {
-      lines.push('    - Žene: ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33');
+      lines.push('    - Žene: ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,3333... (točno 100/300, ne zaokruženo)');
     }
     if (includeTeamSumNote) {
       lines.push('    Za ekipni poredak prvo se zbroje rezultati svih članova ekipe u svakoj disciplini, a zatim se na taj zbroj primijeni gornja formula.');
@@ -191,7 +191,7 @@ export class PdfReportService {
       doc.setTextColor(60);
       const formula = category === 'M'
         ? 'Formula bodovanja: TRAP × 20 + ZRACNA PUSKA × 2 + PRACKA × 20'
-        : 'Formula bodovanja: ZRACNA PUSKA × 2 + PRACKA × 20 + PIKADO × 0,33';
+        : 'Formula bodovanja: ZRACNA PUSKA × 2 + PRACKA × 20 + PIKADO × 0,3333... (100/300, ne zaokruzeno)';
       doc.text(this.normalizeText(formula), 105, textY, { align: 'center' });
       textY += 10;
     }
@@ -304,7 +304,7 @@ export class PdfReportService {
       doc.setTextColor(60);
       const formula = category === 'M'
         ? 'Formula bodovanja (zbroj svih članova): TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20'
-        : 'Formula bodovanja (zbroj svih članova): ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33';
+        : 'Formula bodovanja (zbroj svih članova): ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,3333... (100/300, ne zaokruženo)';
       doc.text(this.normalizeText(formula), 105, textY, { align: 'center' });
       textY += 10;
     }
