@@ -535,9 +535,12 @@ export class PdfReportService {
   }
 
   /**
-   * Jedan "startni list" (prazan zapisnik za popunjavanje bodova na licu mjesta) po ekipi -
-   * naziv ekipe i popis natjecatelja su unaprijed ispisani, a stupci s bodovima ostaju prazni
-   * jer ih suci ručno ispisuju na natjecanju. Format prati postojeće papirnate obrasce, vidi
+   * Jedan "startni list" (prazan zapisnik za popunjavanje bodova na licu mjesta) po ekipi PO
+   * disciplini - zaglavlje (naziv natjecanja + naziv ekipe) se ponavlja ispred SVAKE tablice, ne
+   * samo jednom na vrhu, jer se list reže škarama po disciplinama i svaki dio nosi sudac na svoju
+   * poziciju - mora odmah vidjeti koja mu je ekipa stigla bez da gleda ostatak lista. Naziv ekipe
+   * i popis natjecatelja su unaprijed ispisani, a stupci s bodovima ostaju prazni jer ih suci
+   * ručno ispisuju na natjecanju. Format prati postojeće papirnate obrasce, vidi
    * docs/Startni list za udruge muški.pdf i docs/Startni list za udruge ženske.pdf.
    */
   exportStartingListsToPdf(teams: Team[], disciplines: Discipline[], category: 'M' | 'Ž'): void {
@@ -546,44 +549,48 @@ export class PdfReportService {
     const doc = new jsPDF();
     const sortedTeams = [...teams].sort((a, b) => a.name.localeCompare(b.name, 'hr'));
     const shotColumnsForCategory = this.STARTING_LIST_SHOT_COLUMNS[category] || {};
+    let isFirstBlock = true;
+    let y = 15;
 
-    sortedTeams.forEach((team, index) => {
-      if (index > 0) {
-        doc.addPage();
-      }
-
-      let y = 15;
-      doc.setFontSize(12);
-      doc.setTextColor(40);
-      doc.text(this.normalizeText('LD PATKA Donji Vidovec-Sveta Marija'), 105, y, { align: 'center' });
-      y += 10;
-
-      autoTable(doc, {
-        startY: y,
-        theme: 'grid',
-        body: [[
-          this.normalizeText('MEMORIJAL\nDRAGUTIN CENKO'),
-          `${this.normalizeText('Naziv ekipe / UDRUGE')}\n\n${this.normalizeText(team.name)}`,
-          `${this.normalizeText('Iz mjesta')}\n\n`
-        ]],
-        styles: { fontSize: 10, cellPadding: 4, halign: 'center', valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
-        columnStyles: {
-          0: { cellWidth: 42, fillColor: [235, 235, 235], fontStyle: 'bold' },
-          1: { cellWidth: 85, fontStyle: 'bold' },
-          2: { cellWidth: 50 }
-        }
-      });
-      y = (doc as any).lastAutoTable.finalY + 12;
-
+    sortedTeams.forEach((team) => {
       for (const discipline of disciplines) {
         const shotColumns = shotColumnsForCategory[discipline.name] || 5;
 
-        // Svaka tablica treba otprilike 45mm (naslov + zaglavlje + 3 retka + sveukupno + potpisi) -
-        // ako ne stane na trenutnu stranicu, nastavi na sljedećoj umjesto da je odsječe.
-        if (y > doc.internal.pageSize.height - 50) {
-          doc.addPage();
-          y = 20;
+        // Svaki blok (zaglavlje + tablica + potpisi) treba otprilike 90mm - ako ne stane na
+        // trenutnu stranicu, nastavi na sljedećoj umjesto da ga prereže na pola.
+        if (!isFirstBlock) {
+          if (y > doc.internal.pageSize.height - 90) {
+            doc.addPage();
+            y = 15;
+          } else {
+            // Isprekidana linija kao vodilja za rezanje škarama između dva bloka na istoj stranici.
+            doc.setLineDashPattern([1, 1], 0);
+            doc.line(10, y, doc.internal.pageSize.width - 10, y);
+            doc.setLineDashPattern([], 0);
+            y += 8;
+          }
         }
+        isFirstBlock = false;
+
+        doc.setFontSize(12);
+        doc.setTextColor(40);
+        doc.text(this.normalizeText('LD PATKA Donji Vidovec-Sveta Marija'), 105, y, { align: 'center' });
+        y += 10;
+
+        autoTable(doc, {
+          startY: y,
+          theme: 'grid',
+          body: [[
+            this.normalizeText('MEMORIJAL\nDRAGUTIN CENKO'),
+            `${this.normalizeText('Naziv ekipe / UDRUGE')}\n\n${this.normalizeText(team.name)}`
+          ]],
+          styles: { fontSize: 10, cellPadding: 4, halign: 'center', valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
+          columnStyles: {
+            0: { cellWidth: 42, fillColor: [235, 235, 235], fontStyle: 'bold' },
+            1: { cellWidth: 135, fontStyle: 'bold' }
+          }
+        });
+        y = (doc as any).lastAutoTable.finalY + 12;
 
         doc.setFontSize(12);
         doc.setTextColor(40);

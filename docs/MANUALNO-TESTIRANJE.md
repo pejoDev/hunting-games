@@ -227,23 +227,25 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 
 ## L. Startni listovi (PDF)
 
-Dva nova gumba u kontrolnoj traci ("Startni listovi (M)" / "Startni listovi (Ž)") generiraju PDF s praznim "zapisnicima" po ekipi — jedna stranica po ekipi, s nazivom ekipe i popisom natjecatelja unaprijed ispisanim, ali stupci s bodovima ostaju prazni jer ih suci ručno ispisuju na natjecanju (na tri gađanja/discipline: za muškarce TRAP/ZRAČNA PUŠKA/PRAČKA, za žene ZRAČNA PUŠKA/PRAČKA/PIKADO). Format prati postojeći papirnati obrazac, vidi `docs/Startni list za udruge muški.pdf` i `docs/Startni list za udruge ženske.pdf`. Implementacija: `PdfReportService.exportStartingListsToPdf()`, ožičeno kroz `OverviewComponent.exportStartingLists()`.
+Dva nova gumba u kontrolnoj traci ("Startni listovi (M)" / "Startni listovi (Ž)") generiraju PDF s praznim "zapisnicima" po ekipi PO disciplini — zaglavlje (naziv natjecanja + naziv ekipe) se ponavlja ISPRED SVAKE tablice (ne samo jednom po ekipi), jer se list reže škarama po disciplinama i svaki dio nosi sudac na svoju poziciju — mora odmah vidjeti koja mu je ekipa stigla. Između blokova na istoj stranici je isprekidana linija kao vodilja za rezanje. Naziv ekipe i popis natjecatelja su unaprijed ispisani, ali stupci s bodovima ostaju prazni jer ih suci ručno ispisuju na natjecanju (na tri gađanja/discipline: za muškarce TRAP/ZRAČNA PUŠKA/PRAČKA, za žene ZRAČNA PUŠKA/PRAČKA/PIKADO). Format prati postojeći papirnati obrazac, vidi `docs/Startni list za udruge muški.pdf` i `docs/Startni list za udruge ženske.pdf`. Implementacija: `PdfReportService.exportStartingListsToPdf()`, ožičeno kroz `OverviewComponent.exportStartingLists()`.
 
 | # | Korak | Očekivano | Rezultat |
 |---|-------|-----------|----------|
-| L1 | Kreiraj `TEST_EkipaM1` (M, 3 člana) i `TEST_EkipaŽ1` (Ž, 3 člana) (vidi sekciju A), klikni "Startni listovi (M)" | Preuzima se PDF `startni-listovi-muskarci-[datum].pdf`; jedna stranica po M ekipi | ☐ |
-| L2 | Otvori PDF iz L1 za `TEST_EkipaM1` | Zaglavlje "LD PATKA Donji Vidovec-Sveta Marija", okvir "MEMORIJAL DRAGUTIN CENKO" / naziv ekipe (`TEST_EkipaM1`) / "Iz mjesta" (prazno, za ručni upis) | ☐ |
-| L3 | Provjeri broj i redoslijed "ZAPISNIK" tablica na stranici ekipe (M) | Točno 3 tablice, redom TRAP (stupci 1-5), ZRAČNA PUŠKA (stupci 1-10), PRAČKA (stupci 1-5) — brojevi stupaca odgovaraju papirnatom obrascu, NE `discipline.maxPoints` | ☐ |
-| L4 | Provjeri retke unutar svake tablice | Točno 3 retka (R.br. 1/2/3), svaki s imenom i prezimenom jednog člana ekipe (istim redoslijedom za sve 3 discipline), treći stupac ponavlja naziv discipline; svi stupci s brojevima gađanja i "Ukupno" su prazni | ☐ |
-| L5 | Provjeri dno svake tablice i ispod nje | Redak "Sveukupno" (prazna ćelija za ukupan zbroj), zatim "Sudac:" i "Za ekipu: ________________________" za ručni potpis | ☐ |
-| L6 | Klikni "Startni listovi (Ž)" | PDF `startni-listovi-zene-[datum].pdf`; tablice redom ZRAČNA PUŠKA, PRAČKA, PIKADO, sve sa stupcima 1-5 (za razliku od M gdje ZRAČNA PUŠKA ima 10 stupaca) | ☐ |
-| L7 | Testiraj ekipu s manje od 3 člana (npr. 1 član) | I dalje se prikazuju točno 3 retka po tablici — retci za nepostojeće članove su prazni (ime i prezime), spremni da ih sudac ručno popuni na licu mjesta | ☐ |
-| L8 | Testiraj s 2+ ekipe iste kategorije | Svaka ekipa dobiva svoju stranicu (page break između ekipa), footer "Stranica X od Y" na svakoj stranici | ☐ |
-| L9 | Filtriraj/obriši sve M ekipe (ili gledaj kategoriju bez timova) | Gumb "Startni listovi (M)" je disabled (`hasTeamsForCategory('M')` === false); Ž gumb ostaje aktivan ako Ž ekipe postoje, i obrnuto | ☐ |
-| L10 | Provjeri da `H.V` verifikacija (ista kao za ostale PDF exporte) i dalje radi za ove gumbe | Ako postoje strukturne nepravilnosti (npr. dupli ID-evi), prikazuje se isti dijalog upozorenja prije preuzimanja | ☐ |
-| L11 | Provjeri hrvatske dijakritike u imenima/nazivu ekipe/disciplina u PDF-u | Dijakritici su stripani (`normalizeText()`), isto poznato/namjerno ponašanje kao u ostatku PDF izvoza (vidi H9) | ☐ |
-| L12 | Usporedi generirani PDF vizualno s `docs/Startni list za udruge muški.pdf` / `.../ženske.pdf` | Struktura (zaglavlje, broj tablica, broj stupaca po disciplini, "Sveukupno"/"Sudac"/"Za ekipu" redci) odgovara predlošku; jedina razlika je što je naziv ekipe i popis natjecatelja već popunjen | ☐ |
-| L13 | Na `/pracenje` (javna, neprijavljena stranica) | Gumbi "Startni listovi (M)" / "(Ž)" NISU vidljivi (unutar `pdf-controls`, sakriveno za `readOnly`, isto kao ostali PDF gumbi — vidi K4) | ☐ |
+| L1 | Kreiraj `TEST_EkipaM1` (M, 3 člana) i `TEST_EkipaŽ1` (Ž, 3 člana) (vidi sekciju A), klikni "Startni listovi (M)" | Preuzima se PDF `startni-listovi-muskarci-[datum].pdf` | ☐ |
+| L2 | Otvori PDF iz L1, provjeri PRVI blok (TRAP) za `TEST_EkipaM1` | Zaglavlje "LD PATKA Donji Vidovec-Sveta Marija" + okvir "MEMORIJAL DRAGUTIN CENKO" / naziv ekipe (`TEST_EkipaM1`) neposredno IZNAD "ZAPISNIK" tablice — nema polja "Iz mjesta" (uklonjeno, nepotrebno) | ☐ |
+| L3 | Provjeri DRUGI i TREĆI blok (ZRAČNA PUŠKA, PRAČKA) za istu ekipu | Zaglavlje s istim nazivom ekipe se PONAVLJA ispred svake od te 3 tablice — svaki blok je samostalan, ne oslanja se na zaglavlje prethodnog bloka | ☐ |
+| L4 | Provjeri broj i redoslijed tablica za ekipu (M) | Točno 3 bloka/tablice, redom TRAP (stupci 1-5), ZRAČNA PUŠKA (stupci 1-10), PRAČKA (stupci 1-5) — brojevi stupaca odgovaraju papirnatom obrascu, NE `discipline.maxPoints` | ☐ |
+| L5 | Provjeri isprekidanu liniju između dva bloka koja stanu na istu stranicu | Vidljiva isprekidana (dashed) horizontalna linija preko cijele širine stranice, kao vodilja za rezanje škarama | ☐ |
+| L6 | Provjeri retke unutar svake tablice | Točno 3 retka (R.br. 1/2/3), svaki s imenom i prezimenom jednog člana ekipe (istim redoslijedom za sve 3 discipline), treći stupac ponavlja naziv discipline; svi stupci s brojevima gađanja i "Ukupno" su prazni | ☐ |
+| L7 | Provjeri dno svake tablice | Redak "Sveukupno" (prazna ćelija za ukupan zbroj), zatim "Sudac:" i "Za ekipu: ________________________" za ručni potpis, ispod čega slijedi (ili isprekidana linija, ili novi blok/stranica) | ☐ |
+| L8 | Klikni "Startni listovi (Ž)" | PDF `startni-listovi-zene-[datum].pdf`; blokovi redom ZRAČNA PUŠKA, PRAČKA, PIKADO, sve sa stupcima 1-5 (za razliku od M gdje ZRAČNA PUŠKA ima 10 stupaca) | ☐ |
+| L9 | Testiraj ekipu s manje od 3 člana (npr. 1 član) | I dalje se prikazuju točno 3 retka po tablici — retci za nepostojeće članove su prazni (ime i prezime), spremni da ih sudac ručno popuni na licu mjesta | ☐ |
+| L10 | Testiraj s 2+ ekipe iste kategorije | Svih 3×N blokova (N=broj ekipa) ide redom (sve 3 discipline prve ekipe, pa sve 3 druge ekipe...), s automatskim prijelomom stranice kad blok ne stane (nikad prerezan na pola); footer "Stranica X od Y" na svakoj stranici | ☐ |
+| L11 | Filtriraj/obriši sve M ekipe (ili gledaj kategoriju bez timova) | Gumb "Startni listovi (M)" je disabled (`hasTeamsForCategory('M')` === false); Ž gumb ostaje aktivan ako Ž ekipe postoje, i obrnuto | ☐ |
+| L12 | Provjeri da `H.V` verifikacija (ista kao za ostale PDF exporte) i dalje radi za ove gumbe | Ako postoje strukturne nepravilnosti (npr. dupli ID-evi), prikazuje se isti dijalog upozorenja prije preuzimanja | ☐ |
+| L13 | Provjeri hrvatske dijakritike u imenima/nazivu ekipe/disciplina u PDF-u | Dijakritici su stripani (`normalizeText()`), isto poznato/namjerno ponašanje kao u ostatku PDF izvoza (vidi H9) | ☐ |
+| L14 | Isprintaj (ili barem pogledaj u 100% zoomu) i zamisli rezanje škarama duž isprekidanih linija | Svaki izrezani komad sadrži POTPUNO zaglavlje (natjecanje + ekipa) + tu jednu tablicu + potpise — sudac na poziciji ne treba ništa iz ostatka lista da zna koja mu je ekipa stigla | ☐ |
+| L15 | Na `/pracenje` (javna, neprijavljena stranica) | Gumbi "Startni listovi (M)" / "(Ž)" NISU vidljivi (unutar `pdf-controls`, sakriveno za `readOnly`, isto kao ostali PDF gumbi — vidi K4) | ☐ |
 
 ---
 
@@ -262,8 +264,8 @@ Dva nova gumba u kontrolnoj traci ("Startni listovi (M)" / "Startni listovi (Ž)
 | I — Real-time/konkurentnost | 5 | | | |
 | J — Regresija refaktoringa | 4 | | | |
 | K — Javna `/pracenje` stranica | 12 | | | |
-| L — Startni listovi (PDF) | 13 | | | |
-| **UKUPNO** | **126** | | | |
+| L — Startni listovi (PDF) | 15 | | | |
+| **UKUPNO** | **128** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
