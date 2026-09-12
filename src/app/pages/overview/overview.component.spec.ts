@@ -225,6 +225,26 @@ describe('OverviewComponent', () => {
     });
   });
 
+  describe('finishCompetition', () => {
+    it('should reset the competition when the user confirms', () => {
+      spyOn(window, 'confirm').and.returnValue(true);
+      spyOn(competitionService, 'resetCompetition');
+
+      component.finishCompetition();
+
+      expect(competitionService.resetCompetition).toHaveBeenCalled();
+    });
+
+    it('should not reset the competition when the user cancels', () => {
+      spyOn(window, 'confirm').and.returnValue(false);
+      spyOn(competitionService, 'resetCompetition');
+
+      component.finishCompetition();
+
+      expect(competitionService.resetCompetition).not.toHaveBeenCalled();
+    });
+  });
+
   describe('hasTeamsForCategory', () => {
     it('should be true when at least one team exists for that category', () => {
       expect(component.hasTeamsForCategory('M')).toBe(true);

@@ -231,6 +231,26 @@ export class OverviewComponent implements OnInit {
     });
   }
 
+  // "Gotovo natjecanje" - briše sve timove, natjecatelje i rezultate radi pripreme za sljedeće
+  // natjecanje, ali zadržava discipline i njihovo bodovanje. Nepovratna radnja pa traži potvrdu.
+  finishCompetition() {
+    const teamCount = this.competitionService.getTeams().length;
+    const competitorCount = this.competitionService.getAllCompetitors().length;
+    const resultCount = this.competitionService.getResults().length;
+
+    const confirmReset = confirm(
+      `Jeste li sigurni da želite označiti natjecanje kao gotovo?\n\n` +
+      `Ovo će trajno obrisati ${teamCount} timova, ${competitorCount} natjecatelja i ${resultCount} rezultata. ` +
+      `Discipline i njihovo bodovanje ostaju sačuvani za sljedeće natjecanje.\n\n` +
+      `Ova radnja se ne može poništiti.`
+    );
+
+    if (confirmReset) {
+      this.competitionService.resetCompetition();
+      this.snackBar.open('Natjecanje je završeno. Podaci su obrisani, aplikacija je spremna za sljedeće natjecanje.', undefined, { duration: 5000 });
+    }
+  }
+
   hasData(): boolean {
     if (this.viewMode === 'individual') {
       return this.competitorRows.length > 0;

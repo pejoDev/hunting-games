@@ -23,7 +23,7 @@ Svaki TC ima: korake, očekivani rezultat i prazan stupac za rezultat (✅/❌) 
 | 0.3 | Otvori Console (DevTools) | Nema crvenih grešaka pri učitavanju | ☐ |
 | 0.4 | Provjeri Firebase Realtime Database konzolu → grana `disciplines` | Postoji 6 zapisa: TRAP (M), ZRAČNA PUŠKA (M), PRAČKA (M), ZRAČNA PUŠKA (Ž), PRAČKA (Ž), PIKADO (Ž) — svaki sa poljem `maxPoints` (redom: 5, 50, 5, 50, 5, 300). Nema UI-a za upravljanje disciplinama — ovo se provjerava direktno u bazi. | ☐ |
 | 0.5 | (Opcionalno) `npm run build` | Build prolazi bez grešaka (samo postojeći CommonJS warninzi su OK) | ☐ |
-| 0.6 | `npx ng test --watch=false --browsers=ChromeHeadless` | Svi testovi prolaze (178/178 u trenutku pisanja ovog dokumenta) | ☐ |
+| 0.6 | `npx ng test --watch=false --browsers=ChromeHeadless` | Svi testovi prolaze (222/222 u trenutku pisanja ovog dokumenta) | ☐ |
 
 Formula podsjetnik (izračunava se dinamički iz `maxPoints`, koeficijent = `100 / maxPoints`):
 
@@ -247,6 +247,30 @@ Dva nova gumba u kontrolnoj traci ("Startni listovi (M)" / "Startni listovi (Ž)
 | L14 | Isprintaj (ili barem pogledaj u 100% zoomu) i zamisli rezanje škarama duž isprekidanih linija | Svaki izrezani komad sadrži POTPUNO zaglavlje (natjecanje + ekipa) + tu jednu tablicu + potpise — sudac na poziciji ne treba ništa iz ostatka lista da zna koja mu je ekipa stigla | ☐ |
 | L15 | Na `/pracenje` (javna, neprijavljena stranica) | Gumbi "Startni listovi (M)" / "(Ž)" NISU vidljivi (unutar `pdf-controls`, sakriveno za `readOnly`, isto kao ostali PDF gumbi — vidi K4) | ☐ |
 
+## M. "Gotovo natjecanje" — reset za sljedeće natjecanje
+
+Crveni gumb u kontrolnoj traci (`OverviewComponent.finishCompetition()`, servisna metoda `CompetitionService.resetCompetition()`) briše SVE timove, natjecatelje i rezultate iz baze — priprema aplikaciju za sljedeće natjecanje s novim natjecateljima po ISTIM pravilima. Discipline i njihov `maxPoints` (bodovanje) se NE diraju, jer su pravila natjecanja (formula, max bodovi po disciplini) nepromijenjena iz sezone u sezonu. Piše `teams: []` i `results: []` atomarno u jednom `setCollections()` pozivu (isti obrazac kao `deleteTeam`/`deleteDiscipline`), tako da prekid mreže usred pisanja ne može ostaviti djelomično stanje.
+
+> 🛑 **OVO JE NAJDESTRUKTIVNIJA AKCIJA U APLIKACIJI — briše SVE natjecatelje, timove i rezultate odjednom, bez mogućnosti undo.** Ne testiraj M1-M5 na produkcijskoj bazi dok natjecanje stvarno traje ili dok su u bazi pravi (ne `TEST_`) podaci iz tekuće/nedavne sezone koje još netko treba (npr. za naknadni PDF izvoz). Testiraj:
+> - odmah nakon što je službeni PDF izvještaj za sezonu već preuzet i arhiviran, ILI
+> - koristeći isključivo `TEST_` timove/rezultate koje si sam unio radi ovog testiranja, ILI
+> - odmah NAKON izrade backupa (repo već sadrži `backup/hunting-games-2025.json`, ručno izvezen JSON snimak baze — izvezi svjež snimak iz Firebase konzole (Realtime Database → izbornik → Export JSON) prije nego pokreneš M3/M4 ako baza sadrži išta vrijedno).
+>
+> Ako slučajno pokreneš reset na stvarnim podacima bez backupa, podaci se NE mogu vratiti kroz UI.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| M1 | Provjeri izgled gumba "Gotovo natjecanje" u kontrolnoj traci na `/` (admin, prijavljen) | Gumb je jasno CRVEN (ne standardna Material "warn" nijansa kao ostali gumbi poput "Unos rezultata") i vizualno odvojen (poravnat na desnu stranu trake) da ga nije lako slučajno kliknuti umjesto drugih akcija; ima ikonu kante za smeće ("delete_forever") i tooltip s objašnjenjem što radi | ☐ |
+| M2 | S nekoliko `TEST_` timova/rezultata u bazi, klikni "Gotovo natjecanje" | Prikazuje se browser `confirm()` dijalog koji navodi TOČAN broj timova, natjecatelja i rezultata koji će biti obrisani, spominje da discipline/bodovanje ostaju sačuvani, i upozorava da je radnja nepovratna | ☐ |
+| M3 | U confirm dijalogu klikni "Cancel/Odustani" | Ništa se ne briše — timovi, natjecatelji i rezultati ostaju identični kao prije klika; nema poziva prema Firebase-u (provjeri Network tab — nema PATCH/PUT zahtjeva) | ☐ |
+| M4 | Ponovi M2 i potvrdi (OK) | Svi timovi i rezultati nestaju iz oba poretka (pojedinačni i ekipni) ODMAH, prikazuje se empty state ("Nema dostupnih rezultata/timova za prikaz") u oba prikaza; prikazuje se snackbar s porukom da je natjecanje završeno i da je aplikacija spremna za sljedeće | ☐ |
+| M5 | Nakon M4, provjeri Firebase Realtime Database konzolu izravno | Grane `teams` i `results` su prazne (`[]`/`null`); grana `disciplines` je NEPROMIJENJENA — svih 6 zapisa i njihove `maxPoints` vrijednosti (5, 50, 5, 50, 5, 300) su i dalje prisutne, identične kao prije resetiranja (vidi 0.4) | ☐ |
+| M6 | Nakon M4, klikni "Dodaj tim" i kreiraj novi tim (npr. `TEST_SljedecaSezona`) s članom, pa mu kroz "Unos rezultata" upiši rezultat u postojećoj disciplini | Tim se dodaje s id-em 1 (brojanje ID-eva kreće ispočetka jer je `teams` prazan), rezultat se ispravno bodovnjuje po ISTOJ formuli/`maxPoints` kao i prije reseta (npr. TRAP=5 i dalje daje točno 100,00) — potvrđuje da je aplikacija potpuno funkcionalna "iz čista" odmah nakon reseta, bez potrebe za ručnim ponovnim unosom disciplina | ☐ |
+| M7 | Provjeri "Editiraj tim" i "Editiraj rezultat" padajuće izbornike odmah nakon M4 (prije M6) | Oba su prazna (nema timova/rezultata za odabir) — ne bacaju grešku u konzoli | ☐ |
+| M8 | Otvori `/pracenje` (javna, neprijavljena stranica) | Gumb "Gotovo natjecanje" NIJE vidljiv (unutar bloka koji se sakriva za `readOnly`, isto kao ostale akcije za izmjenu — vidi K3) | ☐ |
+| M9 | Real-time provjera: otvori admin `/` u tabu 1 i `/pracenje` u tabu 2 (ili incognito), u tabu 1 izvrši M4 | Tab 2 se automatski isprazni (poredak nestaje, prikazuje empty state) BEZ ručnog refresha, u par sekundi (Firebase `onValue` real-time) | ☐ |
+| M10 | Pokušaj klika na gumb dva puta brzo zaredom (prije nego stigneš odgovoriti na prvi confirm) | Drugi `confirm()` se ne pojavljuje dok je prvi otvoren (browser dialog je blokirajući) — nema mogućnosti pokrenuti dvije istovremene `resetCompetition()` mutacije | ☐ |
+
 ---
 
 ## Sažetak / sign-off
@@ -265,7 +289,8 @@ Dva nova gumba u kontrolnoj traci ("Startni listovi (M)" / "Startni listovi (Ž)
 | J — Regresija refaktoringa | 4 | | | |
 | K — Javna `/pracenje` stranica | 12 | | | |
 | L — Startni listovi (PDF) | 15 | | | |
-| **UKUPNO** | **128** | | | |
+| M — Gotovo natjecanje (reset) | 10 | | | |
+| **UKUPNO** | **138** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
