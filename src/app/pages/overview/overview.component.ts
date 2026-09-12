@@ -182,6 +182,19 @@ export class OverviewComponent implements OnInit {
     );
   }
 
+  exportStartingLists(category: 'M' | 'Ž') {
+    const teams = this.competitionService.getTeams().filter(t => t.category === category);
+    const disciplines = this.competitionService.getDisciplinesForCategory(category);
+
+    this.verifyThenExport(() =>
+      this.pdfReportService.exportStartingListsToPdf(teams, disciplines, category)
+    );
+  }
+
+  hasTeamsForCategory(category: 'M' | 'Ž'): boolean {
+    return this.competitionService.getTeams().some(t => t.category === category);
+  }
+
   exportCompleteReport() {
     const category = this.selectedCategory || undefined;
     const individualData = this.competitionService.getCompetitorRankings(category as 'M' | 'Ž');

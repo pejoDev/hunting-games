@@ -1,12 +1,23 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { CompetitorRanking, TeamRanking, Discipline } from './models';
+import { CompetitorRanking, TeamRanking, Discipline, Team } from './models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PdfReportService {
+
+  // Broj gađanja/bacaja po disciplini na papirnatom "startnom listu" (vidi
+  // docs/Startni list za udruge muški.pdf i .../žene.pdf) - ovo je broj STUPACA na obrascu koji
+  // sudac ručno popunjava, NE isto što i discipline.maxPoints (npr. ZRAČNA PUŠKA ima 10 gađanja
+  // za muškarce, ali samo 5 za žene, iako je maxPoints 50 za obje kategorije). Nema polja u
+  // modelu za ovo jer se tiče isključivo izgleda tiskanog obrasca, a ne bodovne formule. Za
+  // nepoznatu disciplinu (nije na popisu) koristi se fallback od 5 stupaca.
+  private readonly STARTING_LIST_SHOT_COLUMNS: { [category: string]: { [disciplineName: string]: number } } = {
+    'M': { 'TRAP': 5, 'ZRAČNA PUŠKA': 10, 'PRAČKA': 5 },
+    'Ž': { 'ZRAČNA PUŠKA': 5, 'PRAČKA': 5, 'PIKADO': 5 }
+  };
 
   /**
    * Normalizes Croatian text by replacing palatals with regular letters
@@ -520,6 +531,118 @@ export class PdfReportService {
 
     // Save the PDF - normalize filename
     const filename = this.normalizeText(`kompletan-izvjestaj${category ? '-' + category : ''}-${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(filename);
+  }
+
+  /**
+   * Jedan "startni list" (prazan zapisnik za popunjavanje bodova na licu mjesta) po ekipi -
+   * naziv ekipe i popis natjecatelja su unaprijed ispisani, a stupci s bodovima ostaju prazni
+   * jer ih suci ručno ispisuju na natjecanju. Format prati postojeće papirnate obrasce, vidi
+   * docs/Startni list za udruge muški.pdf i docs/Startni list za udruge ženske.pdf.
+   */
+  exportStartingListsToPdf(teams: Team[], disciplines: Discipline[], category: 'M' | 'Ž'): void {
+    if (teams.length === 0) return;
+
+    const doc = new jsPDF();
+    const sortedTeams = [...teams].sort((a, b) => a.name.localeCompare(b.name, 'hr'));
+    const shotColumnsForCategory = this.STARTING_LIST_SHOT_COLUMNS[category] || {};
+
+    sortedTeams.forEach((team, index) => {
+      if (index > 0) {
+        doc.addPage();
+      }
+
+      let y = 15;
+      doc.setFontSize(12);
+      doc.setTextColor(40);
+      doc.text(this.normalizeText('LD PATKA Donji Vidovec-Sveta Marija'), 105, y, { align: 'center' });
+      y += 10;
+
+      autoTable(doc, {
+        startY: y,
+        theme: 'grid',
+        body: [[
+          this.normalizeText('MEMORIJAL\nDRAGUTIN CENKO'),
+          `${this.normalizeText('Naziv ekipe / UDRUGE')}\n\n${this.normalizeText(team.name)}`,
+          `${this.normalizeText('Iz mjesta')}\n\n`
+        ]],
+        styles: { fontSize: 10, cellPadding: 4, halign: 'center', valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
+        columnStyles: {
+          0: { cellWidth: 42, fillColor: [235, 235, 235], fontStyle: 'bold' },
+          1: { cellWidth: 85, fontStyle: 'bold' },
+          2: { cellWidth: 50 }
+        }
+      });
+      y = (doc as any).lastAutoTable.finalY + 12;
+
+      for (const discipline of disciplines) {
+        const shotColumns = shotColumnsForCategory[discipline.name] || 5;
+
+        // Svaka tablica treba otprilike 45mm (naslov + zaglavlje + 3 retka + sveukupno + potpisi) -
+        // ako ne stane na trenutnu stranicu, nastavi na sljedećoj umjesto da je odsječe.
+        if (y > doc.internal.pageSize.height - 50) {
+          doc.addPage();
+          y = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(40);
+        doc.text(this.normalizeText('Z A P I S N I K'), 105, y, { align: 'center' });
+        y += 6;
+
+        const shotHeaders = Array.from({ length: shotColumns }, (_, i) => (i + 1).toString());
+        const columns = ['R.br.', this.normalizeText('Ime i prezime'), '', ...shotHeaders, 'Ukupno'];
+
+        // Uvijek točno 3 retka (ekipa ima do 3 člana) - prazan redak ostaje za natjecatelja koji
+        // još nije prijavljen, sudac ga ručno upisuje na licu mjesta.
+        const rows = [0, 1, 2].map(memberIndex => {
+          const member = team.members[memberIndex];
+          const name = member ? this.normalizeText(`${member.firstName} ${member.lastName}`) : '';
+          return [
+            (memberIndex + 1).toString(),
+            name,
+            this.normalizeText(discipline.name),
+            ...Array(shotColumns).fill(''),
+            ''
+          ];
+        });
+
+        autoTable(doc, {
+          startY: y,
+          head: [columns],
+          body: rows,
+          foot: [[{ content: this.normalizeText('Sveukupno'), colSpan: 3 + shotColumns, styles: { halign: 'right', fontStyle: 'bold' } }, '']],
+          theme: 'grid',
+          styles: { fontSize: 9, cellPadding: 2, halign: 'center', valign: 'middle', lineColor: [0, 0, 0], lineWidth: 0.2 },
+          headStyles: { fillColor: [255, 255, 255], textColor: 0, fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+          footStyles: { fillColor: [255, 255, 255], textColor: 0, lineColor: [0, 0, 0], lineWidth: 0.2 },
+          columnStyles: {
+            1: { halign: 'left', cellWidth: 40 },
+            2: { fontSize: 7, cellWidth: 22 }
+          }
+        });
+        y = (doc as any).lastAutoTable.finalY + 8;
+
+        doc.setFontSize(10);
+        doc.setTextColor(40);
+        doc.text(this.normalizeText('Sudac:'), 160, y);
+        y += 12;
+        doc.text(this.normalizeText('Za ekipu: ________________________'), 25, y);
+        y += 12;
+      }
+    });
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.setTextColor(128);
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.text(`Stranica ${i} od ${pageCount}`, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 10);
+    }
+
+    const categoryLabel = category === 'M' ? 'muskarci' : 'zene';
+    const filename = `startni-listovi-${categoryLabel}-${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
   }
 }

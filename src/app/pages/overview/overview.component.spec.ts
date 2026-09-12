@@ -43,7 +43,7 @@ describe('OverviewComponent', () => {
     gateway = new FakeRealtimeDbGateway();
     dialog = jasmine.createSpyObj('MatDialog', ['open']);
     pdfReportService = jasmine.createSpyObj('PdfReportService', [
-      'exportIndividualRankingToPdf', 'exportTeamRankingToPdf', 'exportCompleteReportToPdf'
+      'exportIndividualRankingToPdf', 'exportTeamRankingToPdf', 'exportCompleteReportToPdf', 'exportStartingListsToPdf'
     ]);
 
     TestBed.configureTestingModule({
@@ -210,6 +210,30 @@ describe('OverviewComponent', () => {
       expect(pdfReportService.exportCompleteReportToPdf).toHaveBeenCalledWith(
         jasmine.any(Array), jasmine.any(Array), [disciplines[0]], 'M'
       );
+    });
+
+    it('exportStartingLists should pass only that category\'s teams and disciplines to the service', () => {
+      component.exportStartingLists('M');
+
+      expect(pdfReportService.exportStartingListsToPdf).toHaveBeenCalledWith([sokolovi], [disciplines[0]], 'M');
+    });
+
+    it('exportStartingLists should work identically for the women\'s category', () => {
+      component.exportStartingLists('Ž');
+
+      expect(pdfReportService.exportStartingListsToPdf).toHaveBeenCalledWith([orlice], [disciplines[1]], 'Ž');
+    });
+  });
+
+  describe('hasTeamsForCategory', () => {
+    it('should be true when at least one team exists for that category', () => {
+      expect(component.hasTeamsForCategory('M')).toBe(true);
+      expect(component.hasTeamsForCategory('Ž')).toBe(true);
+    });
+
+    it('should be false when no team exists for that category', () => {
+      gateway.emit({ teams: [sokolovi], disciplines, results: [] });
+      expect(component.hasTeamsForCategory('Ž')).toBe(false);
     });
   });
 

@@ -38,6 +38,24 @@
             <mat-icon>description</mat-icon>
             Kompletan izvještaj
           </button>
+          <button mat-raised-button
+            color="primary"
+            [disabled]="!hasTeamsForCategory('M')"
+            (click)="exportStartingLists('M')"
+            matTooltip="Izvoz praznih startnih listova (naziv ekipe i popis natjecatelja) za muškarce"
+            class="pdf-button">
+            <mat-icon>assignment</mat-icon>
+            Startni listovi (M)
+          </button>
+          <button mat-raised-button
+            color="primary"
+            [disabled]="!hasTeamsForCategory('Ž')"
+            (click)="exportStartingLists('Ž')"
+            matTooltip="Izvoz praznih startnih listova (naziv ekipe i popis natjecateljica) za žene"
+            class="pdf-button">
+            <mat-icon>assignment</mat-icon>
+            Startni listovi (Ž)
+          </button>
         </div>
       }
 

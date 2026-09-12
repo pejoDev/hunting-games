@@ -225,6 +225,26 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 | K11 | Firebase konzola → Realtime Database → Rules | Potvrdi da su deployana pravila `.read: true` / `.write: "auth != null"` (bez zastarjelog `competition-data` bloka) — mora odgovarati `database.rules.json` u repou | ☐ |
 | K12 | Otvori `/pracenje` na mobitelu (stvarni uređaj ili responsive mode) | Tablica i filteri su čitljivi/upotrebljivi na malom ekranu, bez admin kontrola | ☐ |
 
+## L. Startni listovi (PDF)
+
+Dva nova gumba u kontrolnoj traci ("Startni listovi (M)" / "Startni listovi (Ž)") generiraju PDF s praznim "zapisnicima" po ekipi — jedna stranica po ekipi, s nazivom ekipe i popisom natjecatelja unaprijed ispisanim, ali stupci s bodovima ostaju prazni jer ih suci ručno ispisuju na natjecanju (na tri gađanja/discipline: za muškarce TRAP/ZRAČNA PUŠKA/PRAČKA, za žene ZRAČNA PUŠKA/PRAČKA/PIKADO). Format prati postojeći papirnati obrazac, vidi `docs/Startni list za udruge muški.pdf` i `docs/Startni list za udruge ženske.pdf`. Implementacija: `PdfReportService.exportStartingListsToPdf()`, ožičeno kroz `OverviewComponent.exportStartingLists()`.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| L1 | Kreiraj `TEST_EkipaM1` (M, 3 člana) i `TEST_EkipaŽ1` (Ž, 3 člana) (vidi sekciju A), klikni "Startni listovi (M)" | Preuzima se PDF `startni-listovi-muskarci-[datum].pdf`; jedna stranica po M ekipi | ☐ |
+| L2 | Otvori PDF iz L1 za `TEST_EkipaM1` | Zaglavlje "LD PATKA Donji Vidovec-Sveta Marija", okvir "MEMORIJAL DRAGUTIN CENKO" / naziv ekipe (`TEST_EkipaM1`) / "Iz mjesta" (prazno, za ručni upis) | ☐ |
+| L3 | Provjeri broj i redoslijed "ZAPISNIK" tablica na stranici ekipe (M) | Točno 3 tablice, redom TRAP (stupci 1-5), ZRAČNA PUŠKA (stupci 1-10), PRAČKA (stupci 1-5) — brojevi stupaca odgovaraju papirnatom obrascu, NE `discipline.maxPoints` | ☐ |
+| L4 | Provjeri retke unutar svake tablice | Točno 3 retka (R.br. 1/2/3), svaki s imenom i prezimenom jednog člana ekipe (istim redoslijedom za sve 3 discipline), treći stupac ponavlja naziv discipline; svi stupci s brojevima gađanja i "Ukupno" su prazni | ☐ |
+| L5 | Provjeri dno svake tablice i ispod nje | Redak "Sveukupno" (prazna ćelija za ukupan zbroj), zatim "Sudac:" i "Za ekipu: ________________________" za ručni potpis | ☐ |
+| L6 | Klikni "Startni listovi (Ž)" | PDF `startni-listovi-zene-[datum].pdf`; tablice redom ZRAČNA PUŠKA, PRAČKA, PIKADO, sve sa stupcima 1-5 (za razliku od M gdje ZRAČNA PUŠKA ima 10 stupaca) | ☐ |
+| L7 | Testiraj ekipu s manje od 3 člana (npr. 1 član) | I dalje se prikazuju točno 3 retka po tablici — retci za nepostojeće članove su prazni (ime i prezime), spremni da ih sudac ručno popuni na licu mjesta | ☐ |
+| L8 | Testiraj s 2+ ekipe iste kategorije | Svaka ekipa dobiva svoju stranicu (page break između ekipa), footer "Stranica X od Y" na svakoj stranici | ☐ |
+| L9 | Filtriraj/obriši sve M ekipe (ili gledaj kategoriju bez timova) | Gumb "Startni listovi (M)" je disabled (`hasTeamsForCategory('M')` === false); Ž gumb ostaje aktivan ako Ž ekipe postoje, i obrnuto | ☐ |
+| L10 | Provjeri da `H.V` verifikacija (ista kao za ostale PDF exporte) i dalje radi za ove gumbe | Ako postoje strukturne nepravilnosti (npr. dupli ID-evi), prikazuje se isti dijalog upozorenja prije preuzimanja | ☐ |
+| L11 | Provjeri hrvatske dijakritike u imenima/nazivu ekipe/disciplina u PDF-u | Dijakritici su stripani (`normalizeText()`), isto poznato/namjerno ponašanje kao u ostatku PDF izvoza (vidi H9) | ☐ |
+| L12 | Usporedi generirani PDF vizualno s `docs/Startni list za udruge muški.pdf` / `.../ženske.pdf` | Struktura (zaglavlje, broj tablica, broj stupaca po disciplini, "Sveukupno"/"Sudac"/"Za ekipu" redci) odgovara predlošku; jedina razlika je što je naziv ekipe i popis natjecatelja već popunjen | ☐ |
+| L13 | Na `/pracenje` (javna, neprijavljena stranica) | Gumbi "Startni listovi (M)" / "(Ž)" NISU vidljivi (unutar `pdf-controls`, sakriveno za `readOnly`, isto kao ostali PDF gumbi — vidi K4) | ☐ |
+
 ---
 
 ## Sažetak / sign-off
@@ -242,7 +262,8 @@ Ruta `/pracenje` ponovno koristi isti `OverviewComponent` kao admin sučelje (`/
 | I — Real-time/konkurentnost | 5 | | | |
 | J — Regresija refaktoringa | 4 | | | |
 | K — Javna `/pracenje` stranica | 12 | | | |
-| **UKUPNO** | **113** | | | |
+| L — Startni listovi (PDF) | 13 | | | |
+| **UKUPNO** | **126** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
