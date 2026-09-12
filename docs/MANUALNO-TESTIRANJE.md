@@ -204,7 +204,7 @@ Kreiraj namjenske `TEST_` natjecatelje/timove za svaki scenarij. Kaskada: **M: T
 | J1 | Provjeri natjecatelja s PIKADO=300 (max) | Total doprinos discipline = točno **100,00**, NE 99,xx (stari hardkodirani koeficijent ×0,33 je bio approx; novi je exact `100/300`) | ☐ |
 | J2 | Provjeri natjecatelja s TRAP=5 (max) | Doprinos = točno 100,00 | ☐ |
 | J3 | U "Unos rezultata" i "Editiraj rezultat" provjeri da je max limit povučen iz `discipline.maxPoints` (baza), a NE hardkodiran u kodu | Promjena `maxPoints` u bazi (vidi E8) odmah mijenja i validacijski limit u oba dialoga | ☐ |
-| J4 | Provjeri formula-info panel u overview (plavi info blok iznad tablice kad je kategorija odabrana) | Tekst "TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20" (M) / "ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,33" (Ž) odgovara STVARNOM izračunu (ovaj tekst je statičan u HTML-u — ako se ikad promijene maxPoints vrijednosti u bazi na nešto drugo, ovaj opis treba ručno ažurirati, on se NE generira dinamički) | ☐ |
+| J4 | Provjeri formula-info panel u overview (plavi info blok iznad tablice kad je kategorija odabrana) | Tekst "TRAP × 20 + ZRAČNA PUŠKA × 2 + PRAČKA × 20" (M) / "ZRAČNA PUŠKA × 2 + PRAČKA × 20 + PIKADO × 0,3333..." (Ž) odgovara STVARNOM izračunu (ovaj tekst je statičan u HTML-u — ako se ikad promijene maxPoints vrijednosti u bazi na nešto drugo, ovaj opis treba ručno ažurirati, on se NE generira dinamički). Koeficijent za PIKADO se ISPISUJE kao "0,3333..." (period, ne zaokruženo na "0,33") jer je zaokruživanje koeficijenta na dvije decimale prije zbrajanja prijašnji uzrok pogrešnih ručnih izračuna korisnika (0,33 umjesto točnog 100/300) | ☐ |
 
 ## K. Javna stranica za praćenje uživo — `/pracenje` (bez prijave)
 

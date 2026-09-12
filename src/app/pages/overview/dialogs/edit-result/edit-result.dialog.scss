@@ -5,6 +5,16 @@
   box-sizing: border-box;
 }
 
+input[type="number"] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 @media (min-width: 600px) {
   .dialog-content {
     min-width: 500px;

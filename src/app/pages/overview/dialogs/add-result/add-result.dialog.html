@@ -110,7 +110,8 @@
             min="0"
             [max]="getSelectedDisciplineMaxPoints()"
             placeholder="Unesite broj bodova"
-            (input)="onPointsChange()" />
+            (input)="onPointsChange()"
+            (wheel)="$event.target.blur()" />
           <mat-icon matSuffix>calculate</mat-icon>
           @if (disciplineId && !validatePoints()) {
             <mat-hint>
