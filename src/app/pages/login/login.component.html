@@ -1,0 +1,39 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <div class="login-logo-wrap">
+      <img class="login-logo" src="assets/logo.jpg" alt="LD Patka logo">
+    </div>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon style="vertical-align: middle; margin-right: 8px;">emoji_events</mat-icon>
+        Prijava
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" name="email" [(ngModel)]="email" required autocomplete="username" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Lozinka</mat-label>
+          <input matInput type="password" name="password" [(ngModel)]="password" required autocomplete="current-password" />
+        </mat-form-field>
+
+        @if (errorMessage) {
+          <p class="error-message">{{ errorMessage }}</p>
+        }
+
+        <button mat-flat-button color="primary" type="submit" class="full-width" [disabled]="loading">
+          @if (loading) {
+            <mat-spinner diameter="20" style="display: inline-block; vertical-align: middle;"></mat-spinner>
+          } @else {
+            Prijavi se
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

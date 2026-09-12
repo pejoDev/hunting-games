@@ -1,5 +1,5 @@
 
-# Međudruštveno natjecanje — Angular 18 + Angular Material starter
+# Memorijal Dragutin Cenko — Angular 18 + Angular Material starter
 
 Ovo je minimalni skeleton aplikacije za natjecanje (Angular 18 + Angular Material).
 Sadrži Overview stranicu s rang listom i dugmad koja otvaraju Material dijaloge za dodavanje timova, disciplina i rezultata.

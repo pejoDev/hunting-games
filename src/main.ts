@@ -1,16 +1,23 @@
+import { provideZoneChangeDetection } from "@angular/core";
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-import { getDatabase, provideDatabase } from '@angular/fire/database';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideHttpClient, withXhr } from '@angular/common/http';
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+import { getAuth } from 'firebase/auth';
 import { AppComponent, routes } from './app/app.component';
+import { FIREBASE_DATABASE } from './app/core/firebase-database.token';
+import { FIREBASE_AUTH } from './app/core/firebase-auth.token';
 import { environment } from './environments/environment';
+
+const firebaseApp = initializeApp(environment.firebase);
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(routes),
-    provideHttpClient(),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideDatabase(() => getDatabase())
+    provideZoneChangeDetection(),
+    provideRouter(routes, withComponentInputBinding()),
+    provideHttpClient(withXhr()),
+    { provide: FIREBASE_DATABASE, useValue: getDatabase(firebaseApp) },
+    { provide: FIREBASE_AUTH, useValue: getAuth(firebaseApp) }
   ]
 }).catch(err => console.error(err));

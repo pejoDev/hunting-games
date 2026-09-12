@@ -1,0 +1,20 @@
+    <div class="header">
+      <div class="container header-row">
+        <img class="header-logo" src="assets/logo.jpg" alt="LD Patka logo">
+        <h1>
+          <mat-icon style="vertical-align: middle; margin-right: 12px;">emoji_events</mat-icon>
+          Memorijal Dragutin Cenko
+        </h1>
+        @if (authService.currentUser) {
+          <div class="user-info">
+            <span class="user-email">{{ authService.currentUser.email }}</span>
+            <button mat-icon-button (click)="logout()" aria-label="Odjava" title="Odjava">
+              <mat-icon>logout</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
