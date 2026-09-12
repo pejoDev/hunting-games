@@ -2,11 +2,70 @@ import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { CompetitorRanking, TeamRanking, Discipline, Team } from './models';
+import { PDF_LOGO_DATA_URL } from './pdf-logo';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PdfReportService {
+
+  // Lovačka paleta boja - ista kao src/styles.scss ($hunt-*), pretvorena u RGB za jsPDF
+  // (koji ne razumije SCSS varijable/hex nego traži zaseban r,g,b poziv po boji).
+  private readonly COLOR_GREEN_DARK: [number, number, number] = [27, 67, 50];
+  private readonly COLOR_BROWN: [number, number, number] = [107, 68, 35];
+  private readonly COLOR_RUST: [number, number, number] = [160, 82, 45];
+  private readonly COLOR_GOLD: [number, number, number] = [201, 162, 39];
+  private readonly COLOR_GOLD_LIGHT: [number, number, number] = [224, 194, 94];
+
+  /**
+   * Zaglavlje koje se ponavlja na svakom izvještaju koji se izvozi za javno isticanje (na ploču) -
+   * traka u tamnozelenoj lovačkoj boji s pozlaćenim rubom, grb/logo udruge te naziv natjecanja,
+   * po uzoru na header aplikacije (app.component.html). Vraća y-poziciju odmah ispod naslova
+   * izvještaja, spremnu za nastavak sadržaja.
+   */
+  private drawBrandedHeader(doc: jsPDF, reportTitle: string): number {
+    const pageWidth = doc.internal.pageSize.width;
+    const bannerHeight = 32;
+
+    doc.setFillColor(...this.COLOR_GREEN_DARK);
+    doc.rect(0, 0, pageWidth, bannerHeight, 'F');
+    doc.setFillColor(...this.COLOR_GOLD);
+    doc.rect(0, bannerHeight - 1.5, pageWidth, 1.5, 'F');
+
+    const logoSize = 20;
+    const logoX = 12;
+    const logoY = (bannerHeight - logoSize) / 2;
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(logoX - 1.5, logoY - 1.5, logoSize + 3, logoSize + 3, 2, 2, 'F');
+    doc.setDrawColor(...this.COLOR_GOLD);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(logoX - 1.5, logoY - 1.5, logoSize + 3, logoSize + 3, 2, 2, 'S');
+    try {
+      doc.addImage(PDF_LOGO_DATA_URL, 'JPEG', logoX, logoY, logoSize, logoSize);
+    } catch {
+      // Logo je kozmetički dodatak - ako iz bilo kojeg razloga ne uspije učitati, izvještaj se
+      // svejedno mora izvesti.
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(19);
+    doc.setTextColor(255, 255, 255);
+    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), pageWidth / 2, 15, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...this.COLOR_GOLD_LIGHT);
+    doc.text(this.normalizeText('LD Patka Donji Vidovec-Sveta Marija'), pageWidth / 2, 23, { align: 'center' });
+
+    let y = bannerHeight + 12;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(...this.COLOR_GREEN_DARK);
+    doc.text(this.normalizeText(reportTitle), pageWidth / 2, y, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+
+    return y + 8;
+  }
 
   // Broj gađanja/bacaja po disciplini na papirnatom "startnom listu" (vidi
   // docs/Startni list za udruge muški.pdf i .../žene.pdf) - ovo je broj STUPACA na obrascu koji
@@ -63,7 +122,7 @@ export class PdfReportService {
 
     if (heading) {
       doc.setFontSize(11);
-      doc.setTextColor(150, 60, 0);
+      doc.setTextColor(...this.COLOR_RUST);
       doc.text(this.normalizeText(heading), x, y);
       y += 7;
     }
@@ -134,7 +193,7 @@ export class PdfReportService {
     let y = 20;
 
     doc.setFontSize(14);
-    doc.setTextColor(40);
+    doc.setTextColor(...this.COLOR_GREEN_DARK);
     doc.text(this.normalizeText('Napomene o poretku'), 15, y);
     y += 10;
 
@@ -150,7 +209,7 @@ export class PdfReportService {
     const hasAnyTie = sections.some(s => s.rows.some(r => r.tieNote));
     if (hasAnyTie) {
       doc.setFontSize(12);
-      doc.setTextColor(150, 60, 0);
+      doc.setTextColor(...this.COLOR_RUST);
       doc.text(this.normalizeText('Izjednačeni rezultati u ovom izvještaju:'), 15, y);
       y += 8;
 
@@ -170,22 +229,17 @@ export class PdfReportService {
     const originalDisciplineNames = disciplines.map(d => d.name); // Keep original names for data access
 
     // Header
-    doc.setFontSize(20);
-    doc.setTextColor(40);
-    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), 105, 20, { align: 'center' });
-
-    doc.setFontSize(16);
-    doc.text(this.normalizeText('Pojedinacni Poredak'), 105, 30, { align: 'center' });
+    let textY = this.drawBrandedHeader(doc, 'Pojedinačni poredak');
 
     if (category) {
       doc.setFontSize(14);
       doc.setTextColor(100);
       const categoryText = category === 'M' ? 'Kategorija: Muskarci' : 'Kategorija: Zene';
-      doc.text(this.normalizeText(categoryText), 105, 40, { align: 'center' });
+      doc.text(this.normalizeText(categoryText), 105, textY, { align: 'center' });
+      textY += 10;
     }
 
     // Formula explanation
-    let textY = 50;
     if (category) {
       doc.setFontSize(10);
       doc.setTextColor(60);
@@ -217,13 +271,13 @@ export class PdfReportService {
     autoTable(doc, {
       head: [columns],
       body: rows,
-      startY: category ? textY : 50,
+      startY: textY,
       styles: {
         fontSize: 9,
         cellPadding: 3,
       },
       headStyles: {
-        fillColor: [41, 128, 185],
+        fillColor: this.COLOR_GREEN_DARK,
         textColor: 255,
         fontStyle: 'bold'
       },
@@ -283,22 +337,17 @@ export class PdfReportService {
     const originalDisciplineNames = disciplines.map(d => d.name); // Keep original names for data access
 
     // Header
-    doc.setFontSize(20);
-    doc.setTextColor(40);
-    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), 105, 20, { align: 'center' });
-
-    doc.setFontSize(16);
-    doc.text(this.normalizeText('Ekipni Poredak'), 105, 30, { align: 'center' });
+    let textY = this.drawBrandedHeader(doc, 'Ekipni poredak');
 
     if (category) {
       doc.setFontSize(14);
       doc.setTextColor(100);
       const categoryText = category === 'M' ? 'Kategorija: Muškarci' : 'Kategorija: Žene';
-      doc.text(this.normalizeText(categoryText), 105, 40, { align: 'center' });
+      doc.text(this.normalizeText(categoryText), 105, textY, { align: 'center' });
+      textY += 10;
     }
 
     // Formula explanation
-    let textY = 50;
     if (category) {
       doc.setFontSize(10);
       doc.setTextColor(60);
@@ -328,13 +377,13 @@ export class PdfReportService {
     autoTable(doc, {
       head: [columns],
       body: rows,
-      startY: category ? textY : 50,
+      startY: textY,
       styles: {
         fontSize: 10,
         cellPadding: 4,
       },
       headStyles: {
-        fillColor: [76, 175, 80],
+        fillColor: this.COLOR_BROWN,
         textColor: 255,
         fontStyle: 'bold'
       },
@@ -364,7 +413,7 @@ export class PdfReportService {
     let currentY = (doc as any).lastAutoTable.finalY + 20;
 
     doc.setFontSize(12);
-    doc.setTextColor(40);
+    doc.setTextColor(...this.COLOR_BROWN);
     doc.text(this.normalizeText('Sastav Ekipa:'), 15, currentY);
     currentY += 10;
 
@@ -418,31 +467,28 @@ export class PdfReportService {
     const originalDisciplineNames = disciplines.map(d => d.name); // Keep original names for data access
 
     // Main header
-    doc.setFontSize(24);
-    doc.setTextColor(40);
-    doc.text(this.normalizeText('MEMORIJAL DRAGUTIN CENKO'), 105, 25, { align: 'center' });
-
-    doc.setFontSize(18);
-    doc.text(this.normalizeText('Kompletan Izvještaj Rezultata'), 105, 35, { align: 'center' });
+    let currentY = this.drawBrandedHeader(doc, 'Kompletan izvještaj rezultata');
 
     const date = new Date().toLocaleDateString('hr-HR');
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text(this.normalizeText(`Datum: ${date}`), 105, 45, { align: 'center' });
+    doc.text(this.normalizeText(`Datum: ${date}`), 105, currentY, { align: 'center' });
+    currentY += 10;
 
     if (category) {
       const categoryText = category === 'M' ? 'Kategorija: Muškarci' : 'Kategorija: Žene';
-      doc.text(this.normalizeText(categoryText), 105, 55, { align: 'center' });
+      doc.text(this.normalizeText(categoryText), 105, currentY, { align: 'center' });
+      currentY += 10;
     }
 
-    let currentY = 70;
+    currentY += 5;
     let individualTieRows: { rank: number; tieNote?: string; name: string }[] = [];
     let teamTieRows: { rank: number; tieNote?: string; name: string }[] = [];
 
     // Individual ranking
     if (individualData.length > 0) {
       doc.setFontSize(16);
-      doc.setTextColor(41, 128, 185);
+      doc.setTextColor(...this.COLOR_GREEN_DARK);
       doc.text(this.normalizeText('Pojedinačni Poredak'), 15, currentY);
       currentY += 10;
 
@@ -461,7 +507,7 @@ export class PdfReportService {
         body: rows,
         startY: currentY,
         styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [41, 128, 185] },
+        headStyles: { fillColor: this.COLOR_GREEN_DARK },
         columnStyles: {
           0: { halign: 'center', cellWidth: 12 },
           [columns.length - 1]: { halign: 'right', fontStyle: 'bold' }
@@ -484,7 +530,7 @@ export class PdfReportService {
       }
 
       doc.setFontSize(16);
-      doc.setTextColor(76, 175, 80);
+      doc.setTextColor(...this.COLOR_BROWN);
       doc.text(this.normalizeText('Ekipni Poredak'), 15, currentY);
       currentY += 10;
 
@@ -502,7 +548,7 @@ export class PdfReportService {
         body: rows,
         startY: currentY,
         styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [76, 175, 80] },
+        headStyles: { fillColor: this.COLOR_BROWN },
         columnStyles: {
           0: { halign: 'center', cellWidth: 12 },
           [columns.length - 1]: { halign: 'right', fontStyle: 'bold' }
