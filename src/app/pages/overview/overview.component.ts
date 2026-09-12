@@ -182,6 +182,19 @@ export class OverviewComponent implements OnInit {
     );
   }
 
+  exportStartingLists(category: 'M' | 'Ž') {
+    const teams = this.competitionService.getTeams().filter(t => t.category === category);
+    const disciplines = this.competitionService.getDisciplinesForCategory(category);
+
+    this.verifyThenExport(() =>
+      this.pdfReportService.exportStartingListsToPdf(teams, disciplines, category)
+    );
+  }
+
+  hasTeamsForCategory(category: 'M' | 'Ž'): boolean {
+    return this.competitionService.getTeams().some(t => t.category === category);
+  }
+
   exportCompleteReport() {
     const category = this.selectedCategory || undefined;
     const individualData = this.competitionService.getCompetitorRankings(category as 'M' | 'Ž');
@@ -216,6 +229,26 @@ export class OverviewComponent implements OnInit {
         doExport();
       }
     });
+  }
+
+  // "Gotovo natjecanje" - briše sve timove, natjecatelje i rezultate radi pripreme za sljedeće
+  // natjecanje, ali zadržava discipline i njihovo bodovanje. Nepovratna radnja pa traži potvrdu.
+  finishCompetition() {
+    const teamCount = this.competitionService.getTeams().length;
+    const competitorCount = this.competitionService.getAllCompetitors().length;
+    const resultCount = this.competitionService.getResults().length;
+
+    const confirmReset = confirm(
+      `Jeste li sigurni da želite označiti natjecanje kao gotovo?\n\n` +
+      `Ovo će trajno obrisati ${teamCount} timova, ${competitorCount} natjecatelja i ${resultCount} rezultata. ` +
+      `Discipline i njihovo bodovanje ostaju sačuvani za sljedeće natjecanje.\n\n` +
+      `Ova radnja se ne može poništiti.`
+    );
+
+    if (confirmReset) {
+      this.competitionService.resetCompetition();
+      this.snackBar.open('Natjecanje je završeno. Podaci su obrisani, aplikacija je spremna za sljedeće natjecanje.', undefined, { duration: 5000 });
+    }
   }
 
   hasData(): boolean {

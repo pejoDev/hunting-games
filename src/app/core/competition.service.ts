@@ -479,4 +479,12 @@ export class CompetitionService {
   getAllCompetitors(): Competitor[] {
     return this.value.teams.flatMap(team => team.members);
   }
+
+  // "Gotovo natjecanje" - priprema aplikacije za sljedeće natjecanje: briše sve timove,
+  // natjecatelje i rezultate, ali ZADRŽAVA discipline i njihovo bodovanje (isto pravilo
+  // vrijedi za novo natjecanje). Piše oba prazna popisa atomarno (setCollections) da prekid
+  // veze usred pisanja ne ostavi rezultate koji upućuju na već obrisane timove.
+  async resetCompetition() {
+    await this.dbGateway.setCollections({ teams: [], results: [] });
+  }
 }

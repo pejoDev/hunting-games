@@ -41,6 +41,12 @@
   margin-left: auto;
 }
 
+.finish-competition-button {
+  margin-left: auto;
+  background-color: #b71c1c !important;
+  color: #fff !important;
+}
+
 .filter-controls {
   display: flex;
   gap: 12px;
@@ -126,6 +132,10 @@
   }
 
   .export-button {
+    margin-left: 0;
+  }
+
+  .finish-competition-button {
     margin-left: 0;
   }
 

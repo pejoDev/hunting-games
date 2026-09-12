@@ -242,6 +242,55 @@ describe('PdfReportService', () => {
     });
   });
 
+  describe('exportStartingListsToPdf', () => {
+    const teamDisciplinesM: Discipline[] = [
+      { id: 1, name: 'TRAP', category: 'M', maxPoints: 5 },
+      { id: 2, name: 'ZRAČNA PUŠKA', category: 'M', maxPoints: 50 },
+      { id: 3, name: 'PRAČKA', category: 'M', maxPoints: 5 }
+    ];
+    const teamDisciplinesZ: Discipline[] = [
+      { id: 4, name: 'ZRAČNA PUŠKA', category: 'Ž', maxPoints: 50 },
+      { id: 5, name: 'PRAČKA', category: 'Ž', maxPoints: 5 },
+      { id: 6, name: 'PIKADO', category: 'Ž', maxPoints: 300 }
+    ];
+    const fullTeam = {
+      id: 1, name: 'Sokolovi', category: 'M' as const,
+      members: [
+        { id: 1, firstName: 'Ivan', lastName: 'Horvat' },
+        { id: 2, firstName: 'Marko', lastName: 'Kos' },
+        { id: 3, firstName: 'Pero', lastName: 'Perić' }
+      ]
+    };
+
+    it('should generate a PDF without throwing for a populated team roster (men)', () => {
+      expect(() => service.exportStartingListsToPdf([fullTeam], teamDisciplinesM, 'M')).not.toThrow();
+    });
+
+    it('should generate a PDF without throwing for the women\'s discipline set', () => {
+      const team = { id: 2, name: 'Orlice', category: 'Ž' as const, members: [{ id: 4, firstName: 'Ana', lastName: 'Ban' }] };
+      expect(() => service.exportStartingListsToPdf([team], teamDisciplinesZ, 'Ž')).not.toThrow();
+    });
+
+    it('should not throw for a team with fewer than 3 members (blank rows for the rest)', () => {
+      const team = { id: 3, name: 'Vukovi', category: 'M' as const, members: [{ id: 5, firstName: 'Luka', lastName: 'Babić' }] };
+      expect(() => service.exportStartingListsToPdf([team], teamDisciplinesM, 'M')).not.toThrow();
+    });
+
+    it('should not throw for a team with no members yet', () => {
+      const team = { id: 4, name: 'Novi Tim', category: 'M' as const, members: [] };
+      expect(() => service.exportStartingListsToPdf([team], teamDisciplinesM, 'M')).not.toThrow();
+    });
+
+    it('should not throw when generating multiple teams (one page per team)', () => {
+      const second = { id: 5, name: 'Jastrebovi', category: 'M' as const, members: [{ id: 6, firstName: 'Josip', lastName: 'Novak' }] };
+      expect(() => service.exportStartingListsToPdf([fullTeam, second], teamDisciplinesM, 'M')).not.toThrow();
+    });
+
+    it('should do nothing when there are no teams for the category', () => {
+      expect(() => service.exportStartingListsToPdf([], teamDisciplinesM, 'M')).not.toThrow();
+    });
+  });
+
   describe('Croatian text normalization (via generated content)', () => {
     it('should not throw when competitor or team names contain the full set of Croatian palatals', () => {
       const dataWithDiacritics: CompetitorRanking[] = [{

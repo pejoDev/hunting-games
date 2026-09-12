@@ -378,6 +378,33 @@ describe('CompetitionService', () => {
     });
   });
 
+  describe('resetCompetition', () => {
+    it('should clear teams and results but leave disciplines untouched', async () => {
+      gateway.emit({
+        teams: [team({ id: 1 })],
+        disciplines: [discipline({ id: 1 })],
+        results: [{ id: 1, competitorId: 1, disciplineId: 1, points: 5 }]
+      });
+
+      await service.resetCompetition();
+
+      expect(gateway.writes['teams']).toEqual([]);
+      expect(gateway.writes['results']).toEqual([]);
+      expect(gateway.writes['disciplines']).toBeUndefined();
+    });
+
+    it('should write teams and results atomically in one setCollections call, never as two separate setCollection calls', async () => {
+      gateway.emit({ teams: [team({ id: 1 })], disciplines: [discipline()], results: [] });
+      spyOn(gateway, 'setCollections').and.callThrough();
+      spyOn(gateway, 'setCollection').and.callThrough();
+
+      await service.resetCompetition();
+
+      expect(gateway.setCollections).toHaveBeenCalledTimes(1);
+      expect(gateway.setCollection).not.toHaveBeenCalled();
+    });
+  });
+
   describe('discipline management', () => {
     it('addDiscipline should assign the next sequential id, trim the name, and persist maxPoints', async () => {
       gateway.emit({ teams: [], disciplines: [discipline({ id: 3 })], results: [] });
