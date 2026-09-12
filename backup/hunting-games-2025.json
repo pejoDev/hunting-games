@@ -1,0 +1,1622 @@
+{
+  "disciplines": [
+    {
+      "category": "M",
+      "id": 1,
+      "maxPoints": 5,
+      "name": "TRAP"
+    },
+    {
+      "category": "M",
+      "id": 2,
+      "maxPoints": 50,
+      "name": "ZRAČNA PUŠKA"
+    },
+    {
+      "category": "M",
+      "id": 3,
+      "maxPoints": 5,
+      "name": "PRAČKA"
+    },
+    {
+      "category": "Ž",
+      "id": 4,
+      "maxPoints": 50,
+      "name": "ZRAČNA PUŠKA"
+    },
+    {
+      "category": "Ž",
+      "id": 5,
+      "maxPoints": 5,
+      "name": "PRAČKA"
+    },
+    {
+      "category": "Ž",
+      "id": 6,
+      "maxPoints": 300,
+      "name": "PIKADO"
+    }
+  ],
+  "results": [
+    {
+      "competitorId": 46,
+      "disciplineId": 6,
+      "id": 1,
+      "points": 88
+    },
+    {
+      "competitorId": 47,
+      "disciplineId": 6,
+      "id": 2,
+      "points": 35
+    },
+    {
+      "competitorId": 48,
+      "disciplineId": 6,
+      "id": 3,
+      "points": 107
+    },
+    {
+      "competitorId": 49,
+      "disciplineId": 6,
+      "id": 4,
+      "points": 72
+    },
+    {
+      "competitorId": 50,
+      "disciplineId": 6,
+      "id": 5,
+      "points": 68
+    },
+    {
+      "competitorId": 51,
+      "disciplineId": 6,
+      "id": 6,
+      "points": 36
+    },
+    {
+      "competitorId": 58,
+      "disciplineId": 6,
+      "id": 7,
+      "points": 50
+    },
+    {
+      "competitorId": 59,
+      "disciplineId": 6,
+      "id": 8,
+      "points": 50
+    },
+    {
+      "competitorId": 60,
+      "disciplineId": 6,
+      "id": 9,
+      "points": 11
+    },
+    {
+      "competitorId": 61,
+      "disciplineId": 6,
+      "id": 10,
+      "points": 67
+    },
+    {
+      "competitorId": 62,
+      "disciplineId": 6,
+      "id": 11,
+      "points": 54
+    },
+    {
+      "competitorId": 63,
+      "disciplineId": 6,
+      "id": 12,
+      "points": 48
+    },
+    {
+      "competitorId": 55,
+      "disciplineId": 6,
+      "id": 13,
+      "points": 71
+    },
+    {
+      "competitorId": 56,
+      "disciplineId": 6,
+      "id": 14,
+      "points": 52
+    },
+    {
+      "competitorId": 57,
+      "disciplineId": 6,
+      "id": 15,
+      "points": 1
+    },
+    {
+      "competitorId": 1,
+      "disciplineId": 6,
+      "id": 16,
+      "points": 88
+    },
+    {
+      "competitorId": 2,
+      "disciplineId": 6,
+      "id": 17,
+      "points": 33
+    },
+    {
+      "competitorId": 3,
+      "disciplineId": 6,
+      "id": 18,
+      "points": 35
+    },
+    {
+      "competitorId": 52,
+      "disciplineId": 6,
+      "id": 19,
+      "points": 68
+    },
+    {
+      "competitorId": 53,
+      "disciplineId": 6,
+      "id": 20,
+      "points": 97
+    },
+    {
+      "competitorId": 54,
+      "disciplineId": 6,
+      "id": 21,
+      "points": 88
+    },
+    {
+      "competitorId": 1,
+      "disciplineId": 5,
+      "id": 22,
+      "points": 0
+    },
+    {
+      "competitorId": 2,
+      "disciplineId": 5,
+      "id": 23,
+      "points": 0
+    },
+    {
+      "competitorId": 3,
+      "disciplineId": 5,
+      "id": 24,
+      "points": 2
+    },
+    {
+      "competitorId": 52,
+      "disciplineId": 5,
+      "id": 25,
+      "points": 5
+    },
+    {
+      "competitorId": 53,
+      "disciplineId": 5,
+      "id": 26,
+      "points": 0
+    },
+    {
+      "competitorId": 54,
+      "disciplineId": 5,
+      "id": 27,
+      "points": 2
+    },
+    {
+      "competitorId": 58,
+      "disciplineId": 5,
+      "id": 28,
+      "points": 3
+    },
+    {
+      "competitorId": 59,
+      "disciplineId": 5,
+      "id": 29,
+      "points": 1
+    },
+    {
+      "competitorId": 60,
+      "disciplineId": 5,
+      "id": 30,
+      "points": 2
+    },
+    {
+      "competitorId": 55,
+      "disciplineId": 5,
+      "id": 31,
+      "points": 3
+    },
+    {
+      "competitorId": 56,
+      "disciplineId": 5,
+      "id": 32,
+      "points": 4
+    },
+    {
+      "competitorId": 57,
+      "disciplineId": 5,
+      "id": 33,
+      "points": 5
+    },
+    {
+      "competitorId": 61,
+      "disciplineId": 5,
+      "id": 34,
+      "points": 1
+    },
+    {
+      "competitorId": 62,
+      "disciplineId": 5,
+      "id": 35,
+      "points": 0
+    },
+    {
+      "competitorId": 63,
+      "disciplineId": 5,
+      "id": 36,
+      "points": 1
+    },
+    {
+      "competitorId": 49,
+      "disciplineId": 5,
+      "id": 37,
+      "points": 1
+    },
+    {
+      "competitorId": 50,
+      "disciplineId": 5,
+      "id": 38,
+      "points": 0
+    },
+    {
+      "competitorId": 51,
+      "disciplineId": 5,
+      "id": 39,
+      "points": 2
+    },
+    {
+      "competitorId": 46,
+      "disciplineId": 5,
+      "id": 40,
+      "points": 4
+    },
+    {
+      "competitorId": 47,
+      "disciplineId": 5,
+      "id": 41,
+      "points": 1
+    },
+    {
+      "competitorId": 48,
+      "disciplineId": 5,
+      "id": 42,
+      "points": 0
+    },
+    {
+      "competitorId": 22,
+      "disciplineId": 3,
+      "id": 43,
+      "points": 0
+    },
+    {
+      "competitorId": 23,
+      "disciplineId": 3,
+      "id": 44,
+      "points": 1
+    },
+    {
+      "competitorId": 24,
+      "disciplineId": 3,
+      "id": 45,
+      "points": 1
+    },
+    {
+      "competitorId": 19,
+      "disciplineId": 3,
+      "id": 46,
+      "points": 1
+    },
+    {
+      "competitorId": 20,
+      "disciplineId": 3,
+      "id": 47,
+      "points": 0
+    },
+    {
+      "competitorId": 21,
+      "disciplineId": 3,
+      "id": 48,
+      "points": 0
+    },
+    {
+      "competitorId": 28,
+      "disciplineId": 3,
+      "id": 49,
+      "points": 1
+    },
+    {
+      "competitorId": 29,
+      "disciplineId": 3,
+      "id": 50,
+      "points": 0
+    },
+    {
+      "competitorId": 30,
+      "disciplineId": 3,
+      "id": 51,
+      "points": 1
+    },
+    {
+      "competitorId": 13,
+      "disciplineId": 3,
+      "id": 52,
+      "points": 0
+    },
+    {
+      "competitorId": 14,
+      "disciplineId": 3,
+      "id": 53,
+      "points": 3
+    },
+    {
+      "competitorId": 15,
+      "disciplineId": 3,
+      "id": 54,
+      "points": 0
+    },
+    {
+      "competitorId": 40,
+      "disciplineId": 3,
+      "id": 55,
+      "points": 0
+    },
+    {
+      "competitorId": 41,
+      "disciplineId": 3,
+      "id": 56,
+      "points": 0
+    },
+    {
+      "competitorId": 42,
+      "disciplineId": 3,
+      "id": 57,
+      "points": 0
+    },
+    {
+      "competitorId": 10,
+      "disciplineId": 3,
+      "id": 58,
+      "points": 0
+    },
+    {
+      "competitorId": 11,
+      "disciplineId": 3,
+      "id": 59,
+      "points": 0
+    },
+    {
+      "competitorId": 12,
+      "disciplineId": 3,
+      "id": 60,
+      "points": 0
+    },
+    {
+      "competitorId": 7,
+      "disciplineId": 3,
+      "id": 61,
+      "points": 0
+    },
+    {
+      "competitorId": 8,
+      "disciplineId": 3,
+      "id": 62,
+      "points": 1
+    },
+    {
+      "competitorId": 9,
+      "disciplineId": 3,
+      "id": 63,
+      "points": 0
+    },
+    {
+      "competitorId": 4,
+      "disciplineId": 3,
+      "id": 64,
+      "points": 3
+    },
+    {
+      "competitorId": 5,
+      "disciplineId": 3,
+      "id": 65,
+      "points": 0
+    },
+    {
+      "competitorId": 6,
+      "disciplineId": 3,
+      "id": 66,
+      "points": 1
+    },
+    {
+      "competitorId": 37,
+      "disciplineId": 3,
+      "id": 67,
+      "points": 0
+    },
+    {
+      "competitorId": 38,
+      "disciplineId": 3,
+      "id": 68,
+      "points": 1
+    },
+    {
+      "competitorId": 39,
+      "disciplineId": 3,
+      "id": 69,
+      "points": 0
+    },
+    {
+      "competitorId": 43,
+      "disciplineId": 3,
+      "id": 70,
+      "points": 1
+    },
+    {
+      "competitorId": 44,
+      "disciplineId": 3,
+      "id": 71,
+      "points": 1
+    },
+    {
+      "competitorId": 45,
+      "disciplineId": 3,
+      "id": 72,
+      "points": 0
+    },
+    {
+      "competitorId": 16,
+      "disciplineId": 3,
+      "id": 73,
+      "points": 0
+    },
+    {
+      "competitorId": 17,
+      "disciplineId": 3,
+      "id": 74,
+      "points": 2
+    },
+    {
+      "competitorId": 18,
+      "disciplineId": 3,
+      "id": 75,
+      "points": 1
+    },
+    {
+      "competitorId": 31,
+      "disciplineId": 3,
+      "id": 76,
+      "points": 1
+    },
+    {
+      "competitorId": 32,
+      "disciplineId": 3,
+      "id": 77,
+      "points": 0
+    },
+    {
+      "competitorId": 33,
+      "disciplineId": 3,
+      "id": 78,
+      "points": 3
+    },
+    {
+      "competitorId": 34,
+      "disciplineId": 3,
+      "id": 79,
+      "points": 1
+    },
+    {
+      "competitorId": 35,
+      "disciplineId": 3,
+      "id": 80,
+      "points": 3
+    },
+    {
+      "competitorId": 36,
+      "disciplineId": 3,
+      "id": 81,
+      "points": 0
+    },
+    {
+      "competitorId": 25,
+      "disciplineId": 3,
+      "id": 82,
+      "points": 0
+    },
+    {
+      "competitorId": 26,
+      "disciplineId": 3,
+      "id": 83,
+      "points": 0
+    },
+    {
+      "competitorId": 27,
+      "disciplineId": 3,
+      "id": 84,
+      "points": 1
+    },
+    {
+      "competitorId": 31,
+      "disciplineId": 2,
+      "id": 85,
+      "points": 28
+    },
+    {
+      "competitorId": 32,
+      "disciplineId": 2,
+      "id": 86,
+      "points": 20
+    },
+    {
+      "competitorId": 33,
+      "disciplineId": 2,
+      "id": 87,
+      "points": 31
+    },
+    {
+      "competitorId": 19,
+      "disciplineId": 2,
+      "id": 88,
+      "points": 15
+    },
+    {
+      "competitorId": 20,
+      "disciplineId": 2,
+      "id": 89,
+      "points": 7
+    },
+    {
+      "competitorId": 21,
+      "disciplineId": 2,
+      "id": 90,
+      "points": 20
+    },
+    {
+      "competitorId": 16,
+      "disciplineId": 2,
+      "id": 91,
+      "points": 30
+    },
+    {
+      "competitorId": 17,
+      "disciplineId": 2,
+      "id": 92,
+      "points": 37
+    },
+    {
+      "competitorId": 18,
+      "disciplineId": 2,
+      "id": 93,
+      "points": 31
+    },
+    {
+      "competitorId": 13,
+      "disciplineId": 2,
+      "id": 94,
+      "points": 24
+    },
+    {
+      "competitorId": 14,
+      "disciplineId": 2,
+      "id": 95,
+      "points": 27
+    },
+    {
+      "competitorId": 15,
+      "disciplineId": 2,
+      "id": 96,
+      "points": 19
+    },
+    {
+      "competitorId": 22,
+      "disciplineId": 2,
+      "id": 97,
+      "points": 28
+    },
+    {
+      "competitorId": 23,
+      "disciplineId": 2,
+      "id": 98,
+      "points": 11
+    },
+    {
+      "competitorId": 24,
+      "disciplineId": 2,
+      "id": 99,
+      "points": 12
+    },
+    {
+      "competitorId": 43,
+      "disciplineId": 2,
+      "id": 100,
+      "points": 16
+    },
+    {
+      "competitorId": 44,
+      "disciplineId": 2,
+      "id": 101,
+      "points": 34
+    },
+    {
+      "competitorId": 45,
+      "disciplineId": 2,
+      "id": 102,
+      "points": 27
+    },
+    {
+      "competitorId": 10,
+      "disciplineId": 2,
+      "id": 103,
+      "points": 8
+    },
+    {
+      "competitorId": 11,
+      "disciplineId": 2,
+      "id": 104,
+      "points": 30
+    },
+    {
+      "competitorId": 12,
+      "disciplineId": 2,
+      "id": 105,
+      "points": 0
+    },
+    {
+      "competitorId": 28,
+      "disciplineId": 2,
+      "id": 106,
+      "points": 14
+    },
+    {
+      "competitorId": 29,
+      "disciplineId": 2,
+      "id": 107,
+      "points": 9
+    },
+    {
+      "competitorId": 30,
+      "disciplineId": 2,
+      "id": 108,
+      "points": 11
+    },
+    {
+      "competitorId": 34,
+      "disciplineId": 2,
+      "id": 109,
+      "points": 32
+    },
+    {
+      "competitorId": 35,
+      "disciplineId": 2,
+      "id": 110,
+      "points": 17
+    },
+    {
+      "competitorId": 36,
+      "disciplineId": 2,
+      "id": 111,
+      "points": 18
+    },
+    {
+      "competitorId": 7,
+      "disciplineId": 2,
+      "id": 112,
+      "points": 23
+    },
+    {
+      "competitorId": 8,
+      "disciplineId": 2,
+      "id": 113,
+      "points": 20
+    },
+    {
+      "competitorId": 9,
+      "disciplineId": 2,
+      "id": 114,
+      "points": 1
+    },
+    {
+      "competitorId": 40,
+      "disciplineId": 2,
+      "id": 115,
+      "points": 26
+    },
+    {
+      "competitorId": 41,
+      "disciplineId": 2,
+      "id": 116,
+      "points": 29
+    },
+    {
+      "competitorId": 42,
+      "disciplineId": 2,
+      "id": 117,
+      "points": 0
+    },
+    {
+      "competitorId": 25,
+      "disciplineId": 2,
+      "id": 118,
+      "points": 4
+    },
+    {
+      "competitorId": 26,
+      "disciplineId": 2,
+      "id": 119,
+      "points": 17
+    },
+    {
+      "competitorId": 27,
+      "disciplineId": 2,
+      "id": 120,
+      "points": 17
+    },
+    {
+      "competitorId": 46,
+      "disciplineId": 4,
+      "id": 121,
+      "points": 0
+    },
+    {
+      "competitorId": 47,
+      "disciplineId": 4,
+      "id": 122,
+      "points": 9
+    },
+    {
+      "competitorId": 48,
+      "disciplineId": 4,
+      "id": 123,
+      "points": 0
+    },
+    {
+      "competitorId": 1,
+      "disciplineId": 4,
+      "id": 124,
+      "points": 7
+    },
+    {
+      "competitorId": 2,
+      "disciplineId": 4,
+      "id": 125,
+      "points": 3
+    },
+    {
+      "competitorId": 3,
+      "disciplineId": 4,
+      "id": 126,
+      "points": 17
+    },
+    {
+      "competitorId": 52,
+      "disciplineId": 4,
+      "id": 127,
+      "points": 30
+    },
+    {
+      "competitorId": 53,
+      "disciplineId": 4,
+      "id": 128,
+      "points": 10
+    },
+    {
+      "competitorId": 54,
+      "disciplineId": 4,
+      "id": 129,
+      "points": 12
+    },
+    {
+      "competitorId": 55,
+      "disciplineId": 4,
+      "id": 130,
+      "points": 19
+    },
+    {
+      "competitorId": 56,
+      "disciplineId": 4,
+      "id": 131,
+      "points": 10
+    },
+    {
+      "competitorId": 57,
+      "disciplineId": 4,
+      "id": 132,
+      "points": 11
+    },
+    {
+      "competitorId": 58,
+      "disciplineId": 4,
+      "id": 133,
+      "points": 0
+    },
+    {
+      "competitorId": 59,
+      "disciplineId": 4,
+      "id": 134,
+      "points": 0
+    },
+    {
+      "competitorId": 60,
+      "disciplineId": 4,
+      "id": 135,
+      "points": 0
+    },
+    {
+      "competitorId": 4,
+      "disciplineId": 2,
+      "id": 136,
+      "points": 19
+    },
+    {
+      "competitorId": 5,
+      "disciplineId": 2,
+      "id": 137,
+      "points": 5
+    },
+    {
+      "competitorId": 6,
+      "disciplineId": 2,
+      "id": 138,
+      "points": 12
+    },
+    {
+      "competitorId": 37,
+      "disciplineId": 2,
+      "id": 139,
+      "points": 22
+    },
+    {
+      "competitorId": 38,
+      "disciplineId": 2,
+      "id": 140,
+      "points": 4
+    },
+    {
+      "competitorId": 39,
+      "disciplineId": 2,
+      "id": 141,
+      "points": 0
+    },
+    {
+      "competitorId": 61,
+      "disciplineId": 4,
+      "id": 142,
+      "points": 3
+    },
+    {
+      "competitorId": 62,
+      "disciplineId": 4,
+      "id": 143,
+      "points": 3
+    },
+    {
+      "competitorId": 63,
+      "disciplineId": 4,
+      "id": 144,
+      "points": 23
+    },
+    {
+      "competitorId": 49,
+      "disciplineId": 4,
+      "id": 145,
+      "points": 0
+    },
+    {
+      "competitorId": 50,
+      "disciplineId": 4,
+      "id": 146,
+      "points": 13
+    },
+    {
+      "competitorId": 51,
+      "disciplineId": 4,
+      "id": 147,
+      "points": 0
+    },
+    {
+      "competitorId": 34,
+      "disciplineId": 1,
+      "id": 148,
+      "points": 1
+    },
+    {
+      "competitorId": 35,
+      "disciplineId": 1,
+      "id": 149,
+      "points": 1
+    },
+    {
+      "competitorId": 36,
+      "disciplineId": 1,
+      "id": 150,
+      "points": 2
+    },
+    {
+      "competitorId": 28,
+      "disciplineId": 1,
+      "id": 151,
+      "points": 2
+    },
+    {
+      "competitorId": 29,
+      "disciplineId": 1,
+      "id": 152,
+      "points": 2
+    },
+    {
+      "competitorId": 30,
+      "disciplineId": 1,
+      "id": 153,
+      "points": 2
+    },
+    {
+      "competitorId": 25,
+      "disciplineId": 1,
+      "id": 154,
+      "points": 2
+    },
+    {
+      "competitorId": 26,
+      "disciplineId": 1,
+      "id": 155,
+      "points": 0
+    },
+    {
+      "competitorId": 27,
+      "disciplineId": 1,
+      "id": 156,
+      "points": 0
+    },
+    {
+      "competitorId": 37,
+      "disciplineId": 1,
+      "id": 157,
+      "points": 2
+    },
+    {
+      "competitorId": 38,
+      "disciplineId": 1,
+      "id": 158,
+      "points": 0
+    },
+    {
+      "competitorId": 39,
+      "disciplineId": 1,
+      "id": 159,
+      "points": 0
+    },
+    {
+      "competitorId": 10,
+      "disciplineId": 1,
+      "id": 160,
+      "points": 0
+    },
+    {
+      "competitorId": 11,
+      "disciplineId": 1,
+      "id": 161,
+      "points": 2
+    },
+    {
+      "competitorId": 12,
+      "disciplineId": 1,
+      "id": 162,
+      "points": 2
+    },
+    {
+      "competitorId": 43,
+      "disciplineId": 1,
+      "id": 163,
+      "points": 3
+    },
+    {
+      "competitorId": 44,
+      "disciplineId": 1,
+      "id": 164,
+      "points": 2
+    },
+    {
+      "competitorId": 45,
+      "disciplineId": 1,
+      "id": 165,
+      "points": 0
+    },
+    {
+      "competitorId": 40,
+      "disciplineId": 1,
+      "id": 166,
+      "points": 2
+    },
+    {
+      "competitorId": 41,
+      "disciplineId": 1,
+      "id": 167,
+      "points": 3
+    },
+    {
+      "competitorId": 42,
+      "disciplineId": 1,
+      "id": 168,
+      "points": 0
+    },
+    {
+      "competitorId": 19,
+      "disciplineId": 1,
+      "id": 169,
+      "points": 0
+    },
+    {
+      "competitorId": 20,
+      "disciplineId": 1,
+      "id": 170,
+      "points": 0
+    },
+    {
+      "competitorId": 21,
+      "disciplineId": 1,
+      "id": 171,
+      "points": 0
+    },
+    {
+      "competitorId": 13,
+      "disciplineId": 1,
+      "id": 172,
+      "points": 3
+    },
+    {
+      "competitorId": 14,
+      "disciplineId": 1,
+      "id": 173,
+      "points": 0
+    },
+    {
+      "competitorId": 15,
+      "disciplineId": 1,
+      "id": 174,
+      "points": 1
+    },
+    {
+      "competitorId": 4,
+      "disciplineId": 1,
+      "id": 175,
+      "points": 3
+    },
+    {
+      "competitorId": 5,
+      "disciplineId": 1,
+      "id": 176,
+      "points": 0
+    },
+    {
+      "competitorId": 6,
+      "disciplineId": 1,
+      "id": 177,
+      "points": 1
+    },
+    {
+      "competitorId": 31,
+      "disciplineId": 1,
+      "id": 178,
+      "points": 1
+    },
+    {
+      "competitorId": 32,
+      "disciplineId": 1,
+      "id": 179,
+      "points": 0
+    },
+    {
+      "competitorId": 33,
+      "disciplineId": 1,
+      "id": 180,
+      "points": 1
+    },
+    {
+      "competitorId": 22,
+      "disciplineId": 1,
+      "id": 181,
+      "points": 3
+    },
+    {
+      "competitorId": 23,
+      "disciplineId": 1,
+      "id": 182,
+      "points": 4
+    },
+    {
+      "competitorId": 24,
+      "disciplineId": 1,
+      "id": 183,
+      "points": 3
+    },
+    {
+      "competitorId": 16,
+      "disciplineId": 1,
+      "id": 184,
+      "points": 3
+    },
+    {
+      "competitorId": 17,
+      "disciplineId": 1,
+      "id": 185,
+      "points": 2
+    },
+    {
+      "competitorId": 18,
+      "disciplineId": 1,
+      "id": 186,
+      "points": 1
+    }
+  ],
+  "teams": [
+    {
+      "category": "Ž",
+      "id": 1,
+      "members": [
+        {
+          "firstName": "Lea",
+          "id": 1,
+          "lastName": "Luksa"
+        },
+        {
+          "firstName": "Gordana",
+          "id": 2,
+          "lastName": "Zvosec"
+        },
+        {
+          "firstName": "Magdalena",
+          "id": 3,
+          "lastName": "Kristofic"
+        }
+      ],
+      "name": "KUD Donji Vidovec"
+    },
+    {
+      "category": "M",
+      "id": 2,
+      "members": [
+        {
+          "firstName": "Nenad",
+          "id": 4,
+          "lastName": "Luksa"
+        },
+        {
+          "firstName": "Josip",
+          "id": 5,
+          "lastName": "Luksa"
+        },
+        {
+          "firstName": "Vlado",
+          "id": 6,
+          "lastName": "Lukac"
+        }
+      ],
+      "name": "Vidovski zlatari"
+    },
+    {
+      "category": "M",
+      "id": 3,
+      "members": [
+        {
+          "firstName": "Denis",
+          "id": 7,
+          "lastName": "Embreus"
+        },
+        {
+          "firstName": "Karlo",
+          "id": 8,
+          "lastName": "Horvat"
+        },
+        {
+          "firstName": "Stjepan",
+          "id": 9,
+          "lastName": "Horvat"
+        }
+      ],
+      "name": "KUD Donji Vidovec"
+    },
+    {
+      "category": "M",
+      "id": 4,
+      "members": [
+        {
+          "firstName": "Mihael",
+          "id": 10,
+          "lastName": "Mihalic"
+        },
+        {
+          "firstName": "Mislav",
+          "id": 11,
+          "lastName": "Miser"
+        },
+        {
+          "firstName": "Ivan",
+          "id": 12,
+          "lastName": "Miser"
+        }
+      ],
+      "name": "DVD Donji Vidovec"
+    },
+    {
+      "category": "M",
+      "id": 5,
+      "members": [
+        {
+          "firstName": "Bozidar",
+          "id": 13,
+          "lastName": "Kucan"
+        },
+        {
+          "firstName": "Josip",
+          "id": 14,
+          "lastName": "Sarkanj"
+        },
+        {
+          "firstName": "Rudolf",
+          "id": 15,
+          "lastName": "Pongrac"
+        }
+      ],
+      "name": "SRD Mrena Donji Vidovec"
+    },
+    {
+      "category": "M",
+      "id": 6,
+      "members": [
+        {
+          "firstName": "Jabresic",
+          "id": 16,
+          "lastName": "Ivan"
+        },
+        {
+          "firstName": "Dvorski",
+          "id": 17,
+          "lastName": "Zlatko"
+        },
+        {
+          "firstName": "Kedenec",
+          "id": 18,
+          "lastName": "Bozidar"
+        }
+      ],
+      "name": "Tenis klub Sveta Marija"
+    },
+    {
+      "category": "M",
+      "id": 7,
+      "members": [
+        {
+          "firstName": "Dejan",
+          "id": 19,
+          "lastName": "Kocis"
+        },
+        {
+          "firstName": "Tihomir",
+          "id": 20,
+          "lastName": "Igrec"
+        },
+        {
+          "firstName": "Vinko",
+          "id": 21,
+          "lastName": "Pongrac"
+        }
+      ],
+      "name": "DVD Donji Mihaljevec"
+    },
+    {
+      "category": "M",
+      "id": 8,
+      "members": [
+        {
+          "firstName": "Dominik",
+          "id": 22,
+          "lastName": "Kanizaj"
+        },
+        {
+          "firstName": "Branko",
+          "id": 23,
+          "lastName": "Poljak"
+        },
+        {
+          "firstName": "Mucic",
+          "id": 24,
+          "lastName": "Zvjezdan"
+        }
+      ],
+      "name": "KUD Ivan Mustac Kantor Svetan Marija"
+    },
+    {
+      "category": "M",
+      "id": 9,
+      "members": [
+        {
+          "firstName": "Nebojsa",
+          "id": 25,
+          "lastName": "Novak"
+        },
+        {
+          "firstName": "Damir",
+          "id": 26,
+          "lastName": "Kos"
+        },
+        {
+          "firstName": "Antun",
+          "id": 27,
+          "lastName": "Mustac"
+        }
+      ],
+      "name": "Stolno teniski klub Sveta Marija"
+    },
+    {
+      "category": "M",
+      "id": 10,
+      "members": [
+        {
+          "firstName": "Romeo",
+          "id": 28,
+          "lastName": "Kanizaj"
+        },
+        {
+          "firstName": "Miljenko",
+          "id": 29,
+          "lastName": "Lastavec"
+        },
+        {
+          "firstName": "Zlatko",
+          "id": 30,
+          "lastName": "Pongrac"
+        }
+      ],
+      "name": "Ranceri Donji Mihaljevec"
+    },
+    {
+      "category": "M",
+      "id": 11,
+      "members": [
+        {
+          "firstName": "Dinko",
+          "id": 31,
+          "lastName": "Herc"
+        },
+        {
+          "firstName": "Filip",
+          "id": 32,
+          "lastName": "Sulj"
+        },
+        {
+          "firstName": "Dalibor",
+          "id": 33,
+          "lastName": "Gasparic"
+        }
+      ],
+      "name": "DVD Sveta Marija"
+    },
+    {
+      "category": "M",
+      "id": 12,
+      "members": [
+        {
+          "firstName": "Marijan",
+          "id": 34,
+          "lastName": "Pongrac"
+        },
+        {
+          "firstName": "Miroslav",
+          "id": 35,
+          "lastName": "Sulj"
+        },
+        {
+          "firstName": "Damir",
+          "id": 36,
+          "lastName": "Jambresic"
+        }
+      ],
+      "name": "NK Mladost Sveta Marij"
+    },
+    {
+      "category": "M",
+      "id": 13,
+      "members": [
+        {
+          "firstName": "Patrik",
+          "id": 37,
+          "lastName": "Strbad"
+        },
+        {
+          "firstName": "Mihael",
+          "id": 38,
+          "lastName": "Matotek"
+        },
+        {
+          "firstName": "Marcel",
+          "id": 39,
+          "lastName": "Matulin"
+        }
+      ],
+      "name": "NK Vidovcan"
+    },
+    {
+      "category": "M",
+      "id": 14,
+      "members": [
+        {
+          "firstName": "Bojan",
+          "id": 40,
+          "lastName": "Bartolic"
+        },
+        {
+          "firstName": "Zvonko",
+          "id": 41,
+          "lastName": "Igrec"
+        },
+        {
+          "firstName": "Jozo",
+          "id": 42,
+          "lastName": "Jezercic"
+        }
+      ],
+      "name": "NK Drava"
+    },
+    {
+      "category": "M",
+      "id": 15,
+      "members": [
+        {
+          "firstName": "Zdravko",
+          "id": 43,
+          "lastName": "Sabol"
+        },
+        {
+          "firstName": "Ivan",
+          "id": 44,
+          "lastName": "Kanizaj"
+        },
+        {
+          "firstName": "Ljubo",
+          "id": 45,
+          "lastName": "Poljak"
+        }
+      ],
+      "name": "Udruga umirovljenika Sveta Marija"
+    },
+    {
+      "category": "Ž",
+      "id": 16,
+      "members": [
+        {
+          "firstName": "Martina",
+          "id": 46,
+          "lastName": "Lovrek"
+        },
+        {
+          "firstName": "Dragana",
+          "id": 47,
+          "lastName": "Horvat"
+        },
+        {
+          "firstName": "Blazenka",
+          "id": 48,
+          "lastName": "Cenko"
+        }
+      ],
+      "name": "KUD Donji Vidovec 2"
+    },
+    {
+      "category": "Ž",
+      "id": 17,
+      "members": [
+        {
+          "firstName": "Antonija",
+          "id": 49,
+          "lastName": "Kanizaj"
+        },
+        {
+          "firstName": "Ivana",
+          "id": 50,
+          "lastName": "Poljak"
+        },
+        {
+          "firstName": "Dina",
+          "id": 51,
+          "lastName": "Igrec"
+        }
+      ],
+      "name": "KUD Ivan Mustac Kantor"
+    },
+    {
+      "category": "Ž",
+      "id": 18,
+      "members": [
+        {
+          "firstName": "Ivana",
+          "id": 52,
+          "lastName": "Igrec"
+        },
+        {
+          "firstName": "Ela",
+          "id": 53,
+          "lastName": "Igrec"
+        },
+        {
+          "firstName": "Sanja",
+          "id": 54,
+          "lastName": "Komorski"
+        }
+      ],
+      "name": "DVD Donji Mihaljevec"
+    },
+    {
+      "category": "Ž",
+      "id": 19,
+      "members": [
+        {
+          "firstName": "Anamari",
+          "id": 55,
+          "lastName": "Bartolic"
+        },
+        {
+          "firstName": "Marjana",
+          "id": 56,
+          "lastName": "Bartolic"
+        },
+        {
+          "firstName": "Rea",
+          "id": 57,
+          "lastName": "Bartolic"
+        }
+      ],
+      "name": "Drustvo Zena 1Donji Mihaljevec"
+    },
+    {
+      "category": "Ž",
+      "id": 20,
+      "members": [
+        {
+          "firstName": "Biserka",
+          "id": 58,
+          "lastName": "Strbad"
+        },
+        {
+          "firstName": "Milica",
+          "id": 59,
+          "lastName": "Habus"
+        },
+        {
+          "firstName": "Emilija",
+          "id": 60,
+          "lastName": "Igrec"
+        }
+      ],
+      "name": "Drustvo zena 2 Donji Mihaljevec"
+    },
+    {
+      "category": "Ž",
+      "id": 21,
+      "members": [
+        {
+          "firstName": "Katarina",
+          "id": 61,
+          "lastName": "Grivec"
+        },
+        {
+          "firstName": "Katarina",
+          "id": 62,
+          "lastName": "Jambresic"
+        },
+        {
+          "firstName": "Lidija",
+          "id": 63,
+          "lastName": "Poljak"
+        }
+      ],
+      "name": "Udruga umirovljenika Sveta Marija"
+    }
+  ]
+}
