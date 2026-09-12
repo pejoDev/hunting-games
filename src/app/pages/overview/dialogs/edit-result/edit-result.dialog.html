@@ -39,7 +39,8 @@
                 placeholder="Unesite broj bodova"
                 min="0"
                 [max]="selectedResult.discipline.maxPoints"
-                step="0.1" />
+                step="0.1"
+                (wheel)="$event.target.blur()" />
               <mat-icon matSuffix>score</mat-icon>
               <mat-hint>Maksimalno bodova: {{ selectedResult.discipline.maxPoints }}</mat-hint>
             </mat-form-field>
