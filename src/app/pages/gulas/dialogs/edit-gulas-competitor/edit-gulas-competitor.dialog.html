@@ -1,0 +1,56 @@
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>
+          <mat-icon color="primary">edit</mat-icon>
+          Editiraj kodno ime
+        </h2>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field appearance="outline" style="width:100%">
+          <mat-label>Odaberi kodno ime za uređivanje</mat-label>
+          <mat-select [(ngModel)]="selectedCompetitor" (selectionChange)="onCompetitorSelected()">
+            <mat-option value="">-- Odaberi kodno ime --</mat-option>
+            @for (competitor of availableCompetitors; track competitor) {
+              <mat-option [value]="competitor">{{competitor.codeName}}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matSuffix>soup_kitchen</mat-icon>
+        </mat-form-field>
+      </div>
+
+      @if (selectedCompetitor) {
+        <div class="form-group">
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>Kodno ime</mat-label>
+            <input matInput [(ngModel)]="codeName" placeholder="npr. JELEN" />
+            <mat-icon matSuffix>badge</mat-icon>
+          </mat-form-field>
+        </div>
+      }
+
+      <div class="dialog-actions">
+        <button mat-raised-button
+          color="warn"
+          (click)="deleteCompetitor()"
+          [disabled]="!selectedCompetitor"
+          class="delete-button">
+          <mat-icon>delete_forever</mat-icon>
+          Obriši
+        </button>
+
+        <div class="spacer"></div>
+
+        <button mat-button (click)="close()">
+          <mat-icon>close</mat-icon>
+          Odustani
+        </button>
+        <button mat-raised-button
+          color="primary"
+          (click)="save()"
+          [disabled]="!canSave()">
+          <mat-icon>check</mat-icon>
+          Spremi promjene
+        </button>
+      </div>
+    </div>

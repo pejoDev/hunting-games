@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PdfReportService } from './pdf-report.service';
-import { CompetitorRanking, TeamRanking, Discipline } from './models';
+import { CompetitorRanking, TeamRanking, Discipline, GulasRanking } from './models';
 
 describe('PdfReportService', () => {
   let service: PdfReportService;
@@ -288,6 +288,48 @@ describe('PdfReportService', () => {
 
     it('should do nothing when there are no teams for the category', () => {
       expect(() => service.exportStartingListsToPdf([], teamDisciplinesM, 'M')).not.toThrow();
+    });
+  });
+
+  describe('exportGulasRankingToPdf', () => {
+    // Ranks 1, 2 and 3 all present so the gold/silver/bronze highlighting branches run.
+    const gulasRankings: GulasRanking[] = [
+      {
+        rank: 1,
+        competitor: { id: 1, codeName: 'JELEN' },
+        criteriaSums: { boja: 13, izgled: 12, gustoca: 13, okus: 25, dojam: 12 },
+        totalPoints: 75
+      },
+      {
+        rank: 2,
+        competitor: { id: 2, codeName: 'SRNA' },
+        criteriaSums: { boja: 10, izgled: 10, gustoca: 10, okus: 20, dojam: 10 },
+        totalPoints: 60
+      },
+      {
+        rank: 3,
+        competitor: { id: 3, codeName: 'VUK' },
+        criteriaSums: { boja: 6, izgled: 6, gustoca: 6, okus: 12, dojam: 6 },
+        totalPoints: 36
+      }
+    ];
+
+    it('should generate a PDF without throwing for a populated ranking', () => {
+      expect(() => service.exportGulasRankingToPdf(gulasRankings)).not.toThrow();
+    });
+
+    it('should not throw for an empty ranking (no competitor has been scored by all three judges yet)', () => {
+      expect(() => service.exportGulasRankingToPdf([])).not.toThrow();
+    });
+
+    it('should not throw when the code name contains Croatian palatals', () => {
+      const withDiacritics: GulasRanking[] = [{
+        rank: 1,
+        competitor: { id: 1, codeName: 'ČAGALJ' },
+        criteriaSums: { boja: 15, izgled: 15, gustoca: 15, okus: 30, dojam: 15 },
+        totalPoints: 90
+      }];
+      expect(() => service.exportGulasRankingToPdf(withDiacritics)).not.toThrow();
     });
   });
 

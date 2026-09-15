@@ -1,0 +1,78 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.finish-button {
+  margin-left: auto;
+  background-color: #b71c1c !important;
+  color: #fff !important;
+}
+
+.incomplete-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.incomplete-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
+  background-color: #fafafa;
+  border-radius: 8px;
+}
+
+.code-name {
+  font-weight: 600;
+}
+
+.judge-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.judge-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  background-color: #eeeeee;
+  color: #777;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.judge-chip.done {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+@media (max-width: 768px) {
+  .control-panel > button {
+    width: 100%;
+  }
+
+  .finish-button {
+    margin-left: 0;
+  }
+}

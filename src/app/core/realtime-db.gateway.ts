@@ -15,14 +15,14 @@ export class RealtimeDbGateway {
     onValue(ref(this.db), (snapshot) => callback(snapshot.val()));
   }
 
-  setCollection(path: 'teams' | 'disciplines' | 'results', value: unknown): Promise<void> {
+  setCollection(path: 'teams' | 'disciplines' | 'results' | 'gulasCompetitors' | 'gulasScores', value: unknown): Promise<void> {
     return set(ref(this.db, path), value);
   }
 
   // Piše u više top-level kolekcija u JEDNOM atomarnom zahtjevu (Firebase multi-path update) -
   // ili se promijene sve navedene kolekcije, ili nijedna, za razliku od više odvojenih set()
   // poziva (npr. Promise.all) koji mogu djelomično uspjeti ako mreža ispadne između njih.
-  setCollections(updates: Partial<Record<'teams' | 'disciplines' | 'results', unknown>>): Promise<void> {
+  setCollections(updates: Partial<Record<'teams' | 'disciplines' | 'results' | 'gulasCompetitors' | 'gulasScores', unknown>>): Promise<void> {
     return update(ref(this.db), updates);
   }
 }

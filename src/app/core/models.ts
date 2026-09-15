@@ -49,3 +49,41 @@ export interface AppState {
   disciplines: Discipline[];
   results: Result[];
 }
+
+// Natjecatelj u ocjenjivanju lovačkog gulaša - identificiran isključivo kodnim imenom
+// (vidi docs/divlje_zivotinje.pdf), bez veze na Competitor/Team iz sportskog dijela natjecanja;
+// ocjenjivanje je namjerno anonimno.
+export interface GulasCompetitor {
+  id: number;
+  codeName: string;
+}
+
+// Pet kriterija s ocjenjivačkog listića (docs/Ocjenjivacki_listic_Lovacki_gulas_v3.docx),
+// jedan po sucu: boja/izgled/gustoća/dojam su 1-5, okus je 1-10 (max 30 po sucu).
+export interface GulasCriteriaScores {
+  boja: number;
+  izgled: number;
+  gustoca: number;
+  okus: number;
+  dojam: number;
+}
+
+export interface GulasScore {
+  id: number;
+  competitorId: number;
+  judge: 1 | 2 | 3;
+  criteria: GulasCriteriaScores;
+}
+
+export interface GulasRanking {
+  rank: number;
+  competitor: GulasCompetitor;
+  // Zbroj svakog kriterija kroz sva tri suca (max 15 za boja/izgled/gustoća/dojam, max 30 za okus).
+  criteriaSums: GulasCriteriaScores;
+  totalPoints: number; // Zbroj criteriaSums, max 90 (3 suca × max 30)
+}
+
+export interface GulasState {
+  competitors: GulasCompetitor[];
+  scores: GulasScore[];
+}

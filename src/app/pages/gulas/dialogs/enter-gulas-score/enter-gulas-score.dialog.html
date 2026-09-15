@@ -1,0 +1,119 @@
+    <div class="dialog-content">
+      <div class="dialog-header">
+        <h2>
+          <mat-icon color="primary">rate_review</mat-icon>
+          Unos ocjene
+        </h2>
+      </div>
+
+      @if (justCompletedCodeName) {
+        <div class="completed-panel">
+          <mat-icon color="primary">task_alt</mat-icon>
+          <div class="completed-text">
+            <strong>{{justCompletedCodeName}}</strong> ocijenjen - sva tri suca su unesena.
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button mat-button (click)="close()">
+            <mat-icon>close</mat-icon>
+            Zatvori
+          </button>
+          <button mat-raised-button color="primary" (click)="startNextCompetitor()">
+            <mat-icon>arrow_forward</mat-icon>
+            Sljedeći natjecatelj
+          </button>
+        </div>
+      } @else {
+        <div class="selection-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Kodno ime natjecatelja</mat-label>
+            <mat-select [(ngModel)]="selectedCompetitor" (selectionChange)="onCompetitorSelected()">
+              @for (competitor of availableCompetitors; track competitor) {
+                <mat-option [value]="competitor">{{competitor.codeName}}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>soup_kitchen</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Sudac</mat-label>
+            <mat-select [(ngModel)]="selectedJudge" (selectionChange)="onJudgeSelected()">
+              @for (judge of judges; track judge) {
+                <mat-option [value]="judge">Sudac {{judge}}</mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>gavel</mat-icon>
+          </mat-form-field>
+        </div>
+
+        @if (availableCompetitors.length === 0) {
+          <div class="empty-hint">
+            <mat-icon>info</mat-icon>
+            <span>Prvo dodajte barem jedno kodno ime natjecatelja.</span>
+          </div>
+        }
+
+        @if (selectedCompetitor) {
+          <div class="judge-progress">
+            @for (judge of judges; track judge) {
+              <span class="judge-chip" [class.done]="judgeState(judge) === 'done'" [class.current]="judgeState(judge) === 'current'">
+                <mat-icon>{{judgeState(judge) === 'done' ? 'check_circle' : (judgeState(judge) === 'current' ? 'edit' : 'radio_button_unchecked')}}</mat-icon>
+                Sudac {{judge}}
+              </span>
+            }
+          </div>
+        }
+
+        @if (selectedCompetitor && selectedJudge) {
+          @if (isAlreadyScored()) {
+            <div class="info-box">
+              <mat-icon>info</mat-icon>
+              <span>Ovaj sudac je već ocijenio ovog natjecatelja - spremanje će prepisati postojeću ocjenu.</span>
+            </div>
+          }
+
+          <div class="criteria-list">
+            @for (field of criteria; track field.key) {
+              <div class="form-group">
+                <mat-form-field appearance="outline" style="width:100%">
+                  <mat-label>{{field.label}} ({{field.min}}-{{field.max}})</mat-label>
+                  <input matInput
+                    type="number"
+                    [(ngModel)]="values[field.key]"
+                    [min]="field.min"
+                    [max]="field.max"
+                    step="1"
+                    (wheel)="$event.target.blur()" />
+                  <mat-hint>Raspon: {{field.min}} - {{field.max}}</mat-hint>
+                </mat-form-field>
+                @if (fieldError(field)) {
+                  <div class="field-error">
+                    <mat-icon color="warn">error</mat-icon>
+                    <span>{{fieldError(field)}}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="total-box">
+            <mat-icon>calculate</mat-icon>
+            <span>Ukupno bodova (ovaj sudac): <strong>{{getTotal()}}</strong> / 30</span>
+          </div>
+        }
+
+        <div class="dialog-actions">
+          <button mat-button (click)="close()">
+            <mat-icon>close</mat-icon>
+            Zatvori
+          </button>
+          <button mat-raised-button
+            color="primary"
+            (click)="save()"
+            [disabled]="!canSave() || saving">
+            <mat-icon>{{hasMoreJudgesAfterSave() ? 'arrow_forward' : 'check'}}</mat-icon>
+            {{hasMoreJudgesAfterSave() ? 'Spremi i nastavi na sljedećeg suca' : 'Spremi ocjenu'}}
+          </button>
+        </div>
+      }
+    </div>

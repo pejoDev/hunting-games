@@ -1,0 +1,177 @@
+.dialog-content {
+  padding: 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@media (min-width: 600px) {
+  .dialog-content {
+    min-width: 480px;
+  }
+}
+
+@media (max-width: 599px) {
+  .dialog-content {
+    padding: 16px;
+  }
+
+  .selection-row {
+    flex-direction: column;
+  }
+}
+
+.dialog-header h2 {
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selection-row {
+  display: flex;
+  gap: 12px;
+}
+
+.selection-row mat-form-field {
+  flex: 1;
+}
+
+.empty-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #fff3e0;
+  border-radius: 8px;
+  margin-top: 12px;
+  color: #e65100;
+  font-size: 14px;
+}
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.info-box mat-icon {
+  color: #1976d2;
+  margin-top: 2px;
+}
+
+.criteria-list {
+  margin-top: 16px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-top: 4px;
+  color: #c62828;
+  font-size: 13px;
+}
+
+.field-error mat-icon {
+  margin: 0;
+}
+
+.total-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-left: 4px solid #6b4423;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.judge-progress {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.judge-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  background-color: #eeeeee;
+  color: #777;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.judge-chip.done {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.judge-chip.current {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  font-weight: 600;
+}
+
+.completed-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background-color: #e8f5e9;
+  border-radius: 8px;
+  margin: 12px 0 24px;
+}
+
+.completed-panel mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #2e7d32;
+}
+
+.completed-text {
+  font-size: 15px;
+}

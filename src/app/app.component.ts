@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { OverviewComponent } from './pages/overview/overview.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AnalyticsComponent } from './pages/analytics/analytics.component';
+import { GulasComponent } from './pages/gulas/gulas.component';
 import { authGuard } from './core/auth.guard';
 import { AuthService } from './core/auth.service';
 
@@ -14,6 +15,8 @@ export const routes = [
   { path: '', component: OverviewComponent, canActivate: [authGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'analitika', component: AnalyticsComponent, canActivate: [authGuard] },
+  // Ocjenjivanje lovačkog gulaša (anonimno, po kodnom imenu) - samo za prijavljene organizatore/suce
+  { path: 'gulas', component: GulasComponent, canActivate: [authGuard] },
   // Javna, nezaštićena stranica za praćenje rezultata uživo (bez prijave)
   { path: 'pracenje', component: OverviewComponent, data: { readOnly: true } }
 ];
