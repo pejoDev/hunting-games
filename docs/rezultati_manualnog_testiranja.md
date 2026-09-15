@@ -197,6 +197,105 @@ Napomena: budući da su svi zahvaćeni natjecatelji bili unutar `TEST_` timova n
 
 ---
 
+# Dodatak (2026-09-15) — feature "Ocjenjivanje lovačkog gulaša"
+
+Testiranje sekcija N/O/P izvršeno je u ISTOJ sesiji u kojoj je feature implementiran (developer je ujedno i testirao), odmah nakon `npm run build`/`npm test` (222/222 ✅), putem Claude in Chrome browser automatizacije protiv već pokrenutog `ng serve` (:4200) spojenog na produkcijski Firebase. Testni podaci (kodno ime `JELEN`, bez `TEST_` prefiksa — nije korišten po dogovorenoj konvenciji jer je odmah nakon testa obrisan istim tokom kao P5) uklonjeni su s produkcijske baze na kraju sesije putem gumba "Gotovo ocjenjivanje" (vidi P5/P6 niže). Za razliku od 2026-09-08 sesije, ovdje NIJE korišten poseban throwaway tim/entitet koji ostaje u bazi do kraja — cijeli test je izveden i očišćen unutar jedne kontinuirane pjesme radnji nad JEDNIM kodnim imenom, pa opseg pokrivenih scenarija (posebice O1/O2 — višestruki natjecatelji radi provjere sortiranja) nije bio moguć bez dodatnog vremena; zabilježeno kao N/T niže gdje je relevantno.
+
+## N. Ocjenjivanje lovačkog gulaša — pristup, kodna imena i unos ocjena
+
+| # | Korak | Očekivano | Rezultat | Napomena |
+|---|-------|-----------|----------|----------|
+| N1 | `/gulas` neprijavljen | Preusmjerava na `/login` | N/T | Sesija je bila već prijavljena (postojeći `ng serve` s aktivnom auth sesijom u browseru); redirect logika je identična `authGuard`-u koji već štiti `/` i temeljito je testiran u K8, ali nije neovisno ponovljen za `/gulas` |
+| N2 | Otvori `/gulas`, prazno stanje | Empty state "Još nema natjecatelja..." | ✅ | Potvrđeno prvim screenshotom prije dodavanja bilo kojeg kodnog imena |
+| N3 | Gumbi bez ijednog kodnog imena | "Editiraj/obriši", "Unos ocjene", "Izvoz u PDF" disabled | ✅ | Potvrđeno vizualno (sivi/outline stil) na istom prvom screenshotu |
+| N3b | ⚠️ Isti screenshot, gumb "Gotovo ocjenjivanje" | Očekivano: i ovaj gumb disabled kad nema kodnih imena (`[disabled]="!hasCompetitors()"` u kodu) | ⚠️ **NALAZ** | Vizualno NEODVOJIV od enabled stanja — gumb je prikazan kao puni tamnocrveni pravokutnik i prije i poslije dodavanja prvog kodnog imena. Uzrok: `.finish-button { background-color: #b71c1c !important; color: #fff !important; }` u `gulas.component.scss` forsira boju bez obzira na Material-ovo `disabled` stanje (koje inače gumb posivi). Funkcionalno neškodljivo (klik na stvarno disabled gumb ne radi ništa), ali korisnik nema vizualnu potvrdu da je gumb neaktivan. **Isti obrazac (`!important` bez `:not(.mdc-button--disabled)` iznimke) postoji i u postojećem `.finish-competition-button` u `overview.component.scss` (sekcija M) — vjerojatno identičan, dosad nezabilježen, kozmetički nalaz i za "Gotovo natjecanje" gumb.** Nije blocker, preporuka: dodati `&:not(:disabled)` ili osloniti se na Material-ov `[disabled]` stil umjesto potpunog override-a boje |
+| N4 | Prazno polje u "Dodaj kodno ime" | "Dodaj" disabled | ✅ | Potvrđeno vizualno (muted/siva ikona+tekst) u screenshotu odmah nakon otvaranja dialoga, prije upisivanja |
+| N5 | Dodaj `JELEN`, potvrdi | Pojavljuje se u "U tijeku" s 3 sive "Sudac" oznake | ✅ | Potvrđeno — nova sekcija "U tijeku (1)" s tri `○ Sudac 1/2/3` (siva, `radio_button_unchecked` ikona) |
+| N6 | "Unos ocjene", odaberi natjecatelja + Sudac 1 | 5 polja s hintovima raspona | ✅ | Sva 4 labela točno odgovaraju listiću ("1. Boja gulaša", "2. Izgled divljačine (rezanje, mekoća)", "3. Odgovarajuća gustoća gulaša", "4. Okus divljačine", "5. Ukupan dojam"), rasponi 1-5/1-5/1-5/1-10/1-5 |
+| N7 | Upiši 5,4,5,9,zatim 4 | Živi zbroj se ažurira po polju | ✅ | Potvrđeno kroz dva međukoraka: "23 / 30" nakon 4 polja, "27 / 30" nakon 5. polja; "Spremi ocjenu" prelazi iz disabled u enabled točno u tom trenutku |
+| N8 | Vrijednost izvan raspona | Error poruka, disabled | N/T | Nije namjerno testirano (nije unesena nevažeća vrijednost tijekom sesije) |
+| N9 | Decimalna vrijednost | Error "cijeli broj", disabled | N/T | Nije testirano |
+| N10 | Spremi ocjenu suca 1 | Oznaka postaje zelena | ✅ | Potvrđeno — "✓ Sudac 1" (zeleno, `check_circle`) odmah nakon spremanja, bez ručnog refresha (Firebase real-time) |
+| N11 | Ponovno otvori za istog suca (već ocijenjen) | Info poruka + prefill | ✅ | Izravno potvrđeno (nenamjerno, greškom u navigaciji kroz dropdown) — pri pokušaju odabira "Sudac 3" slučajno je odabran već-ocijenjeni "Sudac 2", i dialog je ispravno prikazao plavu poruku "Ovaj sudac je već ocijenio ovog natjecatelja - spremanje će prepisati postojeću ocjenu" s poljima prefillanim točnim prethodno spremljenim vrijednostima (5,5,5,10) |
+| N12 | Promijeni polje i ponovno spremi (upsert) | Nema duplikata | N/T | Nakon N11 dialog je zatvoren biranjem ispravnog "Sudac 3" umjesto spremanja izmjene — upsert-bez-duplikata mehanizam nije eksplicitno re-testiran ovim putem, ALI je implicitno potvrđen kroz N10→N11 tok (isti par natjecatelj+sudac dosljedno vraća JEDAN zapis) |
+| N13 | Unesi sva 3 suca | Natjecatelj prelazi iz "U tijeku" u "Poredak" | ✅ | Potvrđeno — nakon spremanja trećeg suca (Sudac 3: 3,3,3,6,3=18), sekcija "U tijeku" nestaje, "Poredak" prikazuje JELEN s Rang 1, Ukupno 75 (27+30+18, provjereno ručnim zbrajanjem) |
+| N14 | "Editiraj/obriši", odaberi kodno ime | Prefill + enabled gumbi | ✅ | Potvrđeno — "Kodno ime" polje prefillano s "JELEN", "Obriši"/"Spremi promjene" oba enabled |
+| N15 | Preimenuj i spremi | Ažurira se u poretku | N/T | Dialog zatvoren tipkom Escape (bez spremanja) radi izbjegavanja nepotrebne izmjene testnog naziva prije PDF provjere |
+| N16-N18 | Obriši kodno ime (confirm/cancel/potvrdi) preko "Editiraj/obriši" dialoga | Cascade brisanje ocjena, s vidljivim `confirm()` tekstom i mogućnošću Cancel | N/T | Čišćenje testnih podataka umjesto ovoga izvedeno preko "Gotovo ocjenjivanje" (vidi P niže) — pojedinačni delete-jednog-natjecatelja tok (s pravim, ne-overridanim `confirm()` dijalogom) nije zaseban testiran |
+| N19 | Poredak prikazuje samo kompletne natjecatelje | Potvrđeno kroz N13 (jedini test natjecatelj) | ✅ | Prije trećeg suca, JELEN je bio isključivo u "U tijeku", nikad u "Poredak" — potvrđeno na svakom međukoraku |
+
+## O. Ocjenjivanje lovačkog gulaša — poredak i PDF izvoz
+
+| # | Korak | Očekivano | Rezultat | Napomena |
+|---|-------|-----------|----------|----------|
+| O1 | Sortiranje silazno, rang 1 = zlatno | Najviši zbroj = rang 1, zlatna oznaka | ✅ (djelomično) | Potvrđena zlatna oznaka/`row-winner` za jedini (rang 1) redak; STVARNO sortiranje između više natjecatelja nije testirano (samo 1 test natjecatelj u sesiji) |
+| O2 | Srebro/broncano za rang 2/3 | Vidljivo s 3+ natjecatelja | N/T | Nema dovoljno test podataka u ovoj sesiji (isti razlog kao O1) |
+| O3 | Stupci tablice | Rang, Kodno ime, Boja(15), Izgled(15), Gustoća(15), Okus(30), Dojam(15), Ukupno(90) | ✅ | Svi stupci prisutni točno tim redoslijedom i oznakama maksimuma |
+| O4 | Zbroj po kriteriju = zbroj triju sudaca | Boja 5+5+3=13, Izgled 4+5+3=12, Gustoća 5+5+3=13, Okus 9+10+6=25, Dojam 4+5+3=12 | ✅ | Svih pet vrijednosti u tablici podudara se točno s ručnim zbrojem unesenih ocjena triju sudaca |
+| O5 | Ukupno = zbroj 5 stupaca kriterija | 13+12+13+25+12=75 | ✅ | Tablica prikazuje točno 75 |
+| O6 | "Izvoz u PDF" disabled kad prazno | Da | ✅ | Potvrđeno prvim screenshotom (prije dodavanja podataka) |
+| O7 | Klikni "Izvoz u PDF" | Preuzima `gulas-poredak-[datum].pdf` | ✅ | Datoteka `gulas-poredak-2026-09-15.pdf` potvrđena u `~/Downloads` odmah nakon klika |
+| O8 | Sadržaj PDF-a | Brendirano zaglavlje, naslov, napomena o maksimumima, tablica, top-3 boje, footer | ✅ | Provjereno čitanjem PDF-a alatom — svi elementi prisutni: "MEMORIJAL DRAGUTIN CENKO" banner + LD Patka logo/podnaslov, "Ocjenjivanje lovackog gulasa", napomena "Zbroj ocjena tri suca po kriteriju - max...", tablica sa svih 8 stupaca, redak 1 zlatno pozadinski istaknut, footer "Izvjestaj generiran: 15. 09. 2026." + "Stranica 1 od 1" |
+| O9 | Brojevi u PDF-u = brojevi na ekranu | Identični | ✅ | 13/12/13/25/12/75 — identično oboje |
+| O10 | Hrvatski dijakritici stripani u PDF-u | Da | ✅ | "Ocjenjivanje lovackog gulasa" (ne "lovačkog gulaša"), "Gustoca" (ne "Gustoća") — dosljedno s H9 ponašanjem |
+
+## P. Ocjenjivanje lovačkog gulaša — "Gotovo ocjenjivanje" (reset)
+
+> Napomena o metodi: identično B7 iz 2026-09-08 sesije, nativni `confirm()` blokira browser-automatizaciju, pa je test izveden kontroliranim JS override-om `window.confirm = () => true` prije klika na "Gotovo ocjenjivanje" — stvarna komponentna logika (`finishGulas()` → `GulasService.resetGulas()`) i dalje se izvršava i provjerava, ALI stvaran tekst/izgled `confirm()` dijaloga i Cancel-put nisu vizualno potvrđeni ovim pristupom (isto ograničenje kao dolje kod P3/P4).
+
+| # | Korak | Očekivano | Rezultat | Napomena |
+|---|-------|-----------|----------|----------|
+| P1 | Izgled gumba "Gotovo ocjenjivanje" | Crven, ikona kante, tooltip | ⚠️ (djelomično) | Crvena boja i ikona kante potvrđene vizualno; tooltip tekst nije eksplicitno hoverano/pročitano. Vidi i N3b — disabled stanje ovog gumba nije vizualno razlučivo |
+| P2 | Disabled kad nema kodnih imena | Da | ⚠️ | Vidi N3b — gumb funkcionalno JEST disabled (`[disabled]="!hasCompetitors()"` u kodu, klik ne bi ništa učinio), ali VIZUALNO se ne razlikuje od enabled stanja |
+| P3 | `confirm()` navodi točan broj | Da | N/T | `window.confirm` je override-an da uvijek vraća `true` prije klika (vidi napomenu o metodi iznad) — stvaran tekst dijaloga nije pročitan/potvrđen |
+| P4 | Cancel u confirm dijalogu | Ništa se ne briše | N/T | Isti razlog kao P3 — override je uvijek vraćao `true`, put za `false`/Cancel nije testiran u ovoj sesiji (Cancel-put JE testiran za analogni "Gotovo natjecanje" gumb u M3 iz 2026-09-08 sesije, ista implementacijska logika) |
+| P5 | Potvrdi — briše sve, prikazuje snackbar | Da | ✅ | Nakon klika (s override-anim `confirm()`), "Poredak" se odmah isprazni na empty state, i pojavljuje se snackbar s TOČNIM tekstom "Ocjenjivanje gulaša je završeno. Podaci su obrisani." |
+| P6 | Grane baze prazne nakon reseta | `gulasCompetitors`/`gulasScores` prazne | ✅ (djelomično) | Potvrđeno posredno kroz UI (empty state u "Poredak", "U tijeku" sekcija nestala) — nije provjereno izravno u Firebase konzoli (nema pristupa), niti je dodano novo kodno ime radi provjere da ID broji ispočetka |
+
+### Sažetak — sekcije N/O/P (Gulaš)
+
+| Sekcija | Ukupno TC | Prošlo | Pao | N/T | Napomena |
+|---|---|---|---|---|---|
+| N — Kodna imena i unos ocjena | 19 (+1 nalaz N3b) | 12 | 0 | 6 | N3b nije test slučaj iz plana nego dodatni nalaz otkriven usput |
+| O — Poredak i PDF izvoz | 10 | 8 | 0 | 2 | O1/O2 djelomično/N-T zbog samo 1 test natjecatelja u sesiji |
+| P — Gotovo ocjenjivanje (reset) | 6 | 2 | 0 | 4 | P1/P2 djelomično zbog N3b nalaza; P3/P4 N/T zbog `confirm()` override metode |
+| **UKUPNO (N+O+P)** | **35** | **22** | **0** | **13** | Nula funkcionalnih bugova pronađeno; 1 kozmetički nalaz (N3b) koji vjerojatno pogađa i postojeći "Gotovo natjecanje" gumb |
+
+**Testirano na:** grana `feature/analitcs-and-soup` (isti commit u kojem je feature implementiran), verzija 1.0.0
+**Testirao:** Claude (automatizirano putem Claude in Chrome, developer = testirao u istoj sesiji kao implementacija — NE nezavisna/blind provjera)
+**Datum:** 2026-09-15
+
+**Zaključak (spremno za produkciju?):** Uvjetno da. Osnovni tok (dodavanje kodnog imena, unos ocjena sva tri suca s upsert/prefill ponašanjem, prijelaz u konačni poredak, matematička ispravnost zbrajanja po kriteriju i ukupno, PDF izvoz s ispravnim sadržajem) je izravno i točno potvrđen. Otvoreno prije produkcije: (1) N3b — kozmetički popravak `.finish-button`/`.finish-competition-button` disabled stila (nizak prioritet, ne blokira funkcionalnost); (2) validacija granica ocjena (N8/N9), pojedinačni delete-tok s pravim `confirm()` (N16-18/P3/P4), i sortiranje s 3+ natjecatelja (O1/O2) preporučuje se ručno dovršiti od strane organizatora prije prvog stvarnog korištenja, jer ovi scenariji zahtijevaju ili više test podataka ili interakciju s nativnim browser dijalozima izvan pouzdanog dosega ove automatizacije.
+
+---
+
+# Dodatak 2 (2026-09-15) — auto-advance tok u "Unos ocjene"
+
+Nakon inicijalnog testiranja iz "Dodatak (2026-09-15)" iznad, na korisnikov zahtjev dialog "Unos ocjene" (`EnterGulasScoreDialog`) je proširen auto-advance tokom (vidi ažurirani opis i N6-N18 u `MANUALNO-TESTIRANJE.md`): nakon spremanja jednog suca, dialog se ne zatvara nego automatski prelazi na sljedećeg neocijenjenog suca za istog natjecatelja, a kad su sva tri suca uneseni prikazuje se "gotovo" panel s opcijom "Sljedeći natjecatelj" (dialog ostaje otvoren). Testirano izravno u browseru (Claude in Chrome) protiv produkcijske baze, na postojećem kodnom imenu **"Jelen"** (stvaran zapis koji je u bazi već imao Sudac 1 ocijenjenog prije početka ove test sesije — vjerojatno korisnikov vlastiti test dok je opisivao zahtjev) umjesto namjenskog `TEST_` zapisa, jer je iskorištena prilika da se odmah provjeri i scenarij "natjecatelj već ima jednog suca gotovog" (N6/N15 iz ažuriranog plana). Zapis je namjerno OSTAVLJEN u bazi nakon testa (dovršen, rang 1, 65 bodova) — nije obrisan poput `TEST_` zapisa u prijašnjim sesijama, jer nije jasno je li riječ o korisnikovom stvarnom podatku; korisnik je o tome eksplicitno obaviješten u chatu.
+
+| # | Korak | Očekivano | Rezultat | Napomena |
+|---|-------|-----------|----------|----------|
+| N6 | Odaberi natjecatelja s barem jednim ocijenjenim sucem | "Sudac" se automatski postavlja na PRVOG neocijenjenog (ne uvijek na 1) | ✅ | Direktno potvrđeno — "Jelen" je imao Sudac 1 gotov; odabirom natjecatelja dialog je automatski postavio "Sudac 2" (NE "Sudac 1"), s progress oznakama "✓ Sudac 1", "✎ Sudac 2" (trenutni, plavo), "○ Sudac 3" |
+| N6 (fresh) | Isto, za natjecatelja BEZ ijedne ocjene | Auto-select na "Sudac 1" | ⚠️ N/T (logikom potvrđeno) | Nije direktno testirano na svježem (0/3) natjecatelju u ovoj sesiji — provjereno samo posredno kroz kod: `nextUnscoredJudge()` vraća prvog suca iz `[1,2,3]` bez zapisa, pa za natjecatelja s 0 ocjena mora vratiti 1 (ista funkcija čije "preskoči već ocijenjene" ponašanje JE izravno potvrđeno u N6 retku iznad) |
+| N7 | Unos 5 kriterija, live zbroj, dinamički label gumba | "Spremi i nastavi na sljedećeg suca" dok preostaju suci | ✅ | Potvrđeno za Sudac 2 (popunjen 4/4/4/8/4, zbroj uživo 12→24, gumb "Spremi i nastavi na sljedećeg suca" prikazan i enabled na 24/30) |
+| N8/N9 | Validacija raspona/cijelog broja | Error, disabled | N/T | Nije namjerno testirano u ovoj sesiji (isto kao ranije) |
+| N10 | Spremi (nije zadnji preostali sudac) | Dialog NE zatvara, auto-advance na sljedećeg neocijenjenog, polja prazna | ✅ | Nakon spremanja Sudac 2 (klik "Spremi i nastavi na sljedećeg suca"), dialog je ostao otvoren i automatski prešao na "Sudac 3" sa svih 5 polja praznim; u pozadini (glavna stranica, iza dialoga) "U tijeku" oznaka za "Jelen" pokazala "✓ Sudac 1 ✓ Sudac 2" odmah, bez zatvaranja dialoga (Firebase real-time) |
+| N11 | Isto ponašanje za pretposljednjeg suca | Auto-advance na zadnjeg | ✅ | Potvrđeno kroz isti korak kao N10 (Sudac 2 → Sudac 3 prijelaz) |
+| N12 | Zadnji preostali sudac popunjen | Label gumba mijenja se u "Spremi ocjenu" (bez "...i nastavi") | ✅ | Za Sudac 3 (3/3/3/6/3=18), gumb je ispravno prikazao "Spremi ocjenu" (ikona kvačice, ne strelice) |
+| N13 | Spremi zadnjeg (trećeg) suca | Prikazuje se "gotovo" panel, natjecatelj prelazi u "Poredak" | ✅ | Nakon spremanja Sudac 3, forma je nestala i prikazan je zeleni panel s ikonom `task_alt`: "**Jelen** ocijenjen - sva tri suca su unesena." s gumbima "Zatvori"/"Sljedeći natjecatelj"; u pozadini "U tijeku" sekcija je nestala, a "Poredak" je odmah prikazao "Jelen" na rangu 1 s Ukupno=65 — sve dok je dialog i dalje bio otvoren |
+| N14 | "Sljedeći natjecatelj" na gotovo panelu | Forma se resetira, dialog ostaje otvoren | ✅ | Klik je vratio formu na prazan odabir ("Kodno ime natjecatelja"/"Sudac" oba prazna), dialog nije zatvoren (naslov "Unos ocjene" i dalje vidljiv) |
+| N15 | Ponovni odabir kompletnog natjecatelja | Auto-select na Sudac 1 radi ispravke | N/T | Nije ponovljeno u ovoj sesiji nakon N14 (dialog zatvoren umjesto toga radi provjere N18-ekvivalenta) |
+| N16/N17 | Ručni odabir već ocijenjenog suca → info+prefill, upsert bez duplikata | Da | N/T (ovom sesijom) | Nije ponovljeno ovom prilikom — identičan mehanizam (`onJudgeSelected()`/prefill) izravno je potvrđen u prvom "Dodatak (2026-09-15)" testiranju (stari N11/N12), a kod nije mijenjan za ovaj dio |
+| N18 | "Zatvori" umjesto "Spremi" čuva već spremljene suce | Da | ✅ (posredno) | Nakon N14, dialog je zatvoren klikom na "Zatvori" (na praznoj formi) — sve tri prethodno spremljene ocjene za "Jelen" ostale su netaknute u "Poredak" tablici i nakon zatvaranja |
+
+**Testirano na:** grana `feature/analitcs-and-soup`, commit s auto-advance izmjenom (`enter-gulas-score.dialog.ts/html/scss`, `gulas.component.ts`)
+**Testirao:** Claude (automatizirano putem Claude in Chrome, developer = testirao u istoj sesiji kao implementacija)
+**Datum:** 2026-09-15
+
+**Zaključak:** Auto-advance tok radi točno kako je traženo — ključni scenarij iz korisnikovog zahtjeva (nastavak na sljedećeg suca bez zatvaranja dialoga, uključujući ispravan "preskoči već ocijenjenog suca" kad se nastavlja rad na djelomično ocijenjenom natjecatelju) izravno je potvrđen na stvarnom (ne `TEST_`) zapisu. `npm run build` i `npx ng test` (222/222) prolaze bez grešaka nakon izmjene. Konzola bez grešaka tijekom sesije. Preostaje ručno potvrditi N6(fresh)/N15/N16/N17 (nisu ponovljeni ovom prilikom, ali oslanjaju se na kod koji nije mijenjan ili je logički identičan izravno testiranom dijelu) prije produkcije.
+
+---
+
 ## Sažetak / sign-off
 
 | Sekcija | Ukupno TC | Prošlo | Pao | N/T | Napomena |

@@ -1,0 +1,133 @@
+<div class="page-header">
+  <button mat-stroked-button routerLink="/">
+    <mat-icon>arrow_back</mat-icon>
+    Natrag
+  </button>
+  <h2>
+    <mat-icon style="vertical-align: middle; margin-right: 8px;">soup_kitchen</mat-icon>
+    Ocjenjivanje lovačkog gulaša
+  </h2>
+</div>
+
+<div class="control-panel">
+  <button mat-raised-button color="primary" (click)="openAddCompetitor()">
+    <mat-icon>add</mat-icon>
+    Dodaj kodno ime
+  </button>
+  <button mat-raised-button color="accent" (click)="openEditCompetitor()" [disabled]="!hasCompetitors()">
+    <mat-icon>edit</mat-icon>
+    Editiraj / obriši kodno ime
+  </button>
+  <button mat-raised-button color="warn" (click)="openEnterScore()" [disabled]="!hasCompetitors()">
+    <mat-icon>rate_review</mat-icon>
+    Unos ocjene
+  </button>
+  <button mat-raised-button
+    color="primary"
+    [disabled]="rankings.length === 0"
+    (click)="exportToPdf()"
+    class="pdf-button">
+    <mat-icon>picture_as_pdf</mat-icon>
+    Izvoz u PDF
+  </button>
+  <button mat-raised-button color="warn" (click)="finishGulas()" [disabled]="!hasCompetitors()"
+    matTooltip="Briše sva kodna imena i sve ocjene te priprema aplikaciju za sljedeće ocjenjivanje gulaša."
+    class="finish-button">
+    <mat-icon>delete_forever</mat-icon>
+    Gotovo ocjenjivanje
+  </button>
+</div>
+
+<!-- Natjecatelji kojima nedostaje ocjena barem jednog suca - ne ulaze u poredak dok se ne dovrše -->
+@if (incomplete.length > 0) {
+  <div class="card">
+    <div class="section-header">
+      <mat-icon color="accent">hourglass_top</mat-icon>
+      <h3>U tijeku ({{incomplete.length}})</h3>
+    </div>
+    <div class="incomplete-list">
+      @for (entry of incomplete; track entry.competitor.id) {
+        <div class="incomplete-item">
+          <span class="code-name">{{entry.competitor.codeName}}</span>
+          <div class="judge-chips">
+            @for (judge of [1, 2, 3]; track judge) {
+              <span class="judge-chip" [class.done]="judgeStatus(entry.judgesScored, judge)">
+                <mat-icon>{{judgeStatus(entry.judgesScored, judge) ? 'check_circle' : 'radio_button_unchecked'}}</mat-icon>
+                Sudac {{judge}}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Konačni poredak - samo natjecatelji ocijenjeni od sva tri suca -->
+<div class="card">
+  <div class="section-header">
+    <mat-icon color="primary">emoji_events</mat-icon>
+    <h3>Poredak</h3>
+  </div>
+
+  @if (rankings.length === 0) {
+    <div class="empty-state">
+      <mat-icon>sentiment_dissatisfied</mat-icon>
+      <p>Još nema natjecatelja koje su ocijenila sva tri suca</p>
+    </div>
+  }
+
+  @if (rankings.length > 0) {
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="rankings" class="modern-table">
+        <ng-container matColumnDef="rank">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon style="vertical-align: middle; margin-right: 8px;">military_tech</mat-icon>
+            Rang
+          </th>
+          <td mat-cell *matCellDef="let r">
+            <span [class]="getRankClass(r.rank)">{{r.rank}}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="codeName">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon style="vertical-align: middle; margin-right: 8px;">badge</mat-icon>
+            Kodno ime
+          </th>
+          <td mat-cell *matCellDef="let r">{{r.competitor.codeName}}</td>
+        </ng-container>
+        <ng-container matColumnDef="boja">
+          <th mat-header-cell *matHeaderCellDef>Boja (15)</th>
+          <td mat-cell *matCellDef="let r">{{r.criteriaSums.boja}}</td>
+        </ng-container>
+        <ng-container matColumnDef="izgled">
+          <th mat-header-cell *matHeaderCellDef>Izgled (15)</th>
+          <td mat-cell *matCellDef="let r">{{r.criteriaSums.izgled}}</td>
+        </ng-container>
+        <ng-container matColumnDef="gustoca">
+          <th mat-header-cell *matHeaderCellDef>Gustoća (15)</th>
+          <td mat-cell *matCellDef="let r">{{r.criteriaSums.gustoca}}</td>
+        </ng-container>
+        <ng-container matColumnDef="okus">
+          <th mat-header-cell *matHeaderCellDef>Okus (30)</th>
+          <td mat-cell *matCellDef="let r">{{r.criteriaSums.okus}}</td>
+        </ng-container>
+        <ng-container matColumnDef="dojam">
+          <th mat-header-cell *matHeaderCellDef>Dojam (15)</th>
+          <td mat-cell *matCellDef="let r">{{r.criteriaSums.dojam}}</td>
+        </ng-container>
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon style="vertical-align: middle; margin-right: 8px;">calculate</mat-icon>
+            Ukupno (90)
+          </th>
+          <td mat-cell *matCellDef="let r">
+            <span class="total-points">{{r.totalPoints}}</span>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" [class]="getRowClass(row.rank)"></tr>
+      </table>
+    </div>
+  }
+</div>

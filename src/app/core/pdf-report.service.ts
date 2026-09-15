@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { CompetitorRanking, TeamRanking, Discipline, Team } from './models';
+import { CompetitorRanking, TeamRanking, Discipline, Team, GulasRanking } from './models';
 import { PDF_LOGO_DATA_URL } from './pdf-logo';
 
 @Injectable({
@@ -577,6 +577,92 @@ export class PdfReportService {
 
     // Save the PDF - normalize filename
     const filename = this.normalizeText(`kompletan-izvjestaj${category ? '-' + category : ''}-${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(filename);
+  }
+
+  /**
+   * Konačni poredak ocjenjivanja lovačkog gulaša (vidi GulasService.getRankings - samo
+   * natjecatelji koje su ocijenila sva tri suca). Stupci prate ocjenjivački listić
+   * (docs/Ocjenjivacki_listic_Lovacki_gulas_v3.docx): redni broj, kodno ime (natjecatelji su
+   * namjerno anonimni - nema stvarnog imena u aplikaciji), zbroj bodova po svakom od pet
+   * kriterija kroz sva tri suca, te ukupno (max 90).
+   */
+  exportGulasRankingToPdf(data: GulasRanking[]): void {
+    const doc = new jsPDF();
+
+    let textY = this.drawBrandedHeader(doc, 'Ocjenjivanje lovackog gulasa');
+
+    doc.setFontSize(10);
+    doc.setTextColor(60);
+    doc.text(
+      this.normalizeText('Zbroj ocjena tri suca po kriteriju - max. Boja/Izgled/Gustoca/Dojam 15, Okus 30, Ukupno 90'),
+      105,
+      textY,
+      { align: 'center' }
+    );
+    textY += 10;
+
+    const columns = ['Rang', 'Kodno ime', 'Boja', 'Izgled', 'Gustoca', 'Okus', 'Ukupan dojam', 'Ukupno']
+      .map(col => this.normalizeText(col));
+
+    const rows = data.map(row => [
+      row.rank.toString(),
+      this.normalizeText(row.competitor.codeName),
+      row.criteriaSums.boja.toString(),
+      row.criteriaSums.izgled.toString(),
+      row.criteriaSums.gustoca.toString(),
+      row.criteriaSums.okus.toString(),
+      row.criteriaSums.dojam.toString(),
+      row.totalPoints.toString()
+    ]);
+
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: textY,
+      styles: {
+        fontSize: 10,
+        cellPadding: 4,
+      },
+      headStyles: {
+        fillColor: this.COLOR_RUST,
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 15 }, // Rang
+        [columns.length - 1]: { halign: 'right', fontStyle: 'bold' } // Ukupno
+      },
+      didParseCell: (data) => {
+        // Highlight top 3 positions
+        if (data.column.index === 0 && data.section === 'body') {
+          const rank = parseInt(data.cell.text[0]);
+          if (rank === 1) {
+            data.cell.styles.fillColor = [255, 215, 0]; // Gold
+            data.cell.styles.textColor = [0, 0, 0];
+          } else if (rank === 2) {
+            data.cell.styles.fillColor = [192, 192, 192]; // Silver
+            data.cell.styles.textColor = [0, 0, 0];
+          } else if (rank === 3) {
+            data.cell.styles.fillColor = [205, 127, 50]; // Bronze
+            data.cell.styles.textColor = [255, 255, 255];
+          }
+        }
+      }
+    });
+
+    // Footer
+    const pageCount = doc.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.setTextColor(128);
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      const date = new Date().toLocaleDateString('hr-HR');
+      doc.text(this.normalizeText(`Izvještaj generiran: ${date}`), 15, doc.internal.pageSize.height - 10);
+      doc.text(`Stranica ${i} od ${pageCount}`, doc.internal.pageSize.width - 40, doc.internal.pageSize.height - 10);
+    }
+
+    const filename = `gulas-poredak-${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
   }
 

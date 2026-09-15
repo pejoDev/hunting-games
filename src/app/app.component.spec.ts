@@ -8,6 +8,8 @@ import { FakeAuthGateway } from './testing/fake-auth.gateway';
 import { provideRouter } from '@angular/router';
 import { OverviewComponent } from './pages/overview/overview.component';
 import { LoginComponent } from './pages/login/login.component';
+import { AnalyticsComponent } from './pages/analytics/analytics.component';
+import { GulasComponent } from './pages/gulas/gulas.component';
 
 describe('AppComponent', () => {
   beforeEach(() => {
@@ -35,5 +37,24 @@ describe('AppComponent', () => {
 
   it('should route /login to the login screen', () => {
     expect(routes[1]).toEqual({ path: 'login', component: LoginComponent });
+  });
+
+  it('should route /analitika to the analytics screen, guarded by login', () => {
+    const route = routes.find(r => r.path === 'analitika')!;
+    expect(route.component).toBe(AnalyticsComponent);
+    expect(route.canActivate).toBeTruthy();
+  });
+
+  it('should route /gulas to the gulaš scoring screen, guarded by login', () => {
+    const route = routes.find(r => r.path === 'gulas')!;
+    expect(route.component).toBe(GulasComponent);
+    expect(route.canActivate).toBeTruthy();
+  });
+
+  it('should route /pracenje to the read-only overview screen without a login guard', () => {
+    const route = routes.find(r => r.path === 'pracenje')!;
+    expect(route.component).toBe(OverviewComponent);
+    expect(route.canActivate).toBeUndefined();
+    expect((route as any).data).toEqual({ readOnly: true });
   });
 });

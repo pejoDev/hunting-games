@@ -271,6 +271,93 @@ Crveni gumb u kontrolnoj traci (`OverviewComponent.finishCompetition()`, servisn
 | M9 | Real-time provjera: otvori admin `/` u tabu 1 i `/pracenje` u tabu 2 (ili incognito), u tabu 1 izvrši M4 | Tab 2 se automatski isprazni (poredak nestaje, prikazuje empty state) BEZ ručnog refresha, u par sekundi (Firebase `onValue` real-time) | ☐ |
 | M10 | Pokušaj klika na gumb dva puta brzo zaredom (prije nego stigneš odgovoriti na prvi confirm) | Drugi `confirm()` se ne pojavljuje dok je prvi otvoren (browser dialog je blokirajući) — nema mogućnosti pokrenuti dvije istovremene `resetCompetition()` mutacije | ☐ |
 
+## N. Ocjenjivanje lovačkog gulaša — pristup, kodna imena i unos ocjena
+
+Novi, neovisni feature (ruta `/gulas`, iza `authGuard`, kao i `/`) za anonimno ocjenjivanje lovačkog gulaša po **kodnom imenu** (primjer popisa naziva: `docs/divlje_zivotinje.pdf`), prema pet kriterija s papirnatog ocjenjivačkog listića (`docs/Ocjenjivacki_listic_Lovacki_gulas_v3.docx`): Boja gulaša (1-5), Izgled divljačine/rezanje-mekoća (1-5), Odgovarajuća gustoća gulaša (1-5), Okus divljačine (1-10), Ukupan dojam (1-5) — max 30 bodova po sucu, max 90 ukupno (3 suca). Podaci se pišu u zasebne top-level grane Firebase baze (`gulasCompetitors`, `gulasScores`) preko `GulasService` (`core/gulas.service.ts`), potpuno odvojeno od `teams`/`disciplines`/`results` — namjerno nema nikakve veze s postojećim natjecateljima/timovima iz sportskog dijela natjecanja. Stranica: `pages/gulas/gulas.component.ts`.
+
+Dijalog "Unos ocjene" (`EnterGulasScoreDialog`) ima **auto-advance tok**: nakon spremanja jednog suca za natjecatelja, dialog se NE zatvara — automatski prelazi na sljedećeg neocijenjenog suca za ISTOG natjecatelja (redoslijed 1→2→3), tako da organizator može unijeti sva tri suca za jedno kodno ime bez ponovnog otvaranja dialoga. Kad su sva tri suca uneseni, prikazuje se "gotovo" panel s opcijom nastavka na sljedećeg natjecatelja bez zatvaranja dialoga. Svaka ocjena se sprema izravno (`GulasService.setScore()`) čim se klikne "Spremi..." za tog suca — nema "otkaži sve" na razini cijelog natjecatelja, samo trenutno nespremljeni unos u polju se gubi na "Zatvori".
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| N1 | Otvori `/gulas` u neprijavljenom (incognito) prozoru | Preusmjerava na `/login` (ruta je iza `authGuard`, isto kao `/`) | ☐ |
+| N2 | Prijavi se, klikni ikonu "juha" (soup_kitchen) u headeru pored ikone "Analitika", ili otvori `/gulas` izravno | Stranica se učitava; ako nema podataka, "Poredak" prikazuje empty state ("Još nema natjecatelja koje su ocijenila sva tri suca") | ☐ |
+| N3 | Bez ijednog kodnog imena, provjeri gumbe "Editiraj / obriši kodno ime", "Unos ocjene", "Izvoz u PDF", "Gotovo ocjenjivanje" | Svi disabled dok ne postoji barem 1 kodno ime | ☐ |
+| N4 | Klikni "Dodaj kodno ime", ostavi polje prazno | Gumb "Dodaj" je disabled | ☐ |
+| N5 | Upiši `TEST_JELEN`, klikni "Dodaj" | Dialog se zatvara, kodno ime se ODMAH pojavljuje u novoj sekciji "U tijeku" sa 3 sive oznake "Sudac 1/2/3" (nijedan sudac još nije ocijenio) | ☐ |
+| N6 | Klikni "Unos ocjene", odaberi `TEST_JELEN` (svjež, bez ijedne ocjene) | Polje "Sudac" se AUTOMATSKI postavlja na "Sudac 1" (ne treba ručno birati); ispod odabira pojavljuju se 3 "progress" oznake (Sudac 1/2/3, Sudac 1 označen kao trenutni), zatim 5 polja (Boja/Izgled/Gustoća/Okus/Ukupan dojam) s hintom raspona (redom 1-5/1-5/1-5/1-10/1-5) | ☐ |
+| N7 | Upiši redom Boja=5, Izgled=4, Gustoća=5, Okus=9, Dojam=4 | Živi zbroj se ažurira nakon SVAKOG polja (npr. 5→9→14→23→27); gumb postaje enabled tek kad je svih 5 polja ispunjeno unutar raspona, s natpisom "Spremi i nastavi na sljedećeg suca" (jer za ovog natjecatelja preostaju Sudac 2 i 3) | ☐ |
+| N8 | Upiši vrijednost izvan raspona (npr. Okus=11) | Crveni error "Ocjena mora biti između 1 i 10" ispod polja; gumb za spremanje disabled | ☐ |
+| N9 | Upiši decimalnu vrijednost (npr. Boja=4.5) | Error "Ocjena mora biti cijeli broj"; disabled | ☐ |
+| N10 | Klikni "Spremi i nastavi na sljedećeg suca" (stanje iz N7) | Dialog se NE zatvara — automatski prelazi na "Sudac 2", sva polja su prazna; progress oznaka "Sudac 1" postaje zelena (✓), "Sudac 2" postaje trenutna; u pozadini (glavna stranica, real-time) "U tijeku" oznaka "Sudac 1" za `TEST_JELEN` postaje zelena BEZ zatvaranja dialoga | ☐ |
+| N11 | Upiši validne vrijednosti za Sudac 2 i klikni "Spremi i nastavi na sljedećeg suca" | Isto ponašanje kao N10 — automatski prelazi na "Sudac 3" (zadnjeg preostalog), polja prazna, "Sudac 2" oznaka postaje zelena | ☐ |
+| N12 | Upiši validne vrijednosti za Sudac 3 | Budući da je ovo POSLJEDNJI preostali sudac, natpis gumba mijenja se u "Spremi ocjenu" (bez "...i nastavi") | ☐ |
+| N13 | Klikni "Spremi ocjenu" (Sudac 3, iz N12) | Forma nestaje, prikazuje se "gotovo" panel: "✓ `TEST_JELEN` ocijenjen - sva tri suca su unesena." s gumbima "Zatvori" i "Sljedeći natjecatelj"; u pozadini "U tijeku" sekcija za `TEST_JELEN` nestaje i pojavljuje se u tablici "Poredak" — sve BEZ zatvaranja dialoga | ☐ |
+| N14 | Na "gotovo" panelu (iz N13), klikni "Sljedeći natjecatelj" | Panel nestaje, forma se vraća na prazan odabir ("Kodno ime natjecatelja" i "Sudac" prazni); dialog OSTAJE otvoren, spreman za unos sljedećeg natjecatelja bez ponovnog otvaranja s glavne stranice | ☐ |
+| N15 | U istom (i dalje otvorenom) dialogu, odaberi natjecatelja koji je VEĆ kompletan (npr. ponovno `TEST_JELEN` iz N13) | "Sudac" se automatski postavlja na "Sudac 1" (nema neocijenjenog suca pa se otvara na prvom, radi eventualne ispravke); NE prikazuje se odmah "gotovo" panel dok se ponovno ne spremi | ☐ |
+| N16 | Iz stanja N15, ručno promijeni "Sudac" na već ocijenjenog suca (npr. "Sudac 1") | Plava info poruka "Ovaj sudac je već ocijenio ovog natjecatelja - spremanje će prepisati postojeću ocjenu"; svih 5 polja je prefillano prethodno unesenim vrijednostima za tog suca | ☐ |
+| N17 | Promijeni jedno polje (npr. Okus 9→8) i spremi | Ocjena se ažurira (upsert po paru natjecatelj+sudac) — NE stvara se drugi/duplikat zapis; budući da je natjecatelj i dalje kompletan (3/3), ponovno se prikazuje "gotovo" panel | ☐ |
+| N18 | Otvori novo kodno ime, unesi SAMO Sudac 1 (bez 2 i 3), zatim klikni "Zatvori" (ne "Spremi") | Dialog se zatvara; Sudac 1-ova ocjena OSTAJE spremljena (spremljena je odmah pri kliku "Spremi..."), natjecatelj ostaje u "U tijeku" s 1/3 — nema "otkaži sve" za već spremljene sučeve unutar iste dialog-sesije | ☐ |
+| N19 | Klikni "Editiraj / obriši kodno ime", odaberi `TEST_JELEN` | Polje "Kodno ime" prefillano trenutnom vrijednosti; gumbi "Obriši" i "Spremi promjene" postaju enabled | ☐ |
+| N20 | Promijeni naziv u `TEST_JELEN_v2`, klikni "Spremi promjene" | Naziv se ODMAH ažurira u tablici "Poredak" (bodovi ostaju nepromijenjeni) | ☐ |
+| N21 | "Editiraj / obriši kodno ime" → odaberi → "Obriši" | Prikazuje se browser `confirm()` koji eksplicitno navodi da brisanje briše i SVE ocjene tog natjecatelja | ☐ |
+| N22 | Odustani (Cancel) u N21 | Kodno ime i njegove ocjene ostaju netaknuti | ☐ |
+| N23 | Ponovi N21 i potvrdi (OK) | Kodno ime nestaje iz poretka/"U tijeku"; sve njegove ocjene (sva 3 suca) nestaju iz baze atomarno (`GulasService.deleteCompetitor()` koristi `setCollections`, isti obrazac kao cascade-brisanja u `CompetitionService`) | ☐ |
+| N24 | Dodaj drugo kodno ime s manje od 3 unesene ocjene, provjeri "Poredak" naspram "U tijeku" | "Poredak" prikazuje ISKLJUČIVO natjecatelje kojima su sva 3 suca ocijenila; nepotpuni ostaju samo u "U tijeku", bez ranga | ☐ |
+
+## O. Ocjenjivanje lovačkog gulaša — poredak i PDF izvoz
+
+`GulasService.getRankings()` sortira natjecatelje s kompletnim (3/3) ocjenama silazno po zbroju svih pet kriterija kroz sva tri suca; `PdfReportService.exportGulasRankingToPdf()` generira PDF s istim stupcima kao ekranska tablica.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| O1 | Dovrši ocjenjivanje (sva 3 suca) za 2+ kodna imena s različitim ukupnim zbrojem | Poredani silazno po "Ukupno"; redak s najvišim zbrojem ima rang 1, zlatnu oznaku i "row-winner" stil | ☐ |
+| O2 | S 3+ kompletno ocijenjenih kodnih imena | Rang 2 i 3 dobivaju srebrnu/brončanu oznaku ("row-podium" stil), isto ponašanje kao pojedinačni/ekipni poredak (F7/F8) | ☐ |
+| O3 | Provjeri stupce tablice "Poredak" | Rang, Kodno ime, Boja (15), Izgled (15), Gustoća (15), Okus (30), Dojam (15), Ukupno (90) — brojevi u zagradi su MAKSIMUMI (zbroj triju sudaca po kriteriju) | ☐ |
+| O4 | Ručno zbroji sve tri unesene vrijednosti za jedan kriterij (npr. Boja: sudac1+sudac2+sudac3) i usporedi sa stupcem | Vrijednost u stupcu = točan zbroj triju sudaca za taj kriterij | ☐ |
+| O5 | Zbroji svih pet stupaca kriterija u jednom retku i usporedi sa stupcem "Ukupno" | Jednako (npr. 13+12+13+25+12=75) | ☐ |
+| O6 | Gumb "Izvoz u PDF" kad je "Poredak" prazan (nema kompletno ocijenjenih natjecatelja) | Disabled | ☐ |
+| O7 | Klikni "Izvoz u PDF" s barem 1 kompletnim natjecateljem | Preuzima se `gulas-poredak-[datum].pdf` | ☐ |
+| O8 | Otvori preuzeti PDF | Isto brendirano zaglavlje kao ostali izvještaji (MEMORIJAL DRAGUTIN CENKO + LD Patka logo/podnaslov), naslov "Ocjenjivanje lovackog gulasa", napomena o maksimumima ispod naslova, tablica identična O3, top 3 pozlaćen/posrebren/obronzan redak, footer s datumom generiranja i brojem stranice | ☐ |
+| O9 | Usporedi brojeve u PDF-u s brojevima na ekranu za isti redak | Identični (isti izvor podataka — `GulasRanking`) | ☐ |
+| O10 | Provjeri hrvatske dijakritike (č, ć, š, ž) u naslovu/napomeni PDF-a | Stripane (`normalizeText()`), npr. "Ocjenjivanje lovackog gulasa" — poznato/namjerno ponašanje kao i ostali izvještaji (vidi H9) | ☐ |
+
+## P. Ocjenjivanje lovačkog gulaša — "Gotovo ocjenjivanje" (reset)
+
+Crveni gumb (`GulasComponent.finishGulas()`, servisna metoda `GulasService.resetGulas()`) briše SVA kodna imena i SVE ocjene — priprema stranicu za sljedeće ocjenjivanje gulaša (nova sezona, nova kodna imena). Piše `gulasCompetitors: []` i `gulasScores: []` atomarno u jednom `setCollections()` pozivu, isti obrazac kao `CompetitionService.resetCompetition()` (sekcija M).
+
+> 🛑 **DESTRUKTIVNA AKCIJA — briše SVA kodna imena i ocjene odjednom, bez mogućnosti undo.** Testiraj isključivo s `TEST_` kodnim imenima koja si sam unio radi ovog testiranja, i tek nakon što je eventualni stvaran PDF izvještaj za tekuće ocjenjivanje već preuzet i arhiviran.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| P1 | Provjeri izgled gumba "Gotovo ocjenjivanje" u kontrolnoj traci | Jasno CRVEN (isti stil kao "Gotovo natjecanje" iz sekcije M), s ikonom kante za smeće i tooltipom koji objašnjava da briše sva kodna imena i ocjene | ☐ |
+| P2 | Gumb kad nema nijednog kodnog imena | Disabled | ☐ |
+| P3 | S barem 1 (po mogućnosti `TEST_`) kodnim imenom, klikni "Gotovo ocjenjivanje" | Browser `confirm()` navodi TOČAN broj kodnih imena koja će biti obrisana i upozorava da je radnja nepovratna | ☐ |
+| P4 | Odustani (Cancel) u P3 | Ništa se ne briše — kodna imena i ocjene ostaju identični kao prije klika | ☐ |
+| P5 | Ponovi P3 i potvrdi (OK) | Sva kodna imena i sve ocjene nestaju iz "Poredak"/"U tijeku" ODMAH; prikazuje se snackbar "Ocjenjivanje gulaša je završeno. Podaci su obrisani." | ☐ |
+| P6 | Nakon P5, provjeri Firebase konzolu (grane `gulasCompetitors`/`gulasScores`) i/ili dodaj novo kodno ime | Obje grane prazne (`[]`/`null`); novo dodano kodno ime dobiva id=1 (brojanje kreće ispočetka) | ☐ |
+
+## Q. Analitika sudjelovanja — `/analitika` (commit `a4ea83c`, "feat:added analitics")
+
+Nova stranica (ruta `/analitika`, iza `authGuard`, kao i `/`) uspoređuje broj sudionika/ekipa tekuće sezone (iz `CompetitionService.state$`, isti live Firebase izvor kao overview) s prošlom (2025.) sezonom, učitanom jednokratno preko `HttpClient` iz statičnog snapshot-a `src/assets/backup/hunting-games-2025.json` (ručno izvezen JSON prošlogodišnjih podataka, ne live Firebase). Implementacija: `pages/analytics/analytics.component.ts`. Prikazuje tri "stat tile" kartice (sudionici prošle/tekuće sezone i promjena), graf s trakama po kategoriji (Ukupno/Muškarci/Žene) i tablicu s točnim brojkama i razlikom.
+
+| # | Korak | Očekivano | Rezultat |
+|---|-------|-----------|----------|
+| Q1 | Otvori `/analitika` u neprijavljenom (incognito) prozoru | Preusmjerava na `/login` (ruta je iza `authGuard`, isto kao `/`) | ☐ |
+| Q2 | Prijavi se, klikni ikonu "query_stats" (Analitika) u headeru (lijevo od ikone gulaša), ili otvori `/analitika` izravno | Stranica se učitava, naslov "Analitika sudjelovanja" s ikonom | ☐ |
+| Q3 | Odmah po otvaranju (prije nego oba izvora stignu) | Prikazuje se `mat-spinner` s tekstom "Učitavanje podataka..." | ☐ |
+| Q4 | Simuliraj neuspjeh dohvata backup datoteke (npr. privremeno preimenuj/ukloni `src/assets/backup/hunting-games-2025.json` pa `ng build`/posluži ponovno, ili presretni mrežni zahtjev u DevTools i vrati grešku) | Prikazuje se crvena error kartica "Podaci za 2025. sezonu nisu dostupni." umjesto grafova/tablice; stranica se ne zaglavljuje na spinneru zauvijek | ☐ |
+| Q5 | Nakon uspješnog učitavanja oba izvora | Prikazuju se 3 kartice: "Sudionika u 2025.", "Sudionika u {tekuća godina}.", "Promjena u odnosu na 2025." | ☐ |
+| Q6 | Ako je tekući broj sudionika VEĆI od prošlogodišnjeg | Treća kartica zelena (`stat-tile-up`), ikona `trending_up`, broj s "+" predznakom | ☐ |
+| Q7 | Ako je tekući broj MANJI od prošlogodišnjeg | Kartica crvena (`stat-tile-down`), ikona `trending_down`, negativan broj | ☐ |
+| Q8 | Ako su brojevi JEDNAKI | Ikona `trending_flat`, "0" bez predznaka, kartica bez posebne boje | ☐ |
+| Q9 | Provjeri postotak promjene u zagradi pored broja | Točno izračunat i zaokružen postotak s odgovarajućim predznakom; ako je prošlogodišnji broj sudionika 0, postotak se NE prikazuje (izbjegnuto dijeljenje nulom) umjesto da se prikaže "Infinity%"/greška | ☐ |
+| Q10 | Kartica "Broj sudionika po kategoriji" (graf s trakama) | Tri retka (Ukupno, Muškarci, Žene), svaki s po dvije trake (2025. i tekuća godina, vidljivo razlikovane bojom/legendom); dužina trake proporcionalna najvećoj vrijednosti među svim prikazanim brojevima | ☐ |
+| Q11 | Kartica "Pregled brojki" (tablica) | Točno 6 redaka: Sudionici ukupno/muškarci/žene, Ekipe ukupno/muškarci/žene; stupci Kategorija/2025./{tekuća}./Razlika; stupac "Razlika" obojen zeleno za pozitivnu, crveno za negativnu vrijednost | ☐ |
+| Q12 | Dok si na `/analitika`, u drugom tabu (prijavljen kao admin na `/`) dodaj novi tim ili natjecatelja | Kartica "Sudionika u {tekuća godina}.", graf i tablica na `/analitika` se ODMAH ažuriraju bez ručnog refresha (Firebase `state$` real-time) — SAMO tekući podaci reagiraju, "2025." brojke ostaju nepromijenjene (statičan JSON snapshot, ne live izvor) | ☐ |
+| Q13 | Klikni gumb "Natrag" | Vraća na `/` (admin overview) | ☐ |
+| Q14 | Ručna provjera točnosti: usporedi karticu "Sudionika u 2025." s brojem natjecatelja koje sam prebrojiš u `src/assets/backup/hunting-games-2025.json` | Brojevi se podudaraju (potvrđuje da `summarizeTeams()` ispravno zbraja `members.length` po timu iz backup datoteke) | ☐ |
+| Q15 | Otvori `/analitika` na mobitelu (stvaran uređaj ili responsive mode) | Kartice (`stat-tiles`), graf i tablica se čitljivo slažu/prelamaju na uskom ekranu (flex-wrap), bez horizontalnog scrolla stranice | ☐ |
+
 ---
 
 ## Sažetak / sign-off
@@ -290,7 +377,11 @@ Crveni gumb u kontrolnoj traci (`OverviewComponent.finishCompetition()`, servisn
 | K — Javna `/pracenje` stranica | 12 | | | |
 | L — Startni listovi (PDF) | 15 | | | |
 | M — Gotovo natjecanje (reset) | 10 | | | |
-| **UKUPNO** | **138** | | | |
+| N — Gulaš: kodna imena i unos ocjena | 24 | | | |
+| O — Gulaš: poredak i PDF izvoz | 10 | | | |
+| P — Gulaš: Gotovo ocjenjivanje (reset) | 6 | | | |
+| Q — Analitika sudjelovanja (`/analitika`) | 15 | | | |
+| **UKUPNO** | **193** | | | |
 
 **Testirao:** ______________  **Datum:** ______________  **Verzija/commit:** ______________
 
